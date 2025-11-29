@@ -30,6 +30,7 @@ import { orders, menuItems } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 function StatCard({
   title,
