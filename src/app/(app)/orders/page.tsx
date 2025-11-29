@@ -156,21 +156,21 @@ export default function OrdersPage() {
             <CardTitle>Detail List Meja Terisi</CardTitle>
             <div className="flex items-center gap-2">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                <TabsList className="grid grid-cols-2 rounded-full bg-gray-200">
-                  <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2">
+                <TabsList className="grid grid-cols-2 rounded-full bg-gray-200 p-1 h-auto">
+                  <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-4 py-2 text-sm">
                     Dine-in
-                    <Badge className="bg-white/20 text-white rounded-full">{dineInOrders.length}</Badge>
+                    <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{dineInOrders.length}</Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2">
+                  <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-4 py-2 text-sm">
                     Take Away
-                    <Badge className="bg-white/20 text-white rounded-full">{takeawayOrders.length}</Badge>
+                    <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{takeawayOrders.length}</Badge>
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <Badge variant="outline" className="h-9">
+              <Badge variant="outline" className="h-10 text-sm font-medium">
                 {allActiveOrders.length} pesanan aktif
               </Badge>
-              <Button onClick={fetchData} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
+              <Button onClick={fetchData} variant="outline" className="h-10 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
@@ -183,7 +183,7 @@ export default function OrdersPage() {
               {loading ? (
                 <div className="text-center py-16">Loading...</div>
               ) : dineInOrders.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {dineInOrders.map(order => (
                     <OrderGridCard key={order.id} order={order} menuItems={menuItems} />
                   ))}
@@ -204,7 +204,7 @@ export default function OrdersPage() {
               {loading ? (
                 <div className="text-center py-16">Loading...</div>
               ) : takeawayOrders.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {takeawayOrders.map(order => (
                     <OrderGridCard key={order.id} order={order} menuItems={menuItems} />
                   ))}

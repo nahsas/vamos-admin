@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { MapPin, FileText, Info, ArrowRight } from 'lucide-react';
-import { Separator } from './separator';
 
 const statusConfig: {
   [key: string]: {
@@ -69,7 +68,7 @@ export function OrderGridCard({ order, menuItems }: { order: Order; menuItems: M
               {order.detail_pesanans.slice(0, 2).map((item) => (
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                     <span>{getMenuName(item.menu_id)}</span>
+                     <span className="truncate">{getMenuName(item.menu_id)}</span>
                      {item.varian && <Badge variant="outline" className="text-xs bg-gray-200">{item.varian}</Badge>}
                   </div>
                   <span>x {item.jumlah}</span>
@@ -92,15 +91,15 @@ export function OrderGridCard({ order, menuItems }: { order: Order; menuItems: M
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold col-span-1 flex-col h-auto py-2">
+            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold col-span-1 flex-col h-auto py-2 px-1">
               <FileText className="h-4 w-4" />
               <span className="text-xs">Checker</span>
             </Button>
-            <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold col-span-1 flex-col h-auto py-2">
+            <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold col-span-1 flex-col h-auto py-2 px-1">
               <Info className="h-4 w-4" />
               <span className="text-xs">Detail</span>
             </Button>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold col-span-1 flex-col h-auto py-2">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold col-span-1 flex-col h-auto py-2 px-1">
               <span className="text-xs">Proses</span>
               <ArrowRight className="h-4 w-4" />
             </Button>
