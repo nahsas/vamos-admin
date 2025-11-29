@@ -80,7 +80,7 @@ export function PaymentModal({
           <p className="text-muted-foreground text-sm">Silakan pilih metode pembayaran</p>
         </DialogHeader>
 
-        <div className="px-4 pb-4 space-y-4">
+        <div className="px-4 pb-4 space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex justify-between items-center">
             <span className="font-medium text-yellow-800">Total Pembayaran:</span>
             <span className="font-bold text-xl text-yellow-900">
