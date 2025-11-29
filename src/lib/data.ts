@@ -1,10 +1,18 @@
 
 export type MenuItem = {
-  id: string;
-  name: string;
-  category: 'Coffee' | 'Tea' | 'Pastry';
-  price: number;
-  isAvailable: boolean;
+  id: number; // Changed from string to number to match API
+  nama: string; // Changed from name to nama
+  kategori: string;
+  harga: string;
+  is_available: boolean;
+  is_recommendation: boolean;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  is_hidden: boolean;
+  is_special: boolean;
+  image_url: string;
+  kategori_id: number;
 };
 
 export type OrderItem = {
@@ -54,15 +62,6 @@ export type Order = {
 
 
 // The following are mock data and will be replaced by API calls.
-export const menuItems: MenuItem[] = [
-  { id: 'MENU001', name: 'Espresso', category: 'Coffee', price: 2.5, isAvailable: true },
-  { id: 'MENU002', name: 'Latte', category: 'Coffee', price: 3.5, isAvailable: true },
-  { id: 'MENU003', name: 'Cappuccino', category: 'Coffee', price: 3.5, isAvailable: false },
-  { id: 'MENU004', name: 'Americano', category: 'Coffee', price: 3.0, isAvailable: true },
-  { id: 'MENU005', name: 'Green Tea', category: 'Tea', price: 2.0, isAvailable: true },
-  { id: 'MENU006', name: 'Croissant', category: 'Pastry', price: 2.75, isAvailable: true },
-  { id: 'MENU007', name: 'Muffin', category: 'Pastry', price: 2.25, isAvailable: false },
-  { id: 'MENU008', name: 'Black Tea', category: 'Tea', price: 2.0, isAvailable: true },
-];
+export const menuItems: any[] = [];
 
 export const orders: any[] = [];

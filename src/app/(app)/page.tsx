@@ -4,7 +4,7 @@
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Clock, Loader, CalendarDays, Utensils, Layers, ClipboardList, RefreshCw, AlertTriangle } from "lucide-react";
-import { Order } from "@/lib/data";
+import { Order, MenuItem } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderCard } from "@/components/ui/order-card";
@@ -34,6 +34,7 @@ function StatCard({ title, value, icon: Icon, description, bgColor = "bg-white",
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = React.useState("dine-in");
   const [totalMenu, setTotalMenu] = React.useState<number | null>(null);
+  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   const [totalCategories, setTotalCategories] = React.useState<number | null>(null);
   const [todaysOrdersCount, setTodaysOrdersCount] = React.useState<number | null>(null);
   const [pendingOrders, setPendingOrders] = React.useState<number | null>(null);
@@ -49,7 +50,7 @@ export default function DashboardPage() {
     // This can be refactored into a single stats endpoint later
     try {
         const [menuRes, catRes, todayRes, pendingRes, processingRes, completedRes] = await Promise.all([
-            fetch("https://api.sejadikopi.com/api/menu?select=nama"),
+            fetch("https://api.sejadikopi.com/api/menu"),
             fetch("https://api.sejadikopi.com/api/categories?select=nama"),
             fetch("https://api.sejadikopi.com/api/pesanans?select=id,created_at"),
             fetch("https://api.sejadikopi.com/api/pesanans?select=id&status=pending"),
@@ -57,7 +58,14 @@ export default function DashboardPage() {
             fetch("https://api.sejadikopi.com/api/pesanans?select=id,created_at&status=selesai")
         ]);
 
-        if (menuRes.ok) setTotalMenu((await menuRes.json()).data.length); else setTotalMenu(0);
+        if (menuRes.ok) {
+            const menuData = await menuRes.json();
+            setTotalMenu(menuData.data.length);
+            setMenuItems(menuData.data);
+        } else {
+            setTotalMenu(0);
+            setMenuItems([]);
+        }
         if (catRes.ok) setTotalCategories((await catRes.json()).data.length); else setTotalCategories(0);
         
         if (todayRes.ok) {
@@ -83,6 +91,7 @@ export default function DashboardPage() {
     } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
         setTotalMenu(0);
+        setMenuItems([]);
         setTotalCategories(0);
         setTodaysOrdersCount(0);
         setPendingOrders(0);
@@ -152,7 +161,7 @@ export default function DashboardPage() {
           return (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {orders.map((order) => (
-                    <OrderCard key={order.id} order={order} />
+                    <OrderCard key={order.id} order={order} menuItems={menuItems} />
                 ))}
             </div>
           )

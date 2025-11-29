@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Order } from '@/lib/data';
+import { Order, MenuItem } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -20,8 +20,13 @@ const statusConfig: {
   dibatalkan: { variant: 'destructive', label: 'Cancelled' },
 };
 
-export function OrderCard({ order }: { order: Order }) {
+export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
+
+  const getMenuName = (menuId: number) => {
+    const menuItem = menuItems.find((item) => item.id === menuId);
+    return menuItem ? menuItem.nama : 'Unknown Item';
+  };
 
   return (
     <Card className={cn("shadow-md border-l-4", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
@@ -60,8 +65,7 @@ export function OrderCard({ order }: { order: Order }) {
           <div className="space-y-1 text-sm text-muted-foreground">
             {order.detail_pesanans.slice(0, 2).map((item) => (
               <div key={item.id} className="flex justify-between">
-                {/* We need a way to map menu_id to menu name */}
-                <span>Menu ID: {item.menu_id}</span>
+                <span>{getMenuName(item.menu_id)}</span>
                 <span>x {item.jumlah}</span>
               </div>
             ))}
