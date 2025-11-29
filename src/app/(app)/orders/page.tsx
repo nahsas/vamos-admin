@@ -18,7 +18,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { orders as mockOrders } from "@/lib/data";
 import {
   Users,
   Wallet,
@@ -27,9 +26,11 @@ import {
   Filter,
   RefreshCw,
   ClipboardList,
-  Badge,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Order, MenuItem } from "@/lib/data";
+import { OrderGridCard } from "@/components/ui/order-grid-card";
+import { Badge } from "@/components/ui/badge";
+
 
 function StatCard({
   title,
@@ -55,66 +56,68 @@ function StatCard({
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = React.useState("dine-in");
-  const [orders, setOrders] = React.useState<any[]>([]);
+  const [dineInOrders, setDineInOrders] = React.useState<Order[]>([]);
+  const [takeawayOrders, setTakeawayOrders] = React.useState<Order[]>([]);
+  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [occupiedTablesCount, setOccupiedTablesCount] = React.useState<number | null>(null);
 
+  const fetchData = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const [
+        dineInRes,
+        takeawayRes,
+        tablesRes,
+        menuRes
+      ] = await Promise.all([
+        fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses&location_type=dine_in"),
+        fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses&location_type=takeaway"),
+        fetch("https://api.sejadikopi.com/api/pesanans?select=no_meja,created_at&status=pending,diproses"),
+        fetch("https://api.sejadikopi.com/api/menu")
+      ]);
+
+      if (dineInRes.ok) setDineInOrders((await dineInRes.json()).data);
+      if (takeawayRes.ok) setTakeawayOrders((await takeawayRes.json()).data);
+      if (menuRes.ok) setMenuItems((await menuRes.json()).data);
+
+      if (tablesRes.ok) {
+        const tablesData = await tablesRes.json();
+        const today = new Date().toDateString();
+        const uniqueTables = new Set(
+          tablesData.data
+            .filter((order: { created_at: string; no_meja: string }) =>
+              new Date(order.created_at).toDateString() === today &&
+              !order.no_meja.toLowerCase().includes('takeaway') &&
+              !order.no_meja.toLowerCase().includes('take away')
+            )
+            .map((order: { no_meja: string }) => order.no_meja)
+        );
+        setOccupiedTablesCount(uniqueTables.size);
+      } else {
+        setOccupiedTablesCount(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      setDineInOrders([]);
+      setTakeawayOrders([]);
+      setOccupiedTablesCount(0);
+      setMenuItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
-    async function fetchOrdersData() {
-      setLoading(true);
-      try {
-        const [ordersRes, tablesRes] = await Promise.all([
-          fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses"),
-          fetch("https://api.sejadikopi.com/api/pesanans?select=no_meja,created_at&status=pending,diproses")
-        ]);
-        
-        if (ordersRes.ok) {
-          const ordersData = await ordersRes.json();
-          setOrders(ordersData.data);
-        } else {
-          setOrders([]);
-        }
+    fetchData();
+  }, [fetchData]);
 
-        if (tablesRes.ok) {
-            const tablesData = await tablesRes.json();
-            const today = new Date().toDateString();
-            const uniqueTables = new Set(
-                tablesData.data
-                .filter((order: { created_at: string; no_meja: string }) => 
-                    new Date(order.created_at).toDateString() === today &&
-                    !order.no_meja.toLowerCase().includes('takeaway') &&
-                    !order.no_meja.toLowerCase().includes('take away')
-                )
-                .map((order: { no_meja: string }) => order.no_meja)
-            );
-            setOccupiedTablesCount(uniqueTables.size);
-        } else {
-            setOccupiedTablesCount(0);
-        }
+  const allActiveOrders = [...dineInOrders, ...takeawayOrders];
 
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-        setOrders([]);
-        setOccupiedTablesCount(0);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchOrdersData();
-  }, []);
-  
-  const activeOrders = orders.filter(
-    (o) => o.status === "pending" || o.status === "diproses"
-  );
-  
-  const dineInOrders = activeOrders.filter(o => o.location_type.toLowerCase() === 'dine_in');
-  const takeawayOrders = activeOrders.filter(o => o.location_type.toLowerCase() === 'takeaway');
-
-  const totalTransactions = activeOrders.reduce((sum, order) => sum + parseFloat(order.total), 0)
+  const totalTransactions = allActiveOrders.reduce((sum, order) => sum + parseFloat(order.total), 0)
     .toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
 
-  const totalItems = activeOrders.reduce((sum, order) => sum + order.detail_pesanans.length, 0);
+  const totalItems = allActiveOrders.reduce((sum, order) => sum + order.detail_pesanans.reduce((itemSum, item) => itemSum + item.jumlah, 0), 0);
 
   return (
     <div className="space-y-6">
@@ -152,16 +155,22 @@ export default function OrdersPage() {
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <CardTitle>Detail List Meja Terisi</CardTitle>
             <div className="flex items-center gap-2">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                    <TabsList className="grid grid-cols-2">
-                        <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white">Dine-in</TabsTrigger>
-                        <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white">Take Away</TabsTrigger>
-                    </TabsList>
-                </Tabs>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+                <TabsList className="grid grid-cols-2 rounded-full bg-gray-200">
+                  <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2">
+                    Dine-in
+                    <Badge className="bg-white/20 text-white rounded-full">{dineInOrders.length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2">
+                    Take Away
+                    <Badge className="bg-white/20 text-white rounded-full">{takeawayOrders.length}</Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
               <Badge variant="outline" className="h-9">
-                {activeOrders.length} pesanan aktif
+                {allActiveOrders.length} pesanan aktif
               </Badge>
-              <Button variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
+              <Button onClick={fetchData} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
@@ -174,9 +183,11 @@ export default function OrdersPage() {
               {loading ? (
                 <div className="text-center py-16">Loading...</div>
               ) : dineInOrders.length > 0 ? (
-                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Dine In orders would be mapped here */}
-                 </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {dineInOrders.map(order => (
+                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} />
+                  ))}
+                </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-center py-16">
                   <div className="p-4 bg-gray-100 rounded-full mb-4">
@@ -190,16 +201,18 @@ export default function OrdersPage() {
               )}
             </TabsContent>
             <TabsContent value="take-away">
-             {loading ? (
+              {loading ? (
                 <div className="text-center py-16">Loading...</div>
               ) : takeawayOrders.length > 0 ? (
-                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Takeaway orders would be mapped here */}
-                 </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {takeawayOrders.map(order => (
+                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} />
+                  ))}
+                </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-center py-16">
                   <div className="p-4 bg-gray-100 rounded-full mb-4">
-                     <ClipboardList className="w-12 h-12 text-muted-foreground" />
+                    <ClipboardList className="w-12 h-12 text-muted-foreground" />
                   </div>
                   <h3 className="text-xl font-bold">Belum Ada Pesanan Take Away</h3>
                   <p className="text-muted-foreground">
@@ -214,3 +227,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+    
