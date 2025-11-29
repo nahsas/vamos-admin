@@ -35,6 +35,7 @@ import { OrderDetailModal } from "@/components/ui/order-detail-modal";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { PaymentModal } from "@/components/ui/payment-modal";
 
 
 function StatCard({
@@ -71,6 +72,10 @@ export default function OrdersPage() {
   
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const [paymentOrder, setPaymentOrder] = React.useState<Order | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false);
+
   const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -162,6 +167,11 @@ export default function OrdersPage() {
     }
   };
 
+  const handlePaymentClick = (order: Order) => {
+    setPaymentOrder(order);
+    setIsPaymentModalOpen(true);
+  }
+
   const getMenuName = (menuId: number) => {
     const menuItem = menuItems.find((item) => item.id === menuId);
     return menuItem ? menuItem.nama : 'Unknown Item';
@@ -237,7 +247,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {pendingOrders.map(order => (
-                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} />
+                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
                     </div>
                 </div>
@@ -251,7 +261,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {processingOrders.map(order => (
-                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} />
+                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
                     </div>
                 </div>
@@ -271,6 +281,11 @@ export default function OrdersPage() {
           onOrderDeleted={fetchData}
         />
       )}
+       <PaymentModal 
+        order={paymentOrder}
+        open={isPaymentModalOpen}
+        onOpenChange={setIsPaymentModalOpen}
+      />
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

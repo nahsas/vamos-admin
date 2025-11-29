@@ -22,7 +22,7 @@ const statusConfig: {
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
-export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (orderId: number) => void; }) {
+export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (orderId: number) => void; onPaymentClick: (order: Order) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'diproses';
 
@@ -35,8 +35,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus 
   
   const handleActionClick = () => {
     if (isProcessing) {
-      // Logic for "Bayar" button will be implemented later.
-      console.log('Bayar button clicked for order:', order.id)
+      onPaymentClick(order);
     } else {
       onUpdateStatus(order.id);
     }
