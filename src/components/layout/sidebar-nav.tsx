@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coffee, LayoutDashboard, ClipboardList, History, BarChart3, BookOpen, User, Store, LogOut } from "lucide-react";
+import { Coffee, LayoutDashboard, ClipboardList, History, BarChart3, BookOpen, User, Store, LogOut, DoorClosed } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import React, { useState, useEffect } from "react";
 
@@ -106,9 +106,14 @@ export function SidebarNav() {
         });
     }
   };
+  
+  useEffect(() => {
+    fetchShopStatus();
+  }, []);
 
   const handleStoreButtonClick = () => {
-    fetchShopStatus();
+    // Re-fetch status when opening modal to ensure it's fresh
+    fetchShopStatus(); 
     setIsModalOpen(true);
   };
   
@@ -178,8 +183,18 @@ export function SidebarNav() {
                     <p className="text-xs text-muted-foreground">{roleDisplay}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={handleStoreButtonClick} variant="ghost" size="icon" className="h-9 w-9 bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700">
-                        <Store className="h-5 w-5" />
+                    <Button 
+                        onClick={handleStoreButtonClick} 
+                        variant="ghost" 
+                        size="icon" 
+                        className={cn(
+                            "h-9 w-9",
+                            isShopOpen === true && "bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700",
+                            isShopOpen === false && "bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700",
+                            isShopOpen === null && "bg-gray-100 text-gray-600"
+                        )}
+                    >
+                        {isShopOpen ? <Store className="h-5 w-5" /> : <DoorClosed className="h-5 w-5" />}
                     </Button>
                     <Button onClick={logout} variant="ghost" size="icon" className="h-9 w-9 bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700">
                         <LogOut className="h-5 w-5" />
