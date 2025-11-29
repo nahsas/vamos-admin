@@ -161,12 +161,9 @@ export function OrderDetailModal({
                     </div>
                      <p className="text-sm text-muted-foreground">{totalItems} item</p>
                 </div>
-                <div className="w-full grid grid-cols-3 gap-2">
+                <div className="w-full grid grid-cols-2 gap-2">
                     <Button variant="secondary" onClick={() => onOpenChange(false)} className="bg-slate-600 text-white hover:bg-slate-700">
                         <X className="mr-2 h-4 w-4" /> Tutup
-                    </Button>
-                     <Button variant="destructive">
-                        <Trash2 className="mr-2 h-4 w-4" /> Batalkan Item
                     </Button>
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                         Proses <ArrowRight className="ml-2 h-4 w-4" />
