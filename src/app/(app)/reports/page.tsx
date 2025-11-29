@@ -9,11 +9,12 @@ import { orders, Order } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip } from "lucide-react"
+import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, Layers, RefreshCw, Plus, FileText } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Helper to aggregate data client-side
 const aggregateSalesData = (startDate?: Date, endDate?: Date, paymentMethod?: string) => {
@@ -292,31 +293,79 @@ export default function ReportsPage() {
 
 
       <Card>
-        <CardHeader>
-          <CardTitle>Daily Sales</CardTitle>
-          <CardDescription>A summary of sales from completed orders.</CardDescription>
+        <CardHeader className="flex flex-row items-center gap-4">
+          <div className="p-3 rounded-md bg-yellow-100">
+            <Layers className="w-5 h-5 text-yellow-600" />
+          </div>
+          <CardTitle className="text-xl">Performa per Kategori</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={chartConfig} className="h-[400px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={filteredData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
-                <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                <YAxis
-                  tickFormatter={(value) => `$${value}`}
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                />
-                <Tooltip
-                  cursor={{ fill: 'hsl(var(--accent))', radius: 4 }}
-                  content={<ChartTooltipContent
-                    formatter={(value) => `$${(value as number).toFixed(2)}`}
-                    />}
-                />
-                <Bar dataKey="sales" fill="var(--color-sales)" radius={4} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+          <p className="text-muted-foreground">Performance by category will be displayed here.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-xl">Pelacakan Pengeluaran</CardTitle>
+            <div className="flex gap-2">
+                <Button variant="outline" className="bg-blue-500 hover:bg-blue-600 text-white border-none">
+                    <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+                </Button>
+                <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white">
+                    <Plus className="mr-2 h-4 w-4" /> Tambah Pengeluaran
+                </Button>
+            </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tanggal</TableHead>
+                <TableHead>Kategori</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead>Jumlah</TableHead>
+                <TableHead>Foto</TableHead>
+                <TableHead>Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                   No expense data available.
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+            <CardTitle className="text-xl">Riwayat Transaksi</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead>ID Transaksi</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Meja</TableHead>
+                    <TableHead>Items</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                <TableRow>
+                    <TableCell colSpan={6} className="h-48 text-center">
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <FileText className="w-16 h-16 text-muted-foreground/50" />
+                            <p className="text-muted-foreground">Belum ada transaksi</p>
+                        </div>
+                    </TableCell>
+                </TableRow>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
