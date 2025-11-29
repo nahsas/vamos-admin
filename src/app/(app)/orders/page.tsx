@@ -63,7 +63,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = React.useState(true);
   const [occupiedTablesCount, setOccupiedTablesCount] = React.useState<number | null>(null);
   
-  const [selectedOrderId, setSelectedOrderId] = React.useState<number | null>(null);
+  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
@@ -92,8 +92,7 @@ export default function OrdersPage() {
           tablesData.data
             .filter((order: { created_at: string; no_meja: string }) =>
               new Date(order.created_at).toDateString() === today &&
-              !order.no_meja.toLowerCase().includes('takeaway') &&
-              !order.no_meja.toLowerCase().includes('take away')
+              order.location_type.toLowerCase() === 'dine_in'
             )
             .map((order: { no_meja: string }) => order.no_meja)
         );
@@ -116,8 +115,8 @@ export default function OrdersPage() {
     fetchData();
   }, [fetchData]);
 
-  const handleDetailClick = (orderId: number) => {
-    setSelectedOrderId(orderId);
+  const handleDetailClick = (order: Order) => {
+    setSelectedOrder(order);
     setIsModalOpen(true);
   };
 
@@ -130,9 +129,9 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
-       {selectedOrderId && (
+       {selectedOrder && (
         <OrderDetailModal
-          orderId={selectedOrderId}
+          order={selectedOrder}
           open={isModalOpen}
           onOpenChange={setIsModalOpen}
           menuItems={menuItems}

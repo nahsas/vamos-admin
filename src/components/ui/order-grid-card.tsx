@@ -22,7 +22,7 @@ const statusConfig: {
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
-export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (orderId: number) => void; }) {
+export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
 
   const getMenuName = (menuId: number) => {
@@ -95,7 +95,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Orde
               <FileText className="h-3 w-3" />
               Checker
             </Button>
-            <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order.id)}>
+            <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order)}>
               <Info className="h-3 w-3" />
               Detail
             </Button>

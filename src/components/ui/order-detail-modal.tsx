@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Order, MenuItem, OrderItem } from '@/lib/data';
+import { Order, MenuItem } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -37,43 +37,22 @@ const statusConfig: {
 };
 
 export function OrderDetailModal({
-  orderId,
+  order,
   open,
   onOpenChange,
   menuItems,
 }: {
-  orderId: number;
+  order: Order | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   menuItems: MenuItem[];
 }) {
-  const [order, setOrder] = React.useState<Order | null>(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (open && orderId) {
-      const fetchOrderDetails = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const response = await fetch(
-            `https://api.sejadikopi.com/api/pesanans/${orderId}`
-          );
-          if (!response.ok) {
-            throw new Error('Failed to fetch order details');
-          }
-          const data = await response.json();
-          setOrder(data);
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchOrderDetails();
+    if (!open) {
+      // Optional: Add any cleanup logic when modal closes
     }
-  }, [orderId, open]);
+  }, [open]);
 
   const getMenuDetails = (menuId: number) => {
     return menuItems.find((item) => item.id === menuId);
@@ -84,8 +63,7 @@ export function OrderDetailModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0">
-        {loading && <div className="p-8 text-center">Loading...</div>}
-        {error && <div className="p-8 text-center text-red-500">{error}</div>}
+        {!order && <div className="p-8 text-center">No order selected.</div>}
         {order && (
           <>
             <DialogHeader className="p-4 bg-primary text-primary-foreground rounded-t-lg">
