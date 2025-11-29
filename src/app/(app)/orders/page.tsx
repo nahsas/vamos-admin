@@ -272,35 +272,34 @@ export default function OrdersPage() {
           <StatCard title="TOTAL TRANSAKSI" value={totalTransactions} icon={Wallet} />
         </div>
       </div>
+      
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <h2 className="text-xl font-bold">Detail List Meja Terisi</h2>
+        <div className="flex items-center gap-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+            <TabsList className="grid grid-cols-2 rounded-lg bg-gray-200 p-1 h-auto">
+              <TabsTrigger value="dine-in" className="rounded-md data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5 text-sm">
+                Dine-in
+                <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{dineInOrders.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="take-away" className="rounded-md data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5 text-sm">
+                Take Away
+                <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{takeawayOrders.length}</Badge>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Badge variant="outline" className="h-9 text-sm font-medium hidden md:flex">
+            {allActiveOrders.length} pesanan aktif
+          </Badge>
+          <Button onClick={fetchData} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
+      </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <CardTitle>Detail List Meja Terisi</CardTitle>
-            <div className="flex items-center gap-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                <TabsList className="grid grid-cols-2 rounded-lg bg-gray-200 p-1 h-auto">
-                  <TabsTrigger value="dine-in" className="rounded-md data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5 text-sm">
-                    Dine-in
-                    <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{dineInOrders.length}</Badge>
-                  </TabsTrigger>
-                  <TabsTrigger value="take-away" className="rounded-md data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5 text-sm">
-                    Take Away
-                    <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{takeawayOrders.length}</Badge>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Badge variant="outline" className="h-9 text-sm font-medium hidden md:flex">
-                {allActiveOrders.length} pesanan aktif
-              </Badge>
-              <Button onClick={fetchData} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsContent value="dine-in">
               {renderOrderList(dineInOrders, 'dine-in')}
