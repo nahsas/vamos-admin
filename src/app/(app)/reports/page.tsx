@@ -9,7 +9,7 @@ import { orders, Order } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet } from "lucide-react"
+import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -42,6 +42,74 @@ const aggregateSalesData = (startDate?: Date, endDate?: Date, paymentMethod?: st
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
+const ReportStatCard = ({
+  title,
+  value,
+  date,
+  icon,
+  bgColor,
+  textColor,
+  rightIcon
+}: {
+  title: string;
+  value: string;
+  date?: string;
+  icon: React.ReactNode;
+  bgColor: string;
+  textColor: string;
+  rightIcon?: React.ReactNode;
+}) => (
+  <Card className={cn(bgColor, textColor, "rounded-xl shadow-lg")}>
+    <CardContent className="p-4">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            {icon}
+            <span>{title}</span>
+          </div>
+          <div className="text-3xl font-bold">{value}</div>
+          {date && (
+            <div className="flex items-center gap-2 text-xs">
+              <CalendarIcon className="h-4 w-4" />
+              <span>{date}</span>
+            </div>
+          )}
+        </div>
+        {rightIcon && <div className="p-3 bg-white/20 rounded-lg">{rightIcon}</div>}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const PaymentBreakdownCard = ({
+    title,
+    amount,
+    transactions,
+    icon,
+    borderColor
+}: {
+    title: string;
+    amount: string;
+    transactions: number;
+    icon: React.ReactNode;
+    borderColor: string;
+}) => (
+    <Card className={cn("bg-card border-2", borderColor)}>
+        <CardContent className="p-4 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+                <div className="p-2 bg-slate-100 rounded-md">
+                    {icon}
+                </div>
+                <div>
+                    <p className="text-sm text-muted-foreground">{title}</p>
+                    <p className="font-bold text-primary">{amount}</p>
+                </div>
+            </div>
+            <p className="text-sm text-muted-foreground">{transactions} transaksi</p>
+        </CardContent>
+    </Card>
+)
+
 export default function ReportsPage() {
   const [startDate, setStartDate] = React.useState<Date | undefined>();
   const [endDate, setEndDate] = React.useState<Date | undefined>();
@@ -66,6 +134,8 @@ export default function ReportsPage() {
       color: "hsl(var(--primary))",
     },
   }
+
+  const todayStr = format(new Date(), "dd MMMM yyyy");
 
   return (
     <div className="space-y-8">
@@ -162,6 +232,63 @@ export default function ReportsPage() {
           </div>
         </CardContent>
       </Card>
+      
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <ReportStatCard
+            title="Total Pendapatan"
+            value="Rp 0"
+            date={todayStr}
+            icon={<DollarSign className="h-5 w-5" />}
+            bgColor="bg-green-500"
+            textColor="text-white"
+            rightIcon={<Landmark className="h-6 w-6" />}
+          />
+          <ReportStatCard
+            title="Total Pengeluaran"
+            value="Rp 0"
+            date={todayStr}
+            icon={<Receipt className="h-5 w-5" />}
+            bgColor="bg-blue-500"
+            textColor="text-white"
+            rightIcon={<Receipt className="h-6 w-6" />}
+          />
+          <ReportStatCard
+            title="Laba Bersih"
+            value="Rp 0"
+            date="Margin: 0.0%"
+            icon={<LineChart className="h-5 w-5" />}
+            bgColor="bg-purple-500"
+            textColor="text-white"
+            rightIcon={<LineChart className="h-6 w-6" />}
+          />
+          <ReportStatCard
+            title="Total Transaksi"
+            value="0"
+            date="Avg: Rp 0"
+            icon={<ShoppingCart className="h-5 w-5" />}
+            bgColor="bg-orange-500"
+            textColor="text-white"
+            rightIcon={<ShoppingCart className="h-6 w-6" />}
+          />
+        </div>
+
+        <div>
+            <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 bg-purple-100 rounded-md">
+                    <Wallet className="w-5 h-5 text-purple-600" />
+                </div>
+                <h2 className="text-xl font-bold">Breakdown Pembayaran</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                <PaymentBreakdownCard title="Cash" amount="Rp 0" transactions={0} icon={<Landmark className="h-6 w-6 text-green-500"/>} borderColor="border-green-500" />
+                <PaymentBreakdownCard title="QRIS (Semua)" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-purple-500"/>} borderColor="border-purple-500" />
+                <PaymentBreakdownCard title="QRIS BCA" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-blue-500"/>} borderColor="border-blue-500" />
+                <PaymentBreakdownCard title="QRIS BRI" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-sky-500"/>} borderColor="border-sky-500" />
+                <PaymentBreakdownCard title="QRIS BSI" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-orange-500"/>} borderColor="border-orange-500" />
+            </div>
+        </div>
+      </div>
 
 
       <Card>
