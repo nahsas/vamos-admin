@@ -36,6 +36,7 @@ import {
   ArrowRight,
   MessageSquare,
   Pencil,
+  Wallet,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -100,6 +101,7 @@ export function OrderDetailModal({
   };
   
   const totalItems = order?.detail_pesanans.reduce((sum, item) => sum + item.jumlah, 0) || 0;
+  const isProcessing = order?.status.toLowerCase() === 'diproses';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,48 +164,46 @@ export function OrderDetailModal({
               </div>
             </DialogHeader>
 
-            <div className="p-4 space-y-4">
-                <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
-                    {order.detail_pesanans.map((item) => {
-                    const menuItem = getMenuDetails(item.menu_id);
-                    return (
-                        <div key={item.id} className="bg-slate-50 rounded-lg p-3">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="font-bold flex items-center gap-2">
-                                        {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
-                                        <Utensils className="w-4 h-4 text-amber-600" />
-                                    </p>
-                                    <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                        {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold">x {item.jumlah}</p>
-                                    <p className="font-bold text-lg text-primary">
-                                        Rp{' '}
-                                        {parseInt(item.subtotal, 10).toLocaleString('id-ID')}
-                                    </p>
+            <div className="p-4 space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+                {order.detail_pesanans.map((item) => {
+                const menuItem = getMenuDetails(item.menu_id);
+                return (
+                    <div key={item.id} className="bg-slate-50 rounded-lg p-3">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="font-bold flex items-center gap-2">
+                                    {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
+                                    <Utensils className="w-4 h-4 text-amber-600" />
+                                </p>
+                                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                    {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
                                 </div>
                             </div>
-                                <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
-                                   <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
-                                   <span>{item.note}</span>
-                                </div>
-                             <div className="text-sm mt-2 pt-2 border-t border-dashed">
-                                 <div className="flex justify-between">
-                                     <span>Harga satuan:</span>
-                                     <span>Rp {item.base_price.toLocaleString('id-ID')}</span>
-                                 </div>
-                                 <div className="flex justify-between">
-                                     <span>Subtotal ({item.jumlah}x):</span>
-                                     <span>Rp {parseInt(item.subtotal, 10).toLocaleString('id-ID')}</span>
-                                 </div>
-                             </div>
+                            <div className="text-right">
+                                <p className="font-semibold">x {item.jumlah}</p>
+                                <p className="font-bold text-lg text-primary">
+                                    Rp{' '}
+                                    {parseInt(item.subtotal, 10).toLocaleString('id-ID')}
+                                </p>
+                            </div>
                         </div>
-                    );
-                    })}
-                </div>
+                            <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
+                               <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
+                               <span>{item.note}</span>
+                            </div>
+                         <div className="text-sm mt-2 pt-2 border-t border-dashed">
+                             <div className="flex justify-between">
+                                 <span>Harga satuan:</span>
+                                 <span>Rp {item.base_price.toLocaleString('id-ID')}</span>
+                             </div>
+                             <div className="flex justify-between">
+                                 <span>Subtotal ({item.jumlah}x):</span>
+                                 <span>Rp {parseInt(item.subtotal, 10).toLocaleString('id-ID')}</span>
+                             </div>
+                         </div>
+                    </div>
+                );
+                })}
             </div>
 
             <DialogFooter className="p-4 bg-slate-50 border-t rounded-b-lg space-y-4">
@@ -218,8 +218,23 @@ export function OrderDetailModal({
                     <Button variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600">
                         <Pencil className="mr-2 h-4 w-4" /> Edit Item
                     </Button>
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                        Proses <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button 
+                        className={cn(
+                            isProcessing 
+                                ? "bg-green-600 hover:bg-green-700" 
+                                : "bg-blue-600 hover:bg-blue-700",
+                            "text-white"
+                        )}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Wallet className="mr-2 h-4 w-4" /> Bayar
+                        </>
+                      ) : (
+                        <>
+                          Proses <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
                     </Button>
                 </div>
             </DialogFooter>
