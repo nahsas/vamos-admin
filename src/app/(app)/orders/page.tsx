@@ -77,7 +77,7 @@ export default function OrdersPage() {
       ] = await Promise.all([
         fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses&location_type=dine_in"),
         fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses&location_type=takeaway"),
-        fetch("https://api.sejadikopi.com/api/pesanans?select=no_meja,created_at&status=pending,diproses"),
+        fetch("https://api.sejadikopi.com/api/pesanans?select=no_meja,created_at,location_type&status=pending,diproses"),
         fetch("https://api.sejadikopi.com/api/menu")
       ]);
 
@@ -90,7 +90,7 @@ export default function OrdersPage() {
         const today = new Date().toDateString();
         const uniqueTables = new Set(
           tablesData.data
-            .filter((order: { created_at: string; no_meja: string }) =>
+            .filter((order: { created_at: string; no_meja: string; location_type: string }) =>
               new Date(order.created_at).toDateString() === today &&
               order.location_type.toLowerCase() === 'dine_in'
             )
