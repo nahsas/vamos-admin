@@ -77,19 +77,29 @@ export default function OrdersPage() {
     setLoading(true);
     try {
       const [
-        dineInRes,
-        takeawayRes,
+        dineInPendingRes,
+        dineInProcessingRes,
+        takeawayPendingRes,
+        takeawayProcessingRes,
         tablesRes,
         menuRes
       ] = await Promise.all([
-        fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses&location_type=dine_in"),
-        fetch("https://api.sejadikopi.com/api/pesanans?status=pending,diproses&location_type=takeaway"),
+        fetch("https://api.sejadikopi.com/api/pesanans?status=pending&location_type=dine_in"),
+        fetch("https://api.sejadikopi.com/api/pesanans?status=diproses&location_type=dine_in"),
+        fetch("https://api.sejadikopi.com/api/pesanans?status=pending&location_type=takeaway"),
+        fetch("https://api.sejadikopi.com/api/pesanans?status=diproses&location_type=takeaway"),
         fetch("https://api.sejadikopi.com/api/pesanans?select=no_meja,created_at,location_type&status=pending,diproses"),
         fetch("https://api.sejadikopi.com/api/menu")
       ]);
+      
+      const dineInPending = dineInPendingRes.ok ? (await dineInPendingRes.json()).data : [];
+      const dineInProcessing = dineInProcessingRes.ok ? (await dineInProcessingRes.json()).data : [];
+      setDineInOrders([...dineInPending, ...dineInProcessing]);
 
-      if (dineInRes.ok) setDineInOrders((await dineInRes.json()).data);
-      if (takeawayRes.ok) setTakeawayOrders((await takeawayRes.json()).data);
+      const takeawayPending = takeawayPendingRes.ok ? (await takeawayPendingRes.json()).data : [];
+      const takeawayProcessing = takeawayProcessingRes.ok ? (await takeawayProcessingRes.json()).data : [];
+      setTakeawayOrders([...takeawayPending, ...takeawayProcessing]);
+
       if (menuRes.ok) setMenuItems((await menuRes.json()).data);
 
       if (tablesRes.ok) {
@@ -117,6 +127,7 @@ export default function OrdersPage() {
       setLoading(false);
     }
   }, []);
+
 
   React.useEffect(() => {
     fetchData();
