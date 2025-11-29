@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderCard } from "@/components/ui/order-card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/auth-context";
 
 function StatCard({ title, value, icon: Icon, description, bgColor = "bg-white", textColor = "text-black" }: { title:string, value:string, icon: React.ElementType, description: string, bgColor?: string, textColor?: string }) {
   return (
@@ -32,6 +33,7 @@ function StatCard({ title, value, icon: Icon, description, bgColor = "bg-white",
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = React.useState("dine-in");
   const [totalMenu, setTotalMenu] = React.useState<number | null>(null);
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
@@ -172,7 +174,7 @@ export default function DashboardPage() {
                 <div className="p-4 bg-gray-100 rounded-full mb-4">
                     <ClipboardList className="w-12 h-12 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-bold">Tidak Ada Pesanan {type === 'dine-in' ? 'Dine-in' : 'Take Awayasdasd'}</h3>
+                <h3 className="text-xl font-bold">Tidak Ada Pesanan {type === 'dine-in' ? 'Dine-in' : 'Take Away'}</h3>
                 <p className="text-muted-foreground">
                     Saat ini tidak ada pesanan {type === 'dine-in' ? 'dine-in' : 'takeaway'} yang aktif
                 </p>
@@ -183,30 +185,34 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard 
-          title="Total Menu" 
-          value={totalMenu !== null ? totalMenu.toString() : "..."} 
-          icon={Utensils} 
-          description="Semua kategori" 
-          bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
-          textColor="text-white" 
-        />
-        <StatCard 
-            title="Kategori Menu" 
-            value={totalCategories !== null ? totalCategories.toString() : "..."} 
-            icon={Layers} 
-            description="Kategori aktif" 
-            bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
-            textColor="text-white" 
-        />
-        <StatCard 
-            title="Pesanan Hari Ini" 
-            value={todaysOrdersCount !== null ? todaysOrdersCount.toString() : "..."} 
-            icon={ClipboardList} 
-            description="Total pesanan" 
-            bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
-            textColor="text-white" 
-        />
+        {user?.role === 'admin' && (
+          <>
+            <StatCard 
+              title="Total Menu" 
+              value={totalMenu !== null ? totalMenu.toString() : "..."} 
+              icon={Utensils} 
+              description="Semua kategori" 
+              bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+              textColor="text-white" 
+            />
+            <StatCard 
+                title="Kategori Menu" 
+                value={totalCategories !== null ? totalCategories.toString() : "..."} 
+                icon={Layers} 
+                description="Kategori aktif" 
+                bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+                textColor="text-white" 
+            />
+            <StatCard 
+                title="Pesanan Hari Ini" 
+                value={todaysOrdersCount !== null ? todaysOrdersCount.toString() : "..."} 
+                icon={ClipboardList} 
+                description="Total pesanan" 
+                bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+                textColor="text-white" 
+            />
+          </>
+        )}
         <StatCard title="Pending" value={pendingOrders !== null ? pendingOrders.toString() : "..."} icon={Clock} description="Menunggu" bgColor="bg-yellow-400" textColor="text-white" />
         <StatCard title="Diproses" value={processingOrders !== null ? processingOrders.toString() : "..."} icon={Loader} description="Sedang diproses" bgColor="bg-blue-500" textColor="text-white" />
         <StatCard title="Selesai" value={completedOrders !== null ? completedOrders.toString() : "..."} icon={CheckCircle2} description="Selesai hari ini" bgColor="bg-green-500" textColor="text-white" />
