@@ -12,8 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { MenuItem } from "@/lib/data"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,77 +24,76 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import { Discount } from "@/lib/types"
+import { Badge } from "@/components/ui/badge"
+import { format } from "date-fns"
 
-type MenuColumnsProps = {
-  onEdit: (menuItem: MenuItem) => void;
+type DiscountColumnsProps = {
+  onEdit: (discount: Discount) => void;
   onDeleteSuccess: () => void;
 }
 
-export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDef<MenuItem>[] => {
+export const columns = ({ onEdit, onDeleteSuccess }: DiscountColumnsProps): ColumnDef<Discount>[] => {
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://api.sejadikopi.com/api/menu/${id}`, {
+      const response = await fetch(`https://api.sejadikopi.com/api/discount-codes/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Failed to delete menu item.");
-      toast({ title: "Success", description: "Menu item deleted successfully." });
+      if (!response.ok) throw new Error("Failed to delete discount.");
+      toast({ title: "Success", description: "Discount deleted successfully." });
       onDeleteSuccess();
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Could not delete menu item." });
+      toast({ variant: "destructive", title: "Error", description: "Could not delete discount." });
     }
   };
-  
+
   return [
     {
-      accessorKey: "nama",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: ({ row }) => <div className="pl-4">{row.getValue("nama")}</div>
+      accessorKey: "code",
+      header: "Code",
     },
     {
-      accessorKey: "kategori",
-      header: "Category",
-      cell: ({ row }) => {
-        const menuItem = row.original as any;
-        return menuItem.kategori ? menuItem.kategori.nama : 'N/A';
-      }
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
     },
     {
-      accessorKey: "harga",
-      header: () => <div className="text-right">Price</div>,
+      accessorKey: "value",
+      header: "Value",
       cell: ({ row }) => {
-        const price = parseFloat(row.getValue("harga"))
-        const formatted = new Intl.NumberFormat("id-ID", {
+        const discount = row.original;
+        if (discount.type === 'percentage') {
+          return `${discount.value}%`;
+        }
+        return new Intl.NumberFormat("id-ID", {
           style: "currency",
           currency: "IDR",
-        }).format(price)
-
-        return <div className="text-right font-medium">{formatted}</div>
+        }).format(discount.value);
       },
     },
     {
-      accessorKey: "is_available",
-      header: "Availability",
-      cell: ({ row }) => {
-        const isAvailable = row.getValue("is_available")
-        return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? "Available" : "Unavailable"}</Badge>
-      }
+        accessorKey: "is_active",
+        header: "Status",
+        cell: ({ row }) => {
+            const isActive = row.getValue("is_active");
+            return <Badge variant={isActive ? "outline" : "secondary"}>{isActive ? 'Active' : 'Inactive'}</Badge>
+        }
+    },
+    {
+        accessorKey: "valid_to",
+        header: "Valid Until",
+        cell: ({row}) => {
+            const validTo = row.getValue("valid_to") as string | undefined;
+            if (!validTo) return <span>-</span>;
+            return format(new Date(validTo), "dd MMM yyyy");
+        }
     },
     {
       id: "actions",
       cell: ({ row }) => {
-        const menuItem = row.original
+        const discount = row.original
         return (
           <AlertDialog>
             <DropdownMenu>
@@ -108,15 +105,15 @@ export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDe
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onEdit(menuItem)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit item
+                <DropdownMenuItem onClick={() => onEdit(discount)}>
+                   <Pencil className="mr-2 h-4 w-4" />
+                  Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem className="text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete item
+                    Delete
                   </DropdownMenuItem>
                 </AlertDialogTrigger>
               </DropdownMenuContent>
@@ -125,13 +122,13 @@ export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDe
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the menu item.
+                  This action cannot be undone. This will permanently delete the discount code.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleDelete(menuItem.id)}
+                  onClick={() => handleDelete(discount.id)}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   Delete

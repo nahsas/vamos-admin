@@ -12,8 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { MenuItem } from "@/lib/data"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,28 +24,29 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import { Category } from "@/lib/types"
 
-type MenuColumnsProps = {
-  onEdit: (menuItem: MenuItem) => void;
+type CategoryColumnsProps = {
+  onEdit: (category: Category) => void;
   onDeleteSuccess: () => void;
 }
 
-export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDef<MenuItem>[] => {
+export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): ColumnDef<Category>[] => {
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://api.sejadikopi.com/api/menu/${id}`, {
+      const response = await fetch(`https://api.sejadikopi.com/api/categories/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Failed to delete menu item.");
-      toast({ title: "Success", description: "Menu item deleted successfully." });
+      if (!response.ok) throw new Error("Failed to delete category.");
+      toast({ title: "Success", description: "Category deleted successfully." });
       onDeleteSuccess();
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Could not delete menu item." });
+      toast({ variant: "destructive", title: "Error", description: "Could not delete category." });
     }
   };
-  
+
   return [
     {
       accessorKey: "nama",
@@ -65,38 +64,9 @@ export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDe
       cell: ({ row }) => <div className="pl-4">{row.getValue("nama")}</div>
     },
     {
-      accessorKey: "kategori",
-      header: "Category",
-      cell: ({ row }) => {
-        const menuItem = row.original as any;
-        return menuItem.kategori ? menuItem.kategori.nama : 'N/A';
-      }
-    },
-    {
-      accessorKey: "harga",
-      header: () => <div className="text-right">Price</div>,
-      cell: ({ row }) => {
-        const price = parseFloat(row.getValue("harga"))
-        const formatted = new Intl.NumberFormat("id-ID", {
-          style: "currency",
-          currency: "IDR",
-        }).format(price)
-
-        return <div className="text-right font-medium">{formatted}</div>
-      },
-    },
-    {
-      accessorKey: "is_available",
-      header: "Availability",
-      cell: ({ row }) => {
-        const isAvailable = row.getValue("is_available")
-        return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? "Available" : "Unavailable"}</Badge>
-      }
-    },
-    {
       id: "actions",
       cell: ({ row }) => {
-        const menuItem = row.original
+        const category = row.original
         return (
           <AlertDialog>
             <DropdownMenu>
@@ -108,15 +78,15 @@ export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDe
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onEdit(menuItem)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit item
+                <DropdownMenuItem onClick={() => onEdit(category)}>
+                   <Pencil className="mr-2 h-4 w-4" />
+                  Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem className="text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete item
+                    Delete
                   </DropdownMenuItem>
                 </AlertDialogTrigger>
               </DropdownMenuContent>
@@ -125,13 +95,13 @@ export const columns = ({ onEdit, onDeleteSuccess }: MenuColumnsProps): ColumnDe
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the menu item.
+                  This action cannot be undone. This will permanently delete the category.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleDelete(menuItem.id)}
+                  onClick={() => handleDelete(category.id)}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   Delete
