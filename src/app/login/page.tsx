@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Coffee } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@sejadikopi.com');
-  const [password, setPassword] = useState('adminkitabersama1');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const router = useRouter();
