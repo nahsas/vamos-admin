@@ -77,7 +77,7 @@ export function OrderDetailModal({
                     : order.no_meja}
                 </DialogTitle>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive-foreground/70 hover:text-destructive-foreground hover:bg-destructive-foreground/10">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive-foreground/70 hover:text-destructive-foreground hover:bg-destructive-foreground/10 mr-6">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
