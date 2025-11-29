@@ -84,20 +84,19 @@ export default function OrdersPage() {
         dineInProcessingRes,
         takeawayPendingRes,
         takeawayProcessingRes,
-        tablesRes,
         menuRes
       ] = await Promise.all([
         fetch("https://api.sejadikopi.com/api/pesanans?status=pending&location_type=dine_in"),
         fetch("https://api.sejadikopi.com/api/pesanans?status=diproses&location_type=dine_in"),
         fetch("https://api.sejadikopi.com/api/pesanans?status=pending&location_type=takeaway"),
         fetch("https://api.sejadikopi.com/api/pesanans?status=diproses&location_type=takeaway"),
-        fetch("https://api.sejadikopi.com/api/pesanans?select=no_meja,created_at,location_type&status=pending,diproses"),
         fetch("https://api.sejadikopi.com/api/menu")
       ]);
       
       const dineInPending = dineInPendingRes.ok ? (await dineInPendingRes.json()).data : [];
       const dineInProcessing = dineInProcessingRes.ok ? (await dineInProcessingRes.json()).data : [];
-      setDineInOrders([...dineInPending, ...dineInProcessing]);
+      const allDineInOrders = [...dineInPending, ...dineInProcessing];
+      setDineInOrders(allDineInOrders);
 
       const takeawayPending = takeawayPendingRes.ok ? (await takeawayPendingRes.json()).data : [];
       const takeawayProcessing = takeawayProcessingRes.ok ? (await takeawayProcessingRes.json()).data : [];
@@ -105,21 +104,11 @@ export default function OrdersPage() {
 
       if (menuRes.ok) setMenuItems((await menuRes.json()).data);
 
-      if (tablesRes.ok) {
-        const tablesData = await tablesRes.json();
-        const today = new Date().toDateString();
-        const uniqueTables = new Set(
-          tablesData.data
-            .filter((order: { created_at: string; no_meja: string; location_type: string }) =>
-              new Date(order.created_at).toDateString() === today &&
-              order.location_type && order.location_type.toLowerCase() === 'dine_in'
-            )
-            .map((order: { no_meja: string }) => order.no_meja)
-        );
-        setOccupiedTablesCount(uniqueTables.size);
-      } else {
-        setOccupiedTablesCount(0);
-      }
+      const uniqueTables = new Set(
+        allDineInOrders.map((order) => order.no_meja)
+      );
+      setOccupiedTablesCount(uniqueTables.size);
+      
     } catch (error) {
       console.error("Failed to fetch data:", error);
       setDineInOrders([]);
