@@ -92,16 +92,17 @@ export function OrderGridCard({ order, menuItems }: { order: Order; menuItems: M
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold col-span-1">
-              <FileText className="mr-2 h-4 w-4" />
-              Checker
+            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold col-span-1 flex-col h-auto py-2">
+              <FileText className="h-4 w-4" />
+              <span className="text-xs">Checker</span>
             </Button>
-            <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold col-span-1">
-              <Info className="mr-2 h-4 w-4" />
-              Detail
+            <Button variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold col-span-1 flex-col h-auto py-2">
+              <Info className="h-4 w-4" />
+              <span className="text-xs">Detail</span>
             </Button>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold col-span-1">
-              Proses <ArrowRight className="ml-2 h-4 w-4" />
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold col-span-1 flex-col h-auto py-2">
+              <span className="text-xs">Proses</span>
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -109,5 +110,3 @@ export function OrderGridCard({ order, menuItems }: { order: Order; menuItems: M
     </Card>
   );
 }
-
-    
