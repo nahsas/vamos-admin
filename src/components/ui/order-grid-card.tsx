@@ -22,7 +22,7 @@ const statusConfig: {
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
-export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; }) {
+export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (orderId: number) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
 
   const getMenuName = (menuId: number) => {
@@ -99,7 +99,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Orde
               <Info className="h-3 w-3" />
               Detail
             </Button>
-            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
+            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" onClick={() => onUpdateStatus(order.id)} disabled={order.status === 'diproses'}>
               Proses
               <ArrowRight className="h-3 w-3" />
             </Button>
@@ -109,5 +109,3 @@ export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Orde
     </Card>
   );
 }
-
-    

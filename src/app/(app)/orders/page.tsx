@@ -31,6 +31,7 @@ import { Order, MenuItem } from "@/lib/data";
 import { OrderGridCard } from "@/components/ui/order-grid-card";
 import { OrderDetailModal } from "@/components/ui/order-detail-modal";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 
 function StatCard({
@@ -67,6 +68,7 @@ export default function OrdersPage() {
   
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const { toast } = useToast();
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -120,6 +122,38 @@ export default function OrdersPage() {
   const handleDetailClick = (order: Order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
+  };
+  
+  const handleUpdateStatus = async (orderId: number) => {
+    try {
+      const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'diproses' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+
+      toast({
+        title: 'Success',
+        description: `Order #${orderId} has been moved to "Processing".`,
+      });
+
+      // Refetch data to update the UI
+      fetchData();
+
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not update order status.',
+      });
+    }
   };
 
   const allActiveOrders = [...dineInOrders, ...takeawayOrders];
@@ -203,7 +237,7 @@ export default function OrdersPage() {
               ) : dineInOrders.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {dineInOrders.map(order => (
-                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
+                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} />
                   ))}
                 </div>
               ) : (
@@ -224,7 +258,7 @@ export default function OrdersPage() {
               ) : takeawayOrders.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {takeawayOrders.map(order => (
-                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
+                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus}/>
                   ))}
                 </div>
               ) : (
@@ -245,5 +279,3 @@ export default function OrdersPage() {
     </div>
   );
 }
-
-    
