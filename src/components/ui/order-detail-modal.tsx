@@ -8,7 +8,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogClose,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Order, MenuItem } from '@/lib/data';
@@ -25,6 +37,7 @@ import {
   MessageSquare,
   Pencil,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const statusConfig: {
   [key: string]: {
@@ -43,18 +56,44 @@ export function OrderDetailModal({
   open,
   onOpenChange,
   menuItems,
+  onOrderDeleted,
 }: {
   order: Order | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   menuItems: MenuItem[];
+  onOrderDeleted: () => void;
 }) {
+  const { toast } = useToast();
 
-  React.useEffect(() => {
-    if (!open) {
-      // Optional: Add any cleanup logic when modal closes
+  const handleDelete = async () => {
+    if (!order) return;
+
+    try {
+      const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${order.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete order');
+      }
+      
+      toast({
+        title: 'Success',
+        description: `Order #${order.id} has been deleted.`,
+      });
+      onOpenChange(false); // Close the modal
+      onOrderDeleted(); // Trigger a refetch on the parent page
+
+    } catch (error) {
+       console.error('Error deleting order:', error);
+       toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not delete order.',
+      });
     }
-  }, [open]);
+  };
 
   const getMenuDetails = (menuId: number) => {
     return menuItems.find((item) => item.id === menuId);
@@ -68,7 +107,7 @@ export function OrderDetailModal({
         {!order && <div className="p-8 text-center">No order selected.</div>}
         {order && (
           <>
-            <DialogHeader className="p-4 bg-primary text-primary-foreground rounded-t-lg">
+            <DialogHeader className="p-4 bg-primary text-primary-foreground rounded-t-lg relative">
               <div className="flex justify-between items-center">
                 <DialogTitle>
                   Detail Pesanan{' '}
@@ -77,11 +116,32 @@ export function OrderDetailModal({
                     : order.no_meja}
                 </DialogTitle>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive-foreground/70 hover:text-destructive-foreground hover:bg-destructive-foreground/10 mr-6">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                   <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive-foreground/70 hover:text-destructive-foreground hover:bg-destructive-foreground/10 mr-8">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this order?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the order
+                          and remove its data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
+              <DialogClose className="absolute right-4 top-4 rounded-full p-1 bg-white/20 text-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </DialogClose>
               <div className="flex items-center gap-2 text-sm pt-2">
                 <Badge variant="secondary">
                   {format(new Date(order.created_at), 'HH:mm - dd MMM yyyy', {

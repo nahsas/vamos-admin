@@ -268,6 +268,7 @@ export default function OrdersPage() {
           open={isModalOpen}
           onOpenChange={setIsModalOpen}
           menuItems={menuItems}
+          onOrderDeleted={fetchData}
         />
       )}
       <div className="flex flex-col sm:flex-row gap-4">
