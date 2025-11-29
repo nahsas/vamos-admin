@@ -22,6 +22,7 @@ import {
   Utensils,
   MapPin,
   ArrowRight,
+  MessageSquare,
 } from 'lucide-react';
 
 const statusConfig: {
@@ -120,7 +121,10 @@ export function OrderDetailModal({
                                         {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
                                         <Utensils className="w-4 h-4 text-amber-600" />
                                     </p>
-                                    {menuItem && <Badge variant="outline" className="mt-1 text-xs bg-yellow-100 text-yellow-800">{menuItem.kategori}</Badge>}
+                                    <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                        {menuItem && <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800">{menuItem.kategori}</Badge>}
+                                        {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
+                                    </div>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-semibold">x {item.jumlah}</p>
@@ -130,6 +134,12 @@ export function OrderDetailModal({
                                     </p>
                                 </div>
                             </div>
+                            {item.note && (
+                                <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
+                                   <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
+                                   <span>{item.note}</span>
+                                </div>
+                            )}
                              <div className="text-sm mt-2 pt-2 border-t border-dashed">
                                  <div className="flex justify-between">
                                      <span>Harga satuan:</span>
