@@ -32,13 +32,33 @@ function StatCard({ title, value, icon: Icon, description, bgColor = "bg-white",
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = React.useState("dine-in");
+  const [totalMenu, setTotalMenu] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const fetchTotalMenu = async () => {
+      try {
+        const response = await fetch("https://api.sejadikopi.com/api/menu?select=nama");
+        if (response.ok) {
+          const data = await response.json();
+          setTotalMenu(data.data.length);
+        } else {
+          setTotalMenu(0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch total menu:", error);
+        setTotalMenu(0);
+      }
+    };
+
+    fetchTotalMenu();
+  }, []);
+
 
   const pendingOrders = orders.filter(o => o.status === 'Pending').length;
   const processingOrders = orders.filter(o => o.status === 'Processing').length;
   const completedOrders = orders.filter(o => o.status === 'Completed' && new Date(o.createdAt).toDateString() === new Date().toDateString()).length;
   const todaysOrders = orders.filter(o => new Date(o.createdAt).toDateString() === new Date().toDateString()).length;
   
-  const totalMenu = menuItems.length;
   const totalCategories = [...new Set(menuItems.map(item => item.category))].length;
 
   const activeOrders = orders.filter(
@@ -52,7 +72,14 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Total Menu" value={totalMenu.toString()} icon={Utensils} description="Semua kategori" bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" textColor="text-white" />
+        <StatCard 
+          title="Total Menu" 
+          value={totalMenu !== null ? totalMenu.toString() : "..."} 
+          icon={Utensils} 
+          description="Semua kategori" 
+          bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+          textColor="text-white" 
+        />
         <StatCard title="Kategori Menu" value={totalCategories.toString()} icon={Layers} description="Kategori aktif" bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" textColor="text-white" />
         <StatCard title="Pesanan Hari Ini" value={todaysOrders.toString()} icon={ClipboardList} description="Total pesanan" bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" textColor="text-white" />
         <StatCard title="Pending" value={pendingOrders.toString()} icon={Clock} description="Menunggu" bgColor="bg-yellow-400" textColor="text-white" />
