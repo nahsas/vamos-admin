@@ -91,15 +91,15 @@ export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Orde
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1">
+            <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
               <FileText className="h-3 w-3" />
               Checker
             </Button>
-            <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order)}>
+            <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order)}>
               <Info className="h-3 w-3" />
               Detail
             </Button>
-            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1">
+            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
               Proses
               <ArrowRight className="h-3 w-3" />
             </Button>
@@ -109,3 +109,5 @@ export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Orde
     </Card>
   );
 }
+
+    

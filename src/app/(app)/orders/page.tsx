@@ -44,12 +44,14 @@ function StatCard({
 }) {
   return (
     <Card className="shadow-md">
-      <CardContent className="p-4 flex flex-col items-center justify-center gap-2">
+      <CardContent className="p-4 flex items-center gap-4">
         <div className="p-3 bg-amber-400/20 rounded-md">
           <Icon className="w-8 h-8 text-amber-600" />
         </div>
-        <p className="text-sm text-muted-foreground font-semibold">{title}</p>
-        <p className="text-2xl font-bold">{value}</p>
+        <div>
+          <p className="text-sm text-muted-foreground font-semibold">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
+        </div>
       </CardContent>
     </Card>
   );
@@ -92,7 +94,7 @@ export default function OrdersPage() {
           tablesData.data
             .filter((order: { created_at: string; no_meja: string; location_type: string }) =>
               new Date(order.created_at).toDateString() === today &&
-              order.location_type.toLowerCase() === 'dine_in'
+              order.location_type && order.location_type.toLowerCase() === 'dine_in'
             )
             .map((order: { no_meja: string }) => order.no_meja)
         );
@@ -172,21 +174,21 @@ export default function OrdersPage() {
             <CardTitle>Detail List Meja Terisi</CardTitle>
             <div className="flex items-center gap-2">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                <TabsList className="grid grid-cols-2 rounded-full bg-gray-200 p-1 h-auto">
-                  <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-4 py-2 text-sm">
+                <TabsList className="grid grid-cols-2 rounded-lg bg-gray-200 p-1 h-auto">
+                  <TabsTrigger value="dine-in" className="rounded-md data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5 text-sm">
                     Dine-in
                     <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{dineInOrders.length}</Badge>
                   </TabsTrigger>
-                  <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-4 py-2 text-sm">
+                  <TabsTrigger value="take-away" className="rounded-md data-[state=active]:bg-amber-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5 text-sm">
                     Take Away
                     <Badge className="bg-white/20 text-white rounded-full h-6 w-6 flex items-center justify-center">{takeawayOrders.length}</Badge>
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <Badge variant="outline" className="h-10 text-sm font-medium">
+              <Badge variant="outline" className="h-9 text-sm font-medium hidden md:flex">
                 {allActiveOrders.length} pesanan aktif
               </Badge>
-              <Button onClick={fetchData} variant="outline" className="h-10 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
+              <Button onClick={fetchData} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
@@ -199,7 +201,7 @@ export default function OrdersPage() {
               {loading ? (
                 <div className="text-center py-16">Loading...</div>
               ) : dineInOrders.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {dineInOrders.map(order => (
                     <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
                   ))}
@@ -220,7 +222,7 @@ export default function OrdersPage() {
               {loading ? (
                 <div className="text-center py-16">Loading...</div>
               ) : takeawayOrders.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {takeawayOrders.map(order => (
                     <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
                   ))}
@@ -243,3 +245,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+    
