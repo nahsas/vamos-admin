@@ -65,11 +65,13 @@ export function StockForm({
     if (!menuItem) return;
 
     try {
-      // We only update the stock, so we need to fetch the existing item data first
-      // to avoid overwriting other fields. A better API would allow partial updates.
+      // The API requires the full object for a PUT request, not just the stock.
+      // We spread the original item and override the stock and availability.
       const fullMenuItemData = {
         ...menuItem,
-        ...values,
+        stok: values.stok,
+        is_available: values.stok > 0,
+        harga: Number(menuItem.harga) // Ensure price is a number
       };
 
       const response = await fetch(`https://api.sejadikopi.com/api/menu/${menuItem.id}`, {
@@ -79,6 +81,7 @@ export function StockForm({
       });
 
       if (!response.ok) {
+        console.error("Failed to update stock:", await response.json());
         throw new Error('Failed to update stock.');
       }
 
