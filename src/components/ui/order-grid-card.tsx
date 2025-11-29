@@ -22,7 +22,7 @@ const statusConfig: {
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
-export function OrderGridCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }) {
+export function OrderGridCard({ order, menuItems, onDetailClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (orderId: number) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
 
   const getMenuName = (menuId: number) => {
@@ -91,17 +91,17 @@ export function OrderGridCard({ order, menuItems }: { order: Order; menuItems: M
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs p-1">
-              <FileText className="h-3 w-3 mr-1" />
+            <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1">
+              <FileText className="h-3 w-3" />
               Checker
             </Button>
-            <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs p-1">
-              <Info className="h-3 w-3 mr-1" />
+            <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order.id)}>
+              <Info className="h-3 w-3" />
               Detail
             </Button>
-            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs p-1">
+            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-2 py-1 flex items-center justify-center gap-1">
               Proses
-              <ArrowRight className="h-3 w-3 ml-1" />
+              <ArrowRight className="h-3 w-3" />
             </Button>
           </div>
         </div>

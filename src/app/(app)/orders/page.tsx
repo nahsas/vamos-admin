@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Order, MenuItem } from "@/lib/data";
 import { OrderGridCard } from "@/components/ui/order-grid-card";
+import { OrderDetailModal } from "@/components/ui/order-detail-modal";
 import { Badge } from "@/components/ui/badge";
 
 
@@ -61,6 +62,9 @@ export default function OrdersPage() {
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [occupiedTablesCount, setOccupiedTablesCount] = React.useState<number | null>(null);
+  
+  const [selectedOrderId, setSelectedOrderId] = React.useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -112,6 +116,11 @@ export default function OrdersPage() {
     fetchData();
   }, [fetchData]);
 
+  const handleDetailClick = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setIsModalOpen(true);
+  };
+
   const allActiveOrders = [...dineInOrders, ...takeawayOrders];
 
   const totalTransactions = allActiveOrders.reduce((sum, order) => sum + parseFloat(order.total), 0)
@@ -121,6 +130,14 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
+       {selectedOrderId && (
+        <OrderDetailModal
+          orderId={selectedOrderId}
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          menuItems={menuItems}
+        />
+      )}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -185,7 +202,7 @@ export default function OrdersPage() {
               ) : dineInOrders.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {dineInOrders.map(order => (
-                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} />
+                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
                   ))}
                 </div>
               ) : (
@@ -206,7 +223,7 @@ export default function OrdersPage() {
               ) : takeawayOrders.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {takeawayOrders.map(order => (
-                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} />
+                    <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
                   ))}
                 </div>
               ) : (
