@@ -9,7 +9,7 @@ import { orders, Order } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Download } from "lucide-react"
+import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -75,80 +75,90 @@ export default function ReportsPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+            <div className="p-3 rounded-md bg-yellow-100">
+                <Filter className="w-5 h-5 text-yellow-600" />
+            </div>
+            <CardTitle className="text-xl">Filter Data</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+        <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
+                <div className="flex items-center gap-2">
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {startDate ? format(startDate, "dd/MM/yyyy") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={setStartDate}
+                        initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !endDate && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {endDate ? format(endDate, "dd/MM/yyyy") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={setEndDate}
+                        initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
+                </div>
+                <div className="hidden md:block"></div>
+            </div>
             <div className="space-y-2">
-              <Label>Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                <Label>Metode Pembayaran</Label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                    <SelectTrigger className="w-full">
+                        <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                        <SelectValue placeholder="Semua Metode" />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="All">All</SelectItem>
+                    <SelectItem value="Cash">Cash</SelectItem>
+                    <SelectItem value="Credit Card">Credit Card</SelectItem>
+                    <SelectItem value="GoPay">GoPay</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
-             <div className="space-y-2">
-              <Label>End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-2 md:col-span-1 lg:col-span-2">
-              <Label>Payment Method</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All</SelectItem>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Credit Card">Credit Card</SelectItem>
-                  <SelectItem value="GoPay">GoPay</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-6">
-            <Button onClick={handleApplyFilter} className="bg-blue-600 hover:bg-blue-700 text-white">Apply</Button>
-            <Button variant="secondary" onClick={handleResetFilter}>Reset</Button>
-            <Button variant="outline" className="bg-green-600 hover:bg-green-700 text-white border-none"><Download className="mr-2 h-4 w-4" /> Export</Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-4">
+            <Button onClick={handleApplyFilter} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
+                <Check className="mr-2 h-4 w-4" /> Terapkan
+            </Button>
+            <Button variant="secondary" onClick={handleResetFilter} className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
+                <RotateCcw className="mr-2 h-4 w-4" /> Reset
+            </Button>
+            <Button variant="outline" className="bg-green-600 hover:bg-green-700 text-white border-none font-bold">
+                <Download className="mr-2 h-4 w-4" /> Export
+            </Button>
           </div>
         </CardContent>
       </Card>
