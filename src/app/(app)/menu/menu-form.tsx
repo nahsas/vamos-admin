@@ -157,29 +157,24 @@ export function MenuForm({
         ...values,
         image_url: imageUrl,
         available_variants: JSON.stringify(values.available_variants).replace(/"/g, "'"),
-        // API expects is_available and is_recommendation, so let's provide default values
-        is_available: true,
+        is_available: true, 
         is_recommendation: false,
         stok: 1000,
       };
       delete payload.image;
 
-      const method = menuItem ? 'POST' : 'POST'; 
+      const method = menuItem ? 'PUT' : 'POST'; 
       const url = menuItem
         ? `https://api.sejadikopi.com/api/menu/${menuItem.id}`
         : 'https://api.sejadikopi.com/api/menu';
       
-      const finalFormData = new FormData();
-      for (const key in payload) {
-          finalFormData.append(key, payload[key]);
-      }
-      if (menuItem) {
-        finalFormData.append('_method', 'PUT');
-      }
-
       const response = await fetch(url, {
         method,
-        body: finalFormData,
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -198,7 +193,7 @@ export function MenuForm({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: error.message || 'Tidak dapat menyimpan item menu. Endpoint mungkin tidak ada.',
+        description: error.message || 'Tidak dapat menyimpan item menu.',
       });
     }
   };
