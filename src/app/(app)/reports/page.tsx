@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from "react"
@@ -203,7 +204,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
       const url = expense
         ? `https://api.sejadikopi.com/api/pengeluarans/${expense.id}`
         : 'https://api.sejadikopi.com/api/pengeluarans';
-
+      
       const payload = {
         id: values.id || `EXP-${Date.now()}`,
         kategori: values.kategori,
@@ -212,17 +213,20 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
         tanggal: values.tanggal,
         created_by: userEmail,
         bukti_url: imageUrl,
-        foto_url: imageUrl
+        foto_url: imageUrl,
       };
 
       const response = await fetch(url, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
       });
-
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Server responded with an error:", errorData);
         throw new Error(errorData.message || 'Gagal menyimpan pengeluaran.');
       }
 
@@ -232,11 +236,11 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
       });
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: (error as Error).message,
+        description: error.message,
       });
     }
   };
@@ -290,11 +294,11 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                                 )} />
                             </div>
                             <div className="space-y-2">
-                                <FormLabel>Foto Bukti (Opsional, Max 5MB)</FormLabel>
+                                <FormLabel>Foto Bukti (Opsional, Max 50MB)</FormLabel>
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 h-full flex flex-col justify-center items-center text-center">
                                     {imagePreview ? (
                                         <div className="relative w-full h-48 mb-4">
-                                            <Image src={imagePreview} alt="Pratinjau Bukti" layout="fill" objectFit="cover" className="rounded-md" unoptimized/>
+                                            <img src={imagePreview} alt="Pratinjau Bukti" className="rounded-md object-cover w-full h-full" />
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
@@ -317,7 +321,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                                             <Folder className="mr-2 h-4 w-4" /> Galeri
                                         </Button>
                                     </div>
-                                     <p className="text-xs text-muted-foreground mt-2">Format: JPG, PNG, WEBP (Max 5MB). Foto akan dikompres otomatis.</p>
+                                     <p className="text-xs text-muted-foreground mt-2">Format: JPG, PNG, WEBP (Max 50MB). Foto akan dikompres otomatis.</p>
                                 </div>
                             </div>
                         </div>
