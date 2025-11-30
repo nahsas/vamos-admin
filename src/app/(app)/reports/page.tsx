@@ -4,19 +4,18 @@
 import * as React from "react"
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, Layers, RefreshCw, Plus, FileText, Trash2, Pencil } from "lucide-react"
+import { Calendar as CalendarIcon, Download, Filter, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, RefreshCw, Plus } from "lucide-react"
 import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns"
-import { id } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Order, MenuItem } from "@/lib/data"
+import { DataTable } from "@/components/data-table";
+import { transactionColumns } from "./transaction-columns";
+import { expenseColumns } from "./expense-columns";
 import {
   Dialog,
   DialogContent,
@@ -299,7 +298,6 @@ export default function ReportsPage() {
     setStartDate(startOfMonth(new Date()));
     setEndDate(endOfMonth(new Date()));
     setPaymentMethod("all");
-    // Re-fetch will be triggered by state change if fetchData is in useEffect dependency
     setTimeout(fetchData, 100);
   };
   
@@ -327,7 +325,6 @@ export default function ReportsPage() {
     }
   }
   
-  // Calculate stats
   const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
   const netProfit = totalRevenue - totalExpenses;
@@ -367,6 +364,10 @@ export default function ReportsPage() {
   
   const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
   const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
+
+  const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [handleEditExpense, handleDeleteExpense]);
+  const memoizedTransactionColumns = React.useMemo(() => transactionColumns(), []);
+
 
   return (
     <div className="space-y-8">
@@ -537,43 +538,11 @@ export default function ReportsPage() {
             </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tanggal</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Deskripsi</TableHead>
-                <TableHead>Jumlah</TableHead>
-                <TableHead>Dibuat oleh</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dataLoading ? (
-                 <TableRow><TableCell colSpan={6} className="text-center h-24">Memuat data...</TableCell></TableRow>
-              ) : expenses.length > 0 ? (
-                expenses.map(expense => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{format(new Date(expense.created_at), 'dd MMM yyyy')}</TableCell>
-                    <TableCell>{expense.kategori}</TableCell>
-                    <TableCell>{expense.deskripsi}</TableCell>
-                    <TableCell>{toRupiah(expense.jumlah)}</TableCell>
-                    <TableCell>{expense.created_by}</TableCell>
-                    <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditExpense(expense)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteExpense(expense.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
-                    Tidak ada data pengeluaran yang tersedia.
-                    </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {dataLoading ? (
+            <div className="text-center h-24 flex items-center justify-center">Memuat data...</div>
+          ) : (
+            <DataTable columns={memoizedExpenseColumns} data={expenses} />
+          )}
         </CardContent>
       </Card>
       
@@ -582,41 +551,11 @@ export default function ReportsPage() {
             <CardTitle className="text-xl">Riwayat Transaksi</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Tanggal</TableHead>
-                    <TableHead>Meja/Pelanggan</TableHead>
-                    <TableHead>Metode</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dataLoading ? (
-                 <TableRow><TableCell colSpan={5} className="text-center h-48">Memuat data...</TableCell></TableRow>
-              ): transactions.length > 0 ? (
-                transactions.map(t => (
-                  <TableRow key={t.id}>
-                    <TableCell>#{t.id}</TableCell>
-                    <TableCell>{format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm')}</TableCell>
-                    <TableCell>{t.no_meja}</TableCell>
-                    <TableCell className="capitalize">{t.metode_pembayaran || 'N/A'}</TableCell>
-                    <TableCell className="text-right font-medium">{toRupiah(t.total_after_discount || 0)}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                    <TableCell colSpan={6} className="h-48 text-center">
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <FileText className="w-16 h-16 text-muted-foreground/50" />
-                            <p className="text-muted-foreground">Belum ada transaksi</p>
-                        </div>
-                    </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {dataLoading ? (
+            <div className="text-center h-48 flex items-center justify-center">Memuat data...</div>
+          ) : (
+            <DataTable columns={memoizedTransactionColumns} data={transactions} />
+          )}
         </CardContent>
       </Card>
     </div>
