@@ -151,6 +151,7 @@ export function OrderDetailModal({
 
   const parseAdditionals = (additionals: string | null | undefined): string[] => {
     if (!additionals) return [];
+    if (typeof additionals !== 'string') return [];
     try {
       // Handles cases like "['item1', 'item2']" or "'item1', 'item2'"
       const cleanedString = additionals.replace(/'/g, '"');
