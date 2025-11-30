@@ -122,9 +122,9 @@ export function OrderDetailModal({
       });
   
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("API Error:", errorData);
-        throw new Error('Gagal membatalkan pesanan.');
+        const errorText = await response.text();
+        console.error("API Error:", errorText);
+        throw new Error(`Gagal membatalkan pesanan. Status: ${response.status}`);
       }
       
       toast({
