@@ -36,6 +36,7 @@ import {
   MessageSquare,
   Wallet,
   XCircle,
+  PlusCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentModal } from './payment-modal';
@@ -147,6 +148,19 @@ export function OrderDetailModal({
   const getMenuDetails = (menuId: number) => {
     return menuItems.find((item) => item.id === menuId);
   };
+
+  const parseAdditionals = (additionals: string | null | undefined): string[] => {
+    if (!additionals) return [];
+    try {
+      // Handles cases like "['item1', 'item2']" or "'item1', 'item2'"
+      const cleanedString = additionals.replace(/'/g, '"');
+      const parsed = JSON.parse(cleanedString.startsWith('[') ? cleanedString : `[${cleanedString}]`);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      // Handles simple comma-separated strings
+      return additionals.split(',').map(s => s.trim());
+    }
+  };
   
   const totalItems = order?.detail_pesanans.reduce((sum, item) => sum + item.jumlah, 0) || 0;
   const isProcessing = order?.status.toLowerCase() === 'diproses';
@@ -222,6 +236,10 @@ export function OrderDetailModal({
             <div className="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
                 {order.detail_pesanans.map((item) => {
                 const menuItem = getMenuDetails(item.menu_id);
+                const allAdditionals = [
+                    ...parseAdditionals(item.additionals),
+                    ...parseAdditionals(item.dimsum_additionals)
+                ];
                 return (
                     <div key={item.id} className="bg-slate-50 rounded-lg p-3">
                         <div className="flex justify-between items-start">
@@ -232,6 +250,12 @@ export function OrderDetailModal({
                                 </p>
                                 <div className="flex items-center gap-1 mt-1 flex-wrap">
                                     {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
+                                    {allAdditionals.map((add, index) => (
+                                        <Badge key={index} variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                                            <PlusCircle className="mr-1 h-3 w-3" />
+                                            {add}
+                                        </Badge>
+                                    ))}
                                 </div>
                             </div>
                             <div className="text-right">
@@ -244,13 +268,19 @@ export function OrderDetailModal({
                         </div>
                             <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
                                <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
-                               <span>{item.note}</span>
+                               <span>{item.note || "Tidak ada catatan."}</span>
                             </div>
                          <div className="text-sm mt-2 pt-2 border-t border-dashed">
                              <div className="flex justify-between">
                                  <span>Harga satuan:</span>
                                  <span>Rp {item.base_price.toLocaleString('id-ID')}</span>
                              </div>
+                              {item.additional_price && parseInt(item.additional_price, 10) > 0 && (
+                                <div className="flex justify-between">
+                                    <span>Harga tambahan:</span>
+                                    <span>Rp {parseInt(item.additional_price, 10).toLocaleString('id-ID')}</span>
+                                </div>
+                              )}
                              <div className="flex justify-between">
                                  <span>Subtotal ({item.jumlah}x):</span>
                                  <span>Rp {parseInt(item.subtotal, 10).toLocaleString('id-ID')}</span>
