@@ -17,14 +17,23 @@ const formatCurrency = (num: number): string => {
     return num.toLocaleString('id-ID');
 }
 
+type ReceiptType = 'kitchen' | 'bar' | 'waiter' | 'payment';
+
+interface ReceiptOptions {
+    title: string;
+    showPrices: boolean;
+    itemsToPrint: OrderItem[];
+}
+
 const generateReceiptText = (
     order: Order, 
-    itemsToPrint: OrderItem[], 
     menuItems: MenuItem[],
-    receiptTitle: string
+    options: ReceiptOptions
 ): string => {
   
-  const orderDate = new Date(order.created_at);
+  const { title, showPrices, itemsToPrint } = options;
+
+  const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
     year: "2-digit",
     month: "2-digit",
@@ -45,11 +54,16 @@ const generateReceiptText = (
   receipt += "\x1B\x61\x01"; // Align center
 
   // --- Header ---
-  receipt += `\x1B\x21\x10${alignCenter(receiptTitle)}\x1B\x21\x00\n`;
-  receipt += `\x1B\x21\x10${alignCenter("SEJADI KOPI")}\x1B\x21\x00\n\n`;
+  receipt += `\x1B\x21\x10${alignCenter(title)}\x1B\x21\x00\n`;
+  if (showPrices) {
+    receipt += alignCenter("Jl. Pattimura, Air Saga") + "\n";
+  }
+  receipt += "\x1B\x21\x10${alignCenter("SEJADI KOPI")}\x1B\x21\x00\n\n`;
   
   receipt += "\x1B\x61\x00"; // Align left
-  receipt += `No: #${order.id}\n`;
+  if (showPrices) {
+      receipt += createLine("No", `#${order.id}`) + "\n";
+  }
   receipt += createLine("Meja", order.no_meja ? order.no_meja.toString() : "-") + "\n";
   receipt += createLine("Tipe", tipeText) + "\n";
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
@@ -67,18 +81,10 @@ const generateReceiptText = (
     const itemLine = qty + itemName;
     const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
 
-    const maxNameLen = paperWidth - subtotal.length - 2;
-    if (itemLine.length <= maxNameLen) {
-      receipt += createLine(itemLine, subtotal) + "\n";
+    if (showPrices) {
+        receipt += createLine(itemLine, subtotal) + "\n";
     } else {
-      let remainingName = itemLine;
-      while (remainingName.length > paperWidth) {
-        let breakPoint = remainingName.lastIndexOf(' ', paperWidth - 1);
-        if (breakPoint === -1) breakPoint = paperWidth - 1;
-        receipt += remainingName.substring(0, breakPoint) + '\n';
-        remainingName = remainingName.substring(breakPoint).trim();
-      }
-      receipt += createLine(remainingName, subtotal) + "\n";
+        receipt += itemLine + "\n";
     }
 
     if (item.note) {
@@ -87,16 +93,50 @@ const generateReceiptText = (
   });
 
   receipt += "-".repeat(paperWidth) + "\n";
+  
+  // --- Footer ---
+  if (showPrices) {
+    receipt += createLine("TOTAL", `Rp${formatCurrency(order.total_after_discount || parseInt(order.total, 10))}`) + "\n";
+    if (order.discount_amount && order.discount_amount > 0) {
+        receipt += createLine("DISKON", `-Rp${formatCurrency(order.discount_amount)}`) + "\n";
+        receipt += "--------------------------------\n";
+        receipt += createLine("TOTAL BAYAR", `Rp${formatCurrency(order.total_after_discount || 0)}`) + "\n";
+    }
+    if (order.metode_pembayaran) {
+          let metodeLabel = "";
+          if (order.metode_pembayaran === "cash") {
+            metodeLabel = "CASH";
+          } else if (order.metode_pembayaran === "qris") {
+            metodeLabel = order.bank_qris ? `QRIS ${order.bank_qris}` : "QRIS";
+          }
+          if (metodeLabel) {
+            receipt += createLine("Metode", metodeLabel) + "\n";
+          }
+        }
+    receipt += "--------------------------------\n";
+    receipt += alignCenter("Sampai Jumpa") + "\n";
+    receipt += alignCenter("Terima Kasih") + "\n";
+  }
+
   receipt += "\n\n\n";
   receipt += "\x1D\x56\x41"; // Cut paper
+  if (showPrices) {
+    receipt += "\x1B\x70\x00\x19\xFA"; // open drawer
+  }
 
   return receipt;
 };
 
-export const printStruk = (
+const printJob = (receiptContent: string) => {
+    const encoded = encodeURIComponent(receiptContent);
+    const url = `intent:${encoded}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end`;
+    window.location.href = url;
+};
+
+export const printOperationalStruk = (
   order: Order, 
   menuItems: MenuItem[],
-  onSecondPrintRequired: (printFunction: () => void) => void
+  onNextPrint: (nextPrintFn: (() => void), title: string) => void
 ) => {
   try {
     const makananItems = order.detail_pesanans.filter(item => {
@@ -108,37 +148,83 @@ export const printStruk = (
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         return menuItem?.kategori_struk === 'minuman';
     });
-
-    const printJob = (receiptContent: string) => {
-        const encoded = encodeURIComponent(receiptContent);
-        const url = `intent:${encoded}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end`;
-        window.location.href = url;
-    };
     
     const hasMakanan = makananItems.length > 0;
     const hasMinuman = minumanItems.length > 0;
 
-    if (hasMakanan) {
-        const receiptText = generateReceiptText(order, makananItems, menuItems, "CHECKER DAPUR");
+    const kitchenPrintFn = () => {
+        const receiptText = generateReceiptText(order, menuItems, {
+            title: "CHECKER DAPUR",
+            showPrices: false,
+            itemsToPrint: makananItems
+        });
+        printJob(receiptText);
+    }
+    
+    const barPrintFn = () => {
+        const receiptText = generateReceiptText(order, menuItems, {
+            title: "CHECKER BAR",
+            showPrices: false,
+            itemsToPrint: minumanItems
+        });
+        printJob(receiptText);
+    }
+    
+    const waiterPrintFn = () => {
+        const receiptText = generateReceiptText(order, menuItems, {
+            title: "CHECKER PELAYAN",
+            showPrices: false,
+            itemsToPrint: order.detail_pesanans
+        });
         printJob(receiptText);
     }
 
-    if (hasMinuman) {
-        const barPrintJob = () => {
-            const receiptText = generateReceiptText(order, minumanItems, menuItems, "CHECKER BAR");
-            printJob(receiptText);
-        };
+    const printQueue: { fn: () => void, title: string }[] = [];
+    if(hasMakanan) printQueue.push({ fn: kitchenPrintFn, title: "Cetak Struk Dapur?" });
+    if(hasMinuman) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar?" });
+    if(order.detail_pesanans.length > 0) printQueue.push({ fn: waiterPrintFn, title: "Cetak Struk Pelayan?" });
 
-        if (hasMakanan) {
-            // If there was also a food receipt, ask the UI to confirm the second print
-            onSecondPrintRequired(barPrintJob);
+
+    const runNextPrint = (index: number) => {
+        if (index >= printQueue.length) return;
+
+        const currentPrint = printQueue[index];
+
+        if (index === 0) {
+            currentPrint.fn(); // Print the first one directly
+            if (printQueue.length > 1) {
+                // If there's more to print, queue up the next one
+                onNextPrint(() => runNextPrint(index + 1), printQueue[index + 1].title);
+            }
         } else {
-            // If only drinks, print directly
-            barPrintJob();
+            // For subsequent prints, the function is called via the dialog action
+            currentPrint.fn();
+            if (index + 1 < printQueue.length) {
+                // Queue up the next one after this
+                onNextPrint(() => runNextPrint(index + 1), printQueue[index + 1].title);
+            }
         }
     }
+    
+    runNextPrint(0);
+
   } catch (error) {
     console.error("Error printing receipt:", error);
     alert("Gagal mencetak struk. Pastikan aplikasi RawBT terinstall.");
   }
+};
+
+
+export const printPaymentStruk = (order: Order, menuItems: MenuItem[]) => {
+    try {
+        const receiptText = generateReceiptText(order, menuItems, {
+            title: "STRUK PEMBELIAN",
+            showPrices: true,
+            itemsToPrint: order.detail_pesanans
+        });
+        printJob(receiptText);
+    } catch(error) {
+        console.error("Error printing payment receipt:", error);
+        alert("Gagal mencetak struk pembayaran.");
+    }
 };

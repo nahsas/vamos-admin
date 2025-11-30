@@ -14,11 +14,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Order } from '@/lib/data';
+import { Order, MenuItem } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { X, Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { printPaymentStruk } from '@/lib/print-utils';
+import { appEventEmitter } from '@/lib/event-emitter';
 
 const banks = [
     { id: 'BCA', name: 'BCA', logo: 'https://placehold.co/100x40/003087/FFFFFF?text=BCA' },
@@ -44,6 +46,14 @@ export function PaymentModal({
 
   const [discountCode, setDiscountCode] = React.useState('');
   const [appliedDiscount, setAppliedDiscount] = React.useState<{ amount: number, finalTotal: number, code: string } | null>(null);
+  
+  // Need menuItems for printing
+  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
+  React.useEffect(() => {
+    fetch('https://api.sejadikopi.com/api/menu')
+        .then(res => res.json())
+        .then(data => setMenuItems(data.data || []));
+  }, []);
 
   const orderTotal = order ? parseInt(order.total, 10) : 0;
   const displayTotal = appliedDiscount ? appliedDiscount.finalTotal : orderTotal;
@@ -123,16 +133,16 @@ export function PaymentModal({
 
     const now = new Date().toISOString();
 
-    const finalPayload = {
+    const finalPayload: Partial<Order> = {
         status: "selesai",
         updated_at: now,
         completed_at: now,
         is_final: true,
         metode_pembayaran: paymentMethod.toLowerCase() as 'cash' | 'qris',
         bank_qris: paymentMethod === 'QRIS' ? selectedBank : null,
-        discount_code: appliedDiscount?.code || null,
-        discount_amount: appliedDiscount?.amount || 0,
-        total_after_discount: appliedDiscount?.finalTotal || orderTotal
+        discount_code: appliedDiscount?.code || order.discount_code || null,
+        discount_amount: appliedDiscount?.amount || order.discount_amount || 0,
+        total_after_discount: appliedDiscount?.finalTotal || order.total_after_discount || orderTotal
     };
     
     try {
@@ -149,14 +159,18 @@ export function PaymentModal({
             const errorData = await response.json();
             throw new Error(errorData.message || 'Gagal menyelesaikan pembayaran.');
         }
+        const updatedOrder = await response.json();
 
         toast({
             title: "Pembayaran Berhasil",
             description: `Pesanan #${order.id} telah ditandai sebagai selesai.`,
         });
+        
+        // Print the payment receipt with the final order details
+        printPaymentStruk({ ...order, ...finalPayload, detail_pesanans: order.detail_pesanans }, menuItems);
+        
         onOpenChange(false);
-        // Here you might want to trigger a data refresh on the parent page
-        // e.g., by calling a prop function like `onPaymentSuccess()`
+        appEventEmitter.emit('new-order'); // To refetch data on pages
     } catch (error: any) {
         toast({
             variant: "destructive",

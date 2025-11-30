@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { MapPin, FileText, Info, ArrowRight, Wallet } from 'lucide-react';
-import { printStruk } from '@/lib/print-utils';
+import { printOperationalStruk } from '@/lib/print-utils';
 import React from 'react';
 import {
   AlertDialog,
@@ -38,8 +38,8 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'diproses';
   
-  const [showSecondPrintDialog, setShowSecondPrintDialog] = React.useState(false);
-  const [secondPrintJob, setSecondPrintJob] = React.useState<(() => void) | null>(null);
+  const [showSequentialPrintDialog, setShowSequentialPrintDialog] = React.useState(false);
+  const [sequentialPrintJob, setSequentialPrintJob] = React.useState<{ fn: (() => void) | null, title: string }>({ fn: null, title: '' });
 
 
   const getMenuName = (menuId: number) => {
@@ -58,20 +58,19 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   }
 
   const handlePrintChecker = () => {
-    printStruk(order, menuItems, (barPrintJob) => {
-        if (barPrintJob) {
-            setSecondPrintJob(() => barPrintJob);
-            setShowSecondPrintDialog(true);
-        }
+    printOperationalStruk(order, menuItems, (nextPrintFn, title) => {
+        setSequentialPrintJob({ fn: nextPrintFn, title });
+        setShowSequentialPrintDialog(true);
     });
   };
   
-  const executeSecondPrint = () => {
-    if (secondPrintJob) {
-        secondPrintJob();
+  const executeSequentialPrint = () => {
+    if (sequentialPrintJob.fn) {
+        sequentialPrintJob.fn();
     }
-    setShowSecondPrintDialog(false);
-    setSecondPrintJob(null);
+    // This will close the current dialog, and the next call to onNextPrint inside printOperationalStruk will open a new one if needed.
+    setShowSequentialPrintDialog(false); 
+    setSequentialPrintJob({ fn: null, title: '' });
   };
 
 
@@ -168,18 +167,18 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
         </div>
       </CardContent>
     </Card>
-    <AlertDialog open={showSecondPrintDialog} onOpenChange={setShowSecondPrintDialog}>
+    <AlertDialog open={showSequentialPrintDialog} onOpenChange={setShowSequentialPrintDialog}>
         <AlertDialogContent>
         <AlertDialogHeader>
-            <AlertDialogTitle>Cetak Struk Bar?</AlertDialogTitle>
+            <AlertDialogTitle>{sequentialPrintJob.title}</AlertDialogTitle>
             <AlertDialogDescription>
-            Struk dapur telah dikirim. Apakah Anda ingin melanjutkan untuk mencetak struk bar (minuman)?
+            Struk sebelumnya telah dikirim. Apakah Anda ingin melanjutkan untuk mencetak struk berikutnya?
             </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowSecondPrintDialog(false)}>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={executeSecondPrint}>
-            Ya, Cetak Struk Bar
+            <AlertDialogCancel onClick={() => setShowSequentialPrintDialog(false)}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={executeSequentialPrint}>
+            Ya, Lanjutkan Mencetak
             </AlertDialogAction>
         </AlertDialogFooter>
         </AlertDialogContent>
