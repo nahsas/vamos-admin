@@ -45,22 +45,21 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
   }
 
   const handleDelete = async (id: number) => {
-    // API Spec has no DELETE /menu/{id}
-    // I am assuming it should exist and disabling it
-    toast({ variant: "destructive", title: "Error", description: "Fungsi hapus tidak tersedia." });
-    return;
-    /*
     try {
+      // NOTE: The API spec does not officially have DELETE /menu/{id}
+      // but implementing it as requested by the user.
       const response = await fetch(`https://api.sejadikopi.com/api/menu/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Gagal menghapus item menu.");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Gagal menghapus item menu.' }));
+        throw new Error(errorData.message);
+      }
       toast({ title: "Sukses", description: "Item menu berhasil dihapus." });
       onDeleteSuccess();
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Tidak dapat menghapus item menu." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.message || "Tidak dapat menghapus item menu." });
     }
-    */
   };
   
   return [
@@ -110,14 +109,6 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
       },
     },
     {
-      accessorKey: "is_available",
-      header: "Ketersediaan",
-      cell: ({ row }) => {
-        const isAvailable = row.getValue("is_available")
-        return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? "Tersedia" : "Habis"}</Badge>
-      }
-    },
-    {
       id: "actions",
       cell: ({ row }) => {
         const menuItem = row.original
@@ -138,7 +129,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive" disabled>
+                  <DropdownMenuItem className="text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Hapus item
                   </DropdownMenuItem>
