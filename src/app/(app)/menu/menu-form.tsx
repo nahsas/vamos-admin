@@ -123,9 +123,6 @@ export function MenuForm({
   };
 
   const onSubmit = async (values: MenuFormValues) => {
-    // The API spec does not provide a POST/PUT for /menu.
-    // Assuming it's missing from the spec and implementing optimistically.
-    // If this fails, the API needs to be updated.
     try {
       let imageUrl = menuItem?.image_url || '';
 
@@ -150,8 +147,7 @@ export function MenuForm({
       };
       delete payload.image;
 
-
-      const method = menuItem ? 'POST' : 'POST'; // API uses POST for update with _method: 'PUT'
+      const method = menuItem ? 'POST' : 'POST'; 
       const url = menuItem
         ? `https://api.sejadikopi.com/api/menu/${menuItem.id}`
         : 'https://api.sejadikopi.com/api/menu';
@@ -192,146 +188,148 @@ export function MenuForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg p-0">
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>{menuItem ? 'Ubah Menu' : 'Buat Menu'}</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="nama"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama</FormLabel>
-                  <FormControl>
-                    <Input placeholder="cth. Espresso" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {imagePreview && (
-              <div className="w-full h-40 relative">
-                <Image src={imagePreview} alt="Pratinjau Gambar" layout="fill" objectFit="cover" className="rounded-md" unoptimized />
-              </div>
-            )}
-             <FormItem>
-              <FormLabel>Gambar Menu</FormLabel>
-              <FormControl>
-                <Input type="file" accept="image/*" onChange={handleImageChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-            <FormField
-              control={form.control}
-              name="kategori_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kategori</FormLabel>
-                  <Select onValueChange={field.onChange} value={String(field.value || '')}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih kategori" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={String(cat.id)}>
-                          {cat.nama}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
+        <div className="max-h-[80vh] overflow-y-auto px-6">
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                 control={form.control}
-                name="harga"
+                name="nama"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Harga</FormLabel>
+                    <FormLabel>Nama</FormLabel>
                     <FormControl>
-                        <Input type="number" {...field} />
+                        <Input placeholder="cth. Espresso" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
+                {imagePreview && (
+                <div className="w-full h-40 relative">
+                    <Image src={imagePreview} alt="Pratinjau Gambar" layout="fill" objectFit="cover" className="rounded-md" unoptimized />
+                </div>
+                )}
+                <FormItem>
+                <FormLabel>Gambar Menu</FormLabel>
+                <FormControl>
+                    <Input type="file" accept="image/*" onChange={handleImageChange} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
                 <FormField
                 control={form.control}
-                name="stok"
+                name="kategori_id"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Stok</FormLabel>
+                    <FormLabel>Kategori</FormLabel>
+                    <Select onValueChange={field.onChange} value={String(field.value || '')}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Pilih kategori" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.nama}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                    control={form.control}
+                    name="harga"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Harga</FormLabel>
+                        <FormControl>
+                            <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="stok"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Stok</FormLabel>
+                        <FormControl>
+                            <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Deskripsi</FormLabel>
                     <FormControl>
-                        <Input type="number" {...field} />
+                        <Textarea placeholder="Jelaskan item..." {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
-            </div>
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Deskripsi</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Jelaskan item..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center space-x-4">
-                <FormField
-                control={form.control}
-                name="is_available"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
-                      <div className="space-y-0.5">
-                          <FormLabel>Tersedia</FormLabel>
-                      </div>
-                      <FormControl>
-                          <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          />
-                      </FormControl>
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="is_recommendation"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
-                      <div className="space-y-0.5">
-                          <FormLabel>Direkomendasikan</FormLabel>
-                      </div>
-                      <FormControl>
-                          <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          />
-                      </FormControl>
-                    </FormItem>
-                )}
-                />
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Batal
-              </Button>
-              <Button type="submit">Simpan</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+                <div className="flex items-center space-x-4">
+                    <FormField
+                    control={form.control}
+                    name="is_available"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
+                        <div className="space-y-0.5">
+                            <FormLabel>Tersedia</FormLabel>
+                        </div>
+                        <FormControl>
+                            <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="is_recommendation"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
+                        <div className="space-y-0.5">
+                            <FormLabel>Direkomendasikan</FormLabel>
+                        </div>
+                        <FormControl>
+                            <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <DialogFooter className="sticky bottom-0 bg-background py-4">
+                    <Button type="button" variant="outline" onClick={onClose}>
+                        Batal
+                    </Button>
+                    <Button type="submit">Simpan</Button>
+                </DialogFooter>
+            </form>
+            </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
