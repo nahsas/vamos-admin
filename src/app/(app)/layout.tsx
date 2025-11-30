@@ -1,6 +1,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useAuth } from '@/context/auth-context';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
@@ -33,7 +34,10 @@ export default function AppLayout({
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:h-16 sm:px-6 md:hidden">
            <SidebarTrigger />
-           <h1 className="text-lg font.headline font-bold">SejadiKopi</h1>
+           <div className="flex items-center gap-2">
+             <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={32} height={32} className="rounded-md" />
+             <h1 className="text-lg font-headline font-bold">SejadiKopi</h1>
+           </div>
         </header>
         <div className="p-4 sm:p-6 lg:p-8">
           {children}

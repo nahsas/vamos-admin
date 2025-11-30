@@ -2,13 +2,14 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
@@ -38,9 +39,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center space-y-2">
             <div className="flex justify-center items-center mb-2">
-                 <div className="p-4 bg-primary/10 rounded-full">
-                    <Coffee className="w-8 h-8 text-primary" />
-                </div>
+                <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={80} height={80} className="rounded-full" />
             </div>
           <CardTitle className="text-3xl font-bold font-headline">SejadiKopi</CardTitle>
           <CardDescription>Masukkan kredensial Anda untuk mengakses dasbor</CardDescription>

@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -178,9 +179,7 @@ export function SidebarNav() {
       <Sidebar>
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-yellow-100 p-2">
-                <span className="text-center text-xs font-bold text-primary">SEJADI KOPI</span>
-            </div>
+             <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg" />
             <div>
               <h1 className="text-lg font-headline font-bold">SEJADI KOPI</h1>
               <p className="text-sm text-muted-foreground">Panel Admin</p>
