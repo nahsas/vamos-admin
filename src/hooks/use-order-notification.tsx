@@ -15,8 +15,10 @@ export function useOrderNotification() {
   const isFirstLoad = useRef(true);
 
   useEffect(() => {
-    // Initialize Audio object on the client side
-    audioRef.current = new Audio('/notification.mp3');
+    // Initialize Audio object on the client side only once
+    if (typeof window !== 'undefined' && !audioRef.current) {
+        audioRef.current = new Audio('/notification.mp3');
+    }
   }, []);
 
   const fetchPendingOrders = useCallback(async () => {
@@ -29,11 +31,7 @@ export function useOrderNotification() {
       }
       const { data: pendingOrders }: { data: Order[] } = await response.json();
 
-      if (!pendingOrders || pendingOrders.length === 0) {
-        if (isFirstLoad.current) {
-            setLastKnownOrderIds(new Set());
-            isFirstLoad.current = false;
-        }
+      if (!pendingOrders) {
         return;
       }
       
@@ -49,13 +47,15 @@ export function useOrderNotification() {
 
       if (newOrderIds.length > 0) {
         if (audioRef.current) {
+          // Reset and play to ensure it plays every time
+          audioRef.current.currentTime = 0;
           audioRef.current.play().catch(error => console.error("Audio play failed:", error));
         }
         
         const newOrders = pendingOrders.filter(order => newOrderIds.includes(order.id));
 
         newOrders.forEach(newOrder => {
-            const customer = newOrder.location_type === 'DINE-IN' ? `Meja ${newOrder.no_meja}`: newOrder.no_meja;
+            const customer = newOrder.location_type === 'dine-in' ? `Meja ${newOrder.no_meja}`: newOrder.no_meja;
             toast({
                 title: '🔔 Pesanan Baru Diterima!',
                 description: `Pesanan baru dari ${customer} telah diterima.`,
@@ -69,7 +69,7 @@ export function useOrderNotification() {
         });
 
         setLastKnownOrderIds(currentOrderIds);
-      } else if (currentOrderIds.size < lastKnownOrderIds.size) {
+      } else if (currentOrderIds.size !== lastKnownOrderIds.size) {
         // Also update if orders were processed/cancelled elsewhere
         setLastKnownOrderIds(currentOrderIds);
       }
@@ -82,7 +82,7 @@ export function useOrderNotification() {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchPendingOrders();
-    }, 15000); // Poll every 15 seconds
+    }, 3000); // Poll every 3 seconds
 
     // Fetch once on mount
     fetchPendingOrders();
