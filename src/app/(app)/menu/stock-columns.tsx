@@ -44,11 +44,10 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
       fullMenuItemData.append('is_available', newStock > 0 ? '1' : '0');
       fullMenuItemData.append('is_recommendation', String(menuItem.is_recommendation ? 1: 0));
       fullMenuItemData.append('description', menuItem.description || '');
-      fullMenuItemData.append('_method', 'PUT');
 
 
       const response = await fetch(`https://api.sejadikopi.com/api/menu/${menuItem.id}`, {
-        method: 'POST',
+        method: 'PUT',
         body: fullMenuItemData,
       });
 
