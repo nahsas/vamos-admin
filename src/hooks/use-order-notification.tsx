@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Order } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { appEventEmitter } from '@/lib/event-emitter';
 
 export function useOrderNotification() {
   const [lastKnownOrderIds, setLastKnownOrderIds] = useState<Set<number>>(new Set());
@@ -90,7 +91,8 @@ export function useOrderNotification() {
                 duration: 10000,
             });
         });
-
+        
+        appEventEmitter.emit('new-order');
         setLastKnownOrderIds(currentOrderIds);
       } else if (currentOrderIds.size !== lastKnownOrderIds.size) {
         // Also update if orders were processed/cancelled elsewhere

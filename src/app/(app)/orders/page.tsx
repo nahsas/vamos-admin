@@ -36,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { PaymentModal } from "@/components/ui/payment-modal";
+import { appEventEmitter } from "@/lib/event-emitter";
 
 
 function StatCard({
@@ -128,6 +129,12 @@ export default function OrdersPage() {
 
   React.useEffect(() => {
     fetchData();
+    
+    appEventEmitter.on('new-order', fetchData);
+
+    return () => {
+      appEventEmitter.off('new-order', fetchData);
+    };
   }, [fetchData]);
 
   const handleDetailClick = (order: Order) => {
