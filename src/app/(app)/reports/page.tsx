@@ -6,44 +6,37 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
-import { orders, Order } from "@/lib/data"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, Layers, RefreshCw, Plus, FileText } from "lucide-react"
-import { format } from "date-fns"
+import { Calendar as CalendarIcon, Download, Filter, ArrowRight, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, Layers, RefreshCw, Plus, FileText, Trash2, Pencil } from "lucide-react"
+import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns"
+import { id } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-// Helper to aggregate data client-side
-const aggregateSalesData = (startDate?: Date, endDate?: Date, paymentMethod?: string) => {
-  const salesByDate = orders
-    .filter(o => o.status === 'Completed')
-    .filter(o => {
-      const orderDate = new Date(o.createdAt);
-      const start = startDate ? new Date(startDate.setHours(0, 0, 0, 0)) : null;
-      const end = endDate ? new Date(endDate.setHours(23, 59, 59, 999)) : null;
-      if (start && orderDate < start) return false;
-      if (end && orderDate > end) return false;
-      if (paymentMethod && paymentMethod !== 'All' && o.paymentMethod !== paymentMethod) return false;
-      return true;
-    })
-    .reduce((acc, order) => {
-      const date = new Date(order.createdAt).toLocaleDateString('en-CA'); // Use YYYY-MM-DD for sorting
-      acc[date] = (acc[date] || 0) + order.total;
-      return acc;
-    }, {} as Record<string, number>);
-
-  return Object.entries(salesByDate)
-    .map(([date, sales]) => ({
-      date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      sales
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-};
+import { Order, MenuItem } from "@/lib/data"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useToast } from "@/hooks/use-toast"
 
 const ReportStatCard = ({
   title,
@@ -113,49 +106,259 @@ const PaymentBreakdownCard = ({
     </Card>
 )
 
+const expenseFormSchema = z.object({
+  kategori: z.string().min(1, 'Kategori wajib diisi'),
+  deskripsi: z.string().min(1, 'Deskripsi wajib diisi'),
+  jumlah: z.coerce.number().min(1, 'Jumlah harus lebih dari 0'),
+  created_by: z.string(), // Hidden field
+});
+
+type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
+
+function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpen: boolean, onClose: () => void, onSuccess: () => void, userEmail: string, expense: any | null }) {
+    const { toast } = useToast();
+    const form = useForm<ExpenseFormValues>({
+        resolver: zodResolver(expenseFormSchema),
+        defaultValues: expense ? {
+            kategori: expense.kategori,
+            deskripsi: expense.deskripsi,
+            jumlah: expense.jumlah,
+            created_by: userEmail,
+        } : {
+            kategori: '',
+            deskripsi: '',
+            jumlah: 0,
+            created_by: userEmail,
+        },
+    });
+
+    React.useEffect(() => {
+        form.reset(expense ? {
+            kategori: expense.kategori,
+            deskripsi: expense.deskripsi,
+            jumlah: expense.jumlah,
+            created_by: userEmail,
+        } : {
+            kategori: '',
+            deskripsi: '',
+            jumlah: 0,
+            created_by: userEmail,
+        });
+    }, [expense, userEmail, form]);
+
+    const onSubmit = async (values: ExpenseFormValues) => {
+        try {
+            const method = expense ? 'PUT' : 'POST';
+            const url = expense
+                ? `https://api.sejadikopi.com/api/pengeluarans/${expense.id}`
+                : 'https://api.sejadikopi.com/api/pengeluarans';
+            
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values),
+            });
+
+            if (!response.ok) throw new Error('Gagal menyimpan pengeluaran.');
+
+            toast({ title: 'Sukses', description: `Pengeluaran berhasil ${expense ? 'diperbarui' : 'ditambahkan'}.` });
+            onSuccess();
+            onClose();
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
+        }
+    };
+    
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{expense ? 'Ubah Pengeluaran' : 'Tambah Pengeluaran'}</DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField control={form.control} name="kategori" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Kategori</FormLabel>
+                                <FormControl><Input placeholder="cth. Bahan Baku" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="deskripsi" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Deskripsi</FormLabel>
+                                <FormControl><Input placeholder="cth. Pembelian biji kopi" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="jumlah" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Jumlah</FormLabel>
+                                <FormControl><Input type="number" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
+                            <Button type="submit">Simpan</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function ReportsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const [startDate, setStartDate] = React.useState<Date | undefined>();
-  const [endDate, setEndDate] = React.useState<Date | undefined>();
-  const [paymentMethod, setPaymentMethod] = React.useState<string>("All");
-  const [filteredData, setFilteredData] = React.useState(aggregateSalesData());
+  const [startDate, setStartDate] = React.useState<Date | undefined>(startOfMonth(new Date()));
+  const [endDate, setEndDate] = React.useState<Date | undefined>(endOfMonth(new Date()));
+
+  const [transactions, setTransactions] = React.useState<any[]>([]);
+  const [expenses, setExpenses] = React.useState<any[]>([]);
+  
+  const [dataLoading, setDataLoading] = React.useState(true);
+
+  const [isExpenseFormOpen, setIsExpenseFormOpen] = React.useState(false);
+  const [editingExpense, setEditingExpense] = React.useState<any | null>(null);
+  
+  const { toast } = useToast();
+
+  const fetchData = React.useCallback(async () => {
+    setDataLoading(true);
+    try {
+        const sDate = startDate ? format(startOfDay(startDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
+        const eDate = endDate ? format(endOfDay(endDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
+
+        const transactionUrl = `https://api.sejadikopi.com/api/pesanans?status=selesai&created_from=${sDate}&created_to=${eDate}`;
+        const expenseUrl = `https://api.sejadikopi.com/api/pengeluarans?created_from=${sDate}&created_to=${eDate}`;
+        
+        const [transactionRes, expenseRes] = await Promise.all([
+            fetch(transactionUrl),
+            fetch(expenseUrl),
+        ]);
+
+        if (transactionRes.ok) {
+            const data = await transactionRes.json();
+            setTransactions(data.data || []);
+        } else {
+             setTransactions([]);
+        }
+
+        if (expenseRes.ok) {
+            const data = await expenseRes.json();
+            setExpenses(data.data || []);
+        } else {
+            setExpenses([]);
+        }
+
+    } catch (error) {
+        console.error("Gagal mengambil data laporan:", error);
+        toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data laporan." });
+    } finally {
+        setDataLoading(false);
+    }
+  }, [startDate, endDate, toast]);
 
   React.useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    if (user?.role === 'admin') {
+      fetchData();
+    }
+  }, [user, fetchData]);
+
+  React.useEffect(() => {
+    if (!loading && user?.role !== 'admin') {
+      router.push('/');
     }
   }, [user, loading, router]);
 
 
-  if (loading || !user) {
+  if (loading || user?.role !== 'admin') {
     return <div className="flex items-center justify-center h-screen">Akses Ditolak</div>;
   }
-
+  
   const handleApplyFilter = () => {
-    setFilteredData(aggregateSalesData(startDate, endDate, paymentMethod));
+    fetchData();
   };
   
   const handleResetFilter = () => {
-    setStartDate(undefined);
-    setEndDate(undefined);
-    setPaymentMethod("All");
-    setFilteredData(aggregateSalesData());
+    setStartDate(startOfMonth(new Date()));
+    setEndDate(endOfMonth(new Date()));
+    // Re-fetch will be triggered by state change if fetchData is in useEffect dependency
+    setTimeout(fetchData, 100);
+  };
+  
+  const handleEditExpense = (expense: any) => {
+    setEditingExpense(expense);
+    setIsExpenseFormOpen(true);
   };
 
+  const handleAddExpense = () => {
+    setEditingExpense(null);
+    setIsExpenseFormOpen(true);
+  };
 
-  const chartConfig = {
-    sales: {
-      label: "Penjualan",
-      color: "hsl(var(--primary))",
-    },
+  const handleDeleteExpense = async (id: number) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?')) return;
+    try {
+        const response = await fetch(`https://api.sejadikopi.com/api/pengeluarans/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Gagal menghapus pengeluaran.');
+        toast({ title: 'Sukses', description: 'Pengeluaran berhasil dihapus.' });
+        fetchData();
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
+    }
   }
+  
+  // Calculate stats
+  const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.jumlah, 0);
+  const netProfit = totalRevenue - totalExpenses;
+  const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+  const averageTransaction = transactions.length > 0 ? totalRevenue / transactions.length : 0;
 
-  const todayStr = format(new Date(), "dd MMMM yyyy");
+  const paymentBreakdown = transactions.reduce((acc, t) => {
+      const method = t.metode_pembayaran || 'unknown';
+      const bank = t.bank_qris || 'other';
+      
+      if (method === 'cash') {
+          acc.cash.amount += t.total_after_discount || 0;
+          acc.cash.count += 1;
+      } else if (method === 'qris') {
+          acc.qris.amount += t.total_after_discount || 0;
+          acc.qris.count += 1;
+          
+          if (bank.toLowerCase().includes('bca')) {
+              acc.qris_bca.amount += t.total_after_discount || 0;
+              acc.qris_bca.count += 1;
+          } else if (bank.toLowerCase().includes('bri')) {
+              acc.qris_bri.amount += t.total_after_discount || 0;
+              acc.qris_bri.count += 1;
+          } else if (bank.toLowerCase().includes('bsi')) {
+              acc.qris_bsi.amount += t.total_after_discount || 0;
+              acc.qris_bsi.count += 1;
+          }
+      }
+      return acc;
+  }, {
+      cash: { amount: 0, count: 0 },
+      qris: { amount: 0, count: 0 },
+      qris_bca: { amount: 0, count: 0 },
+      qris_bri: { amount: 0, count: 0 },
+      qris_bsi: { amount: 0, count: 0 },
+  });
+  
+  const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
+  const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
 
   return (
     <div className="space-y-8">
+      {isExpenseFormOpen && <ExpenseForm isOpen={isExpenseFormOpen} onClose={() => setIsExpenseFormOpen(false)} onSuccess={fetchData} userEmail={user.email} expense={editingExpense}/>}
+
       <div>
         <h1 className="text-3xl font-headline font-bold tracking-tight">Pembukuan</h1>
         <p className="text-muted-foreground">Analisis penjualan dan kinerja Anda.</p>
@@ -217,34 +420,13 @@ export default function ReportsPage() {
                     </PopoverContent>
                 </Popover>
                 </div>
-                <div className="hidden md:block"></div>
             </div>
-            <div className="space-y-2">
-                <Label>Metode Pembayaran</Label>
-                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <SelectTrigger className="w-full">
-                        <div className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4 text-muted-foreground" />
-                        <SelectValue placeholder="Semua Metode" />
-                        </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                    <SelectItem value="All">Semua</SelectItem>
-                    <SelectItem value="Cash">Tunai</SelectItem>
-                    <SelectItem value="Credit Card">Kartu Kredit</SelectItem>
-                    <SelectItem value="GoPay">GoPay</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-4">
             <Button onClick={handleApplyFilter} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
                 <Check className="mr-2 h-4 w-4" /> Terapkan
             </Button>
             <Button variant="secondary" onClick={handleResetFilter} className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
-            </Button>
-            <Button variant="outline" className="bg-green-600 hover:bg-green-700 text-white border-none font-bold">
-                <Download className="mr-2 h-4 w-4" /> Export
             </Button>
           </div>
         </CardContent>
@@ -254,8 +436,8 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <ReportStatCard
             title="Total Pendapatan"
-            value="Rp 0"
-            date={todayStr}
+            value={toRupiah(totalRevenue)}
+            date={filterDateRangeStr}
             icon={<DollarSign className="h-5 w-5" />}
             bgColor="bg-green-500"
             textColor="text-white"
@@ -263,8 +445,8 @@ export default function ReportsPage() {
           />
           <ReportStatCard
             title="Total Pengeluaran"
-            value="Rp 0"
-            date={todayStr}
+            value={toRupiah(totalExpenses)}
+            date={filterDateRangeStr}
             icon={<Receipt className="h-5 w-5" />}
             bgColor="bg-blue-500"
             textColor="text-white"
@@ -272,8 +454,8 @@ export default function ReportsPage() {
           />
           <ReportStatCard
             title="Laba Bersih"
-            value="Rp 0"
-            date="Margin: 0.0%"
+            value={toRupiah(netProfit)}
+            date={`Margin: ${margin.toFixed(1)}%`}
             icon={<LineChart className="h-5 w-5" />}
             bgColor="bg-purple-500"
             textColor="text-white"
@@ -281,8 +463,8 @@ export default function ReportsPage() {
           />
           <ReportStatCard
             title="Total Transaksi"
-            value="0"
-            date="Rata-rata: Rp 0"
+            value={transactions.length.toString()}
+            date={`Rata-rata: ${toRupiah(averageTransaction)}`}
             icon={<ShoppingCart className="h-5 w-5" />}
             bgColor="bg-orange-500"
             textColor="text-white"
@@ -298,36 +480,23 @@ export default function ReportsPage() {
                 <h2 className="text-xl font-bold">Rincian Pembayaran</h2>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                <PaymentBreakdownCard title="Tunai" amount="Rp 0" transactions={0} icon={<Landmark className="h-6 w-6 text-green-500"/>} borderColor="border-green-500" />
-                <PaymentBreakdownCard title="QRIS (Semua)" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-purple-500"/>} borderColor="border-purple-500" />
-                <PaymentBreakdownCard title="QRIS BCA" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-blue-500"/>} borderColor="border-blue-500" />
-                <PaymentBreakdownCard title="QRIS BRI" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-sky-500"/>} borderColor="border-sky-500" />
-                <PaymentBreakdownCard title="QRIS BSI" amount="Rp 0" transactions={0} icon={<Grip className="h-6 w-6 text-orange-500"/>} borderColor="border-orange-500" />
+                <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6 text-green-500"/>} borderColor="border-green-500" />
+                <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6 text-purple-500"/>} borderColor="border-purple-500" />
+                <PaymentBreakdownCard title="QRIS BCA" amount={toRupiah(paymentBreakdown.qris_bca.amount)} transactions={paymentBreakdown.qris_bca.count} icon={<Grip className="h-6 w-6 text-blue-500"/>} borderColor="border-blue-500" />
+                <PaymentBreakdownCard title="QRIS BRI" amount={toRupiah(paymentBreakdown.qris_bri.amount)} transactions={paymentBreakdown.qris_bri.count} icon={<Grip className="h-6 w-6 text-sky-500"/>} borderColor="border-sky-500" />
+                <PaymentBreakdownCard title="QRIS BSI" amount={toRupiah(paymentBreakdown.qris_bsi.amount)} transactions={paymentBreakdown.qris_bsi.count} icon={<Grip className="h-6 w-6 text-orange-500"/>} borderColor="border-orange-500" />
             </div>
         </div>
       </div>
-
-
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-4">
-          <div className="p-3 rounded-md bg-yellow-100">
-            <Layers className="w-5 h-5 text-yellow-600" />
-          </div>
-          <CardTitle className="text-xl">Kinerja per Kategori</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Kinerja berdasarkan kategori akan ditampilkan di sini.</p>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl">Pelacakan Pengeluaran</CardTitle>
             <div className="flex gap-2">
-                <Button variant="outline" className="bg-blue-500 hover:bg-blue-600 text-white border-none">
+                <Button variant="outline" className="bg-blue-500 hover:bg-blue-600 text-white border-none" onClick={fetchData}>
                     <RefreshCw className="mr-2 h-4 w-4" /> Segarkan
                 </Button>
-                <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white">
+                <Button variant="destructive" className="bg-red-500 hover:bg-red-600 text-white" onClick={handleAddExpense}>
                     <Plus className="mr-2 h-4 w-4" /> Tambah Pengeluaran
                 </Button>
             </div>
@@ -340,16 +509,34 @@ export default function ReportsPage() {
                 <TableHead>Kategori</TableHead>
                 <TableHead>Deskripsi</TableHead>
                 <TableHead>Jumlah</TableHead>
-                <TableHead>Foto</TableHead>
-                <TableHead>Aksi</TableHead>
+                <TableHead>Dibuat oleh</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
-                   Tidak ada data pengeluaran yang tersedia.
-                </TableCell>
-              </TableRow>
+              {dataLoading ? (
+                 <TableRow><TableCell colSpan={6} className="text-center h-24">Memuat data...</TableCell></TableRow>
+              ) : expenses.length > 0 ? (
+                expenses.map(expense => (
+                  <TableRow key={expense.id}>
+                    <TableCell>{format(new Date(expense.created_at), 'dd MMM yyyy')}</TableCell>
+                    <TableCell>{expense.kategori}</TableCell>
+                    <TableCell>{expense.deskripsi}</TableCell>
+                    <TableCell>{toRupiah(expense.jumlah)}</TableCell>
+                    <TableCell>{expense.created_by}</TableCell>
+                    <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditExpense(expense)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteExpense(expense.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                    Tidak ada data pengeluaran yang tersedia.
+                    </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -363,15 +550,27 @@ export default function ReportsPage() {
           <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>ID Transaksi</TableHead>
+                    <TableHead>ID</TableHead>
                     <TableHead>Tanggal</TableHead>
-                    <TableHead>Meja</TableHead>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Meja/Pelanggan</TableHead>
+                    <TableHead>Metode</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
+              {dataLoading ? (
+                 <TableRow><TableCell colSpan={5} className="text-center h-48">Memuat data...</TableCell></TableRow>
+              ): transactions.length > 0 ? (
+                transactions.map(t => (
+                  <TableRow key={t.id}>
+                    <TableCell>#{t.id}</TableCell>
+                    <TableCell>{format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm')}</TableCell>
+                    <TableCell>{t.no_meja}</TableCell>
+                    <TableCell className="capitalize">{t.metode_pembayaran || 'N/A'}</TableCell>
+                    <TableCell className="text-right font-medium">{toRupiah(t.total_after_discount || 0)}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                     <TableCell colSpan={6} className="h-48 text-center">
                         <div className="flex flex-col items-center justify-center gap-4">
@@ -380,6 +579,7 @@ export default function ReportsPage() {
                         </div>
                     </TableCell>
                 </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -387,3 +587,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
