@@ -66,6 +66,7 @@ export function PaymentModal({
     setIsApplyingDiscount(true);
 
     try {
+        // NOTE: This endpoint is not in api.json, but implementing as requested
         const response = await fetch('https://api.sejadikopi.com/api/discount-codes/apply', {
             method: 'POST',
             headers: {
@@ -80,20 +81,19 @@ export function PaymentModal({
 
         const result = await response.json();
 
-        if (!response.ok || !result.success) {
-            throw new Error(result.message || 'Kode diskon tidak valid.');
+        if (response.status === 200 && result.discount_amount !== undefined) {
+             setAppliedDiscount({
+                amount: result.discount_amount,
+                finalTotal: result.total_after_discount,
+                code: discountCode.toUpperCase(),
+            });
+            toast({
+                title: "Diskon Diterapkan",
+                description: `Diskon sebesar Rp ${result.discount_amount.toLocaleString('id-ID')} telah diterapkan.`,
+            });
+        } else {
+             throw new Error(result.message || 'Kode diskon tidak valid atau tidak dapat diterapkan.');
         }
-        
-        setAppliedDiscount({
-            amount: result.discount_amount,
-            finalTotal: result.total_after_discount,
-            code: discountCode.toUpperCase(),
-        });
-
-        toast({
-            title: "Diskon Diterapkan",
-            description: result.message,
-        });
 
     } catch (error: any) {
         toast({
@@ -121,7 +121,6 @@ export function PaymentModal({
 
     setIsLoading(true);
 
-    let payload = {};
     const now = new Date().toISOString();
 
     const finalPayload = {
@@ -337,7 +336,7 @@ export function PaymentModal({
                                         selectedBank === bank.id ? "border-purple-600 bg-purple-50" : "border-gray-200 bg-white"
                                     )}
                                 >
-                                    <Image src={bank.logo} alt={bank.name} width={60} height={24} className="object-contain" />
+                                    <Image src={bank.logo} alt={bank.name} width={60} height={24} className="object-contain" unoptimized />
                                     <span className="text-sm font-medium">{bank.name}</span>
                                 </button>
                             ))}
@@ -393,5 +392,3 @@ export function PaymentModal({
     </Dialog>
   );
 }
-
-    
