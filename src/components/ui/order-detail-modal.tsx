@@ -50,6 +50,7 @@ const statusConfig: {
   diproses: { label: 'PROSES', color: 'bg-blue-500 text-white' },
   selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
+  cancelled: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
 export function OrderDetailModal({
@@ -103,6 +104,7 @@ export function OrderDetailModal({
   
   const totalItems = order?.detail_pesanans.reduce((sum, item) => sum + item.jumlah, 0) || 0;
   const isProcessing = order?.status.toLowerCase() === 'diproses';
+  const isCompleted = order?.status.toLowerCase() === 'selesai' || order?.status.toLowerCase() === 'cancelled';
 
   const handlePaymentClick = () => {
     onOpenChange(false); // Close current modal
@@ -120,7 +122,7 @@ export function OrderDetailModal({
               <div className="flex justify-between items-center">
                 <DialogTitle>
                   Detail Pesanan{' '}
-                  {order.location_type.toLowerCase() === 'dine_in'
+                  {order.location_type.toLowerCase() === 'dine-in'
                     ? `Meja ${order.no_meja}`
                     : order.no_meja}
                 </DialogTitle>
@@ -213,39 +215,41 @@ export function OrderDetailModal({
                 })}
             </div>
 
-            <DialogFooter className="p-4 bg-slate-50 border-t rounded-b-lg space-y-4">
+            <div className="p-4 bg-slate-50 border-t rounded-b-lg space-y-4">
                 <div className="w-full flex justify-between items-center">
                     <div>
                         <p className="text-sm text-muted-foreground">Total Pembayaran:</p>
-                        <p className="text-2xl font-bold">Rp {parseInt(order.total, 10).toLocaleString('id-ID')}</p>
+                        <p className="text-2xl font-bold">Rp {(order.total_after_discount ?? parseInt(order.total, 10)).toLocaleString('id-ID')}</p>
                     </div>
                      <p className="text-sm text-muted-foreground">{totalItems} item</p>
                 </div>
-                <div className="w-full grid grid-cols-2 gap-2">
-                    <Button variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600">
-                        <Pencil className="mr-2 h-4 w-4" /> Edit Item
-                    </Button>
-                    <Button 
-                        onClick={isProcessing ? handlePaymentClick : () => {}}
-                        className={cn(
-                            isProcessing 
-                                ? "bg-green-600 hover:bg-green-700" 
-                                : "bg-blue-600 hover:bg-blue-700",
-                            "text-white"
+                {!isCompleted && (
+                    <DialogFooter className="grid grid-cols-2 gap-2">
+                        <Button variant="secondary" className="bg-yellow-500 text-white hover:bg-yellow-600">
+                            <Pencil className="mr-2 h-4 w-4" /> Edit Item
+                        </Button>
+                        <Button 
+                            onClick={isProcessing ? handlePaymentClick : () => {}}
+                            className={cn(
+                                isProcessing 
+                                    ? "bg-green-600 hover:bg-green-700" 
+                                    : "bg-blue-600 hover:bg-blue-700",
+                                "text-white"
+                            )}
+                        >
+                        {isProcessing ? (
+                            <>
+                            <Wallet className="mr-2 h-4 w-4" /> Bayar
+                            </>
+                        ) : (
+                            <>
+                            Proses <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
                         )}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Wallet className="mr-2 h-4 w-4" /> Bayar
-                        </>
-                      ) : (
-                        <>
-                          Proses <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                </div>
-            </DialogFooter>
+                        </Button>
+                    </DialogFooter>
+                )}
+            </div>
           </>
         )}
       </DialogContent>
