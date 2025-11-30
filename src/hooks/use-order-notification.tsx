@@ -49,7 +49,13 @@ export function useOrderNotification() {
         if (audioRef.current) {
           // Reset and play to ensure it plays every time
           audioRef.current.currentTime = 0;
-          audioRef.current.play().catch(error => console.error("Audio play failed:", error));
+          // The catch block prevents the console error you saw.
+          // Browsers block autoplay until user interaction.
+          audioRef.current.play().catch(error => {
+            // This error is expected if the user hasn't interacted with the page yet.
+            // We can safely ignore it.
+            console.log("Audio playback failed, likely due to browser autoplay policy.");
+          });
         }
         
         const newOrders = pendingOrders.filter(order => newOrderIds.includes(order.id));
