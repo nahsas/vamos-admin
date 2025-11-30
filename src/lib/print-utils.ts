@@ -93,7 +93,11 @@ const generateReceiptText = (
   return receipt;
 };
 
-export const printStruk = (order: Order, menuItems: MenuItem[]) => {
+export const printStruk = (
+  order: Order, 
+  menuItems: MenuItem[],
+  onSecondPrintRequired: (printFunction: () => void) => void
+) => {
   try {
     const makananItems = order.detail_pesanans.filter(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
@@ -111,15 +115,27 @@ export const printStruk = (order: Order, menuItems: MenuItem[]) => {
         window.location.href = url;
     };
     
-    if (makananItems.length > 0) {
+    const hasMakanan = makananItems.length > 0;
+    const hasMinuman = minumanItems.length > 0;
+
+    if (hasMakanan) {
         const receiptText = generateReceiptText(order, makananItems, menuItems, "CHECKER DAPUR");
         printJob(receiptText);
     }
 
-    if (minumanItems.length > 0) {
-        const receiptText = generateReceiptText(order, minumanItems, menuItems, "CHECKER BAR");
-        // Add a slight delay for the second print job if both exist
-        setTimeout(() => printJob(receiptText), makananItems.length > 0 ? 500 : 0);
+    if (hasMinuman) {
+        const barPrintJob = () => {
+            const receiptText = generateReceiptText(order, minumanItems, menuItems, "CHECKER BAR");
+            printJob(receiptText);
+        };
+
+        if (hasMakanan) {
+            // If there was also a food receipt, ask the UI to confirm the second print
+            onSecondPrintRequired(barPrintJob);
+        } else {
+            // If only drinks, print directly
+            barPrintJob();
+        }
     }
   } catch (error) {
     console.error("Error printing receipt:", error);

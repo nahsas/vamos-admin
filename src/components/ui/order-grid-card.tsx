@@ -10,6 +10,17 @@ import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { MapPin, FileText, Info, ArrowRight, Wallet } from 'lucide-react';
 import { printStruk } from '@/lib/print-utils';
+import React from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const statusConfig: {
   [key: string]: {
@@ -26,6 +37,10 @@ const statusConfig: {
 export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (orderId: number) => void; onPaymentClick: (order: Order) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'diproses';
+  
+  const [showSecondPrintDialog, setShowSecondPrintDialog] = React.useState(false);
+  const [secondPrintJob, setSecondPrintJob] = React.useState<(() => void) | null>(null);
+
 
   const getMenuName = (menuId: number) => {
     const menuItem = menuItems.find((item) => item.id === menuId);
@@ -43,10 +58,25 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   }
 
   const handlePrintChecker = () => {
-    printStruk(order, menuItems);
-  }
+    printStruk(order, menuItems, (barPrintJob) => {
+        if (barPrintJob) {
+            setSecondPrintJob(() => barPrintJob);
+            setShowSecondPrintDialog(true);
+        }
+    });
+  };
+  
+  const executeSecondPrint = () => {
+    if (secondPrintJob) {
+        secondPrintJob();
+    }
+    setShowSecondPrintDialog(false);
+    setSecondPrintJob(null);
+  };
+
 
   return (
+    <>
     <Card className={cn("shadow-lg border-2", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
       <CardContent className="p-4 flex flex-col h-full">
         <div className="flex-grow space-y-3">
@@ -138,5 +168,22 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
         </div>
       </CardContent>
     </Card>
+    <AlertDialog open={showSecondPrintDialog} onOpenChange={setShowSecondPrintDialog}>
+        <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Cetak Struk Bar?</AlertDialogTitle>
+            <AlertDialogDescription>
+            Struk dapur telah dikirim. Apakah Anda ingin melanjutkan untuk mencetak struk bar (minuman)?
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSecondPrintDialog(false)}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={executeSecondPrint}>
+            Ya, Cetak Struk Bar
+            </AlertDialogAction>
+        </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
