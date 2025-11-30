@@ -159,15 +159,14 @@ export function PaymentModal({
             const errorData = await response.json();
             throw new Error(errorData.message || 'Gagal menyelesaikan pembayaran.');
         }
-        const updatedOrder = await response.json();
-
+        
         toast({
             title: "Pembayaran Berhasil",
             description: `Pesanan #${order.id} telah ditandai sebagai selesai.`,
         });
         
         // Print the payment receipt with the final order details
-        printPaymentStruk({ ...order, ...finalPayload, detail_pesanans: order.detail_pesanans }, menuItems);
+        printPaymentStruk({ ...order, ...finalPayload, detail_pesanans: order.detail_pesanans }, menuItems, paymentMethod === 'Cash' ? Number(paymentAmount) : undefined);
         
         onOpenChange(false);
         appEventEmitter.emit('new-order'); // To refetch data on pages

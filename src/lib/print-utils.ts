@@ -23,6 +23,7 @@ interface ReceiptOptions {
     title: string;
     showPrices: boolean;
     itemsToPrint: OrderItem[];
+    paymentAmount?: number;
 }
 
 const generateReceiptText = (
@@ -31,7 +32,7 @@ const generateReceiptText = (
     options: ReceiptOptions
 ): string => {
   
-  const { title, showPrices, itemsToPrint } = options;
+  const { title, showPrices, itemsToPrint, paymentAmount } = options;
 
   const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
@@ -96,23 +97,30 @@ const generateReceiptText = (
   
   // --- Footer ---
   if (showPrices) {
-    receipt += createLine("TOTAL", `Rp${formatCurrency(order.total_after_discount || parseInt(order.total, 10))}`) + "\n";
+    const total = order.total_after_discount ?? parseInt(order.total, 10);
+    receipt += createLine("TOTAL", `Rp${formatCurrency(parseInt(order.total, 10))}`) + "\n";
     if (order.discount_amount && order.discount_amount > 0) {
         receipt += createLine("DISKON", `-Rp${formatCurrency(order.discount_amount)}`) + "\n";
         receipt += "--------------------------------\n";
-        receipt += createLine("TOTAL BAYAR", `Rp${formatCurrency(order.total_after_discount || 0)}`) + "\n";
     }
+    receipt += createLine("TOTAL BAYAR", `Rp${formatCurrency(total)}`) + "\n";
+
     if (order.metode_pembayaran) {
-          let metodeLabel = "";
-          if (order.metode_pembayaran === "cash") {
-            metodeLabel = "CASH";
-          } else if (order.metode_pembayaran === "qris") {
-            metodeLabel = order.bank_qris ? `QRIS ${order.bank_qris}` : "QRIS";
-          }
-          if (metodeLabel) {
-            receipt += createLine("Metode", metodeLabel) + "\n";
-          }
+      let metodeLabel = "";
+      if (order.metode_pembayaran === "cash") {
+        metodeLabel = "CASH";
+        if (paymentAmount && paymentAmount > 0) {
+            receipt += createLine("DIBAYAR", `Rp${formatCurrency(paymentAmount)}`) + "\n";
+            const change = paymentAmount - total;
+            receipt += createLine("KEMBALIAN", `Rp${formatCurrency(change)}`) + "\n";
         }
+      } else if (order.metode_pembayaran === "qris") {
+        metodeLabel = order.bank_qris ? `QRIS ${order.bank_qris}` : "QRIS";
+      }
+      if (metodeLabel) {
+        receipt += createLine("Metode", metodeLabel) + "\n";
+      }
+    }
     receipt += "--------------------------------\n";
     receipt += alignCenter("Sampai Jumpa") + "\n";
     receipt += alignCenter("Terima Kasih") + "\n";
@@ -221,12 +229,13 @@ export const printOperationalStruk = (
 };
 
 
-export const printPaymentStruk = (order: Order, menuItems: MenuItem[]) => {
+export const printPaymentStruk = (order: Order, menuItems: MenuItem[], paymentAmount?: number) => {
     try {
         const receiptText = generateReceiptText(order, menuItems, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
-            itemsToPrint: order.detail_pesanans
+            itemsToPrint: order.detail_pesanans,
+            paymentAmount: paymentAmount,
         });
         printJob(receiptText);
     } catch(error) {
