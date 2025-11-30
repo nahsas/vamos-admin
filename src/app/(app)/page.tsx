@@ -219,10 +219,16 @@ export default function DashboardPage() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <CardTitle className="text-xl font-bold">Status Pesanan</CardTitle>
-            <div className="flex w-full sm:w-auto items-center justify-between gap-4">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+        <CardHeader className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <CardTitle className="text-xl font-bold">Status Pesanan</CardTitle>
+                <Button onClick={handleRefresh} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground w-full sm:w-auto">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Segarkan
+                </Button>
+            </div>
+            <div className="flex justify-center">
+                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
                     <TabsList className="grid grid-cols-2 bg-gray-200 rounded-full p-1 h-auto">
                         <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5">
                             Dine-in
@@ -234,10 +240,6 @@ export default function DashboardPage() {
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
-                <Button onClick={handleRefresh} variant="outline" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Segarkan
-                </Button>
             </div>
         </CardHeader>
         <CardContent>
