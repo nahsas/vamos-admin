@@ -2,6 +2,9 @@
 export type Category = {
   id: number;
   nama: string;
+  urutan?: number;
+  support_additional?: boolean;
+  support_dimsum_additional?: boolean;
 };
 
 export type Discount = {

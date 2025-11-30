@@ -66,6 +66,10 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
       cell: ({ row }) => <div className="pl-4">{row.getValue("nama")}</div>
     },
     {
+      accessorKey: "urutan",
+      header: "Urutan"
+    },
+    {
       id: "actions",
       cell: ({ row }) => {
         const category = row.original
