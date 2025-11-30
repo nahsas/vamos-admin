@@ -213,9 +213,9 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
         tanggal: values.tanggal,
         created_by: userEmail,
         bukti_url: imageUrl,
-        foto_url: imageUrl,
+        foto_url: imageUrl, // Keep this for now, might be used elsewhere
       };
-
+      
       const response = await fetch(url, {
         method: method,
         headers: {
@@ -357,7 +357,7 @@ export default function ReportsPage() {
 
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
-    setTransactions([]);
+    let allTransactions: any[] = [];
     setExpenses([]);
     try {
         const sDate = startDate ? format(startOfDay(startDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
@@ -370,8 +370,11 @@ export default function ReportsPage() {
         transactionUrl.searchParams.set('status', 'selesai');
         if(sDate) transactionUrl.searchParams.set('created_from', sDate);
         if(eDate) transactionUrl.searchParams.set('created_to', eDate);
-        if (paymentMethod !== 'all') {
-            transactionUrl.searchParams.set('metode_pembayaran', paymentMethod);
+        
+        // Fetch based on primary method (cash/qris)
+        const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
+        if (fetchMethod !== 'all') {
+            transactionUrl.searchParams.set('metode_pembayaran', fetchMethod);
         }
 
         const expenseUrl = new URL('https://api.sejadikopi.com/api/pengeluarans');
@@ -386,9 +389,7 @@ export default function ReportsPage() {
 
         if (transactionRes.ok) {
             const data = await transactionRes.json();
-            setTransactions(data.data || []);
-        } else {
-             setTransactions([]);
+            allTransactions = data.data || [];
         }
 
         if (expenseRes.ok) {
@@ -398,9 +399,20 @@ export default function ReportsPage() {
             setExpenses([]);
         }
 
+        // Client-side filtering for QRIS banks
+        if (paymentMethod.startsWith('qris-')) {
+            const bank = paymentMethod.split('-')[1];
+            setTransactions(
+                allTransactions.filter(t => t.bank_qris && t.bank_qris.toLowerCase().includes(bank))
+            );
+        } else {
+            setTransactions(allTransactions);
+        }
+
     } catch (error) {
         console.error("Gagal mengambil data laporan:", error);
         toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data laporan." });
+        setTransactions([]);
     } finally {
         setDataLoading(false);
     }
@@ -582,8 +594,11 @@ export default function ReportsPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Semua Metode</SelectItem>
-                        <SelectItem value="cash">Tunai</SelectItem>
-                        <SelectItem value="qris">QRIS</SelectItem>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="qris">QRIS (Semua)</SelectItem>
+                        <SelectItem value="qris-bca">QRIS (BCA)</SelectItem>
+                        <SelectItem value="qris-bri">QRIS (BRI)</SelectItem>
+                        <SelectItem value="qris-bsi">QRIS (BSI)</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
