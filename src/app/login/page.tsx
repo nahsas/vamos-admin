@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -36,10 +35,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen login-bg px-4">
-      <Card className="w-full max-w-sm shadow-xl bg-card/80 backdrop-blur-sm">
+      <Card className="w-full max-w-sm shadow-xl bg-card/80 backdrop-blur-sm border-white/20">
         <CardHeader className="text-center space-y-2">
             <div className="flex justify-center items-center mb-2">
-                <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={80} height={80} className="rounded-full" />
+                <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={80} height={80} className="rounded-full shadow-lg" unoptimized />
             </div>
           <CardTitle className="text-3xl font-bold font-headline">SejadiKopi</CardTitle>
           <CardDescription>Masukkan kredensial Anda untuk mengakses dasbor</CardDescription>
@@ -56,6 +55,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isSubmitting}
+                className="bg-white/10 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
@@ -68,6 +68,7 @@ export default function LoginPage() {
                 placeholder="********"
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
+                className="bg-white/10 placeholder:text-gray-400"
               />
             </div>
              {error && <p className="text-sm font-medium text-destructive pt-2 text-center">{error}</p>}
