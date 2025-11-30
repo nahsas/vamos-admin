@@ -42,6 +42,8 @@ import { useToast } from "@/hooks/use-toast"
 import { Textarea } from "@/components/ui/textarea"
 import { Order, MenuItem } from "@/lib/data"
 import { OrderDetailModal } from "@/components/ui/order-detail-modal"
+import * as XLSX from 'xlsx';
+
 
 const ReportStatCard = ({
   title,
@@ -352,6 +354,7 @@ export default function ReportsPage() {
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   
   const [dataLoading, setDataLoading] = React.useState(true);
+  const [exporting, setExporting] = React.useState(false);
 
   const [isExpenseFormOpen, setIsExpenseFormOpen] = React.useState(false);
   const [editingExpense, setEditingExpense] = React.useState<any | null>(null);
@@ -486,46 +489,108 @@ export default function ReportsPage() {
         toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
     }
   }
-  
-  const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
-  const netProfit = totalRevenue - totalExpenses;
-  const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-  const averageTransaction = transactions.length > 0 ? totalRevenue / transactions.length : 0;
 
-  const paymentBreakdown = transactions.reduce((acc, t) => {
-      const method = t.metode_pembayaran || 'unknown';
-      const bank = t.bank_qris || 'other';
-      
-      if (method === 'cash') {
-          acc.cash.amount += t.total_after_discount || 0;
-          acc.cash.count += 1;
-      } else if (method === 'qris') {
-          acc.qris.amount += t.total_after_discount || 0;
-          acc.qris.count += 1;
-          
-          if (bank && bank.toLowerCase().includes('bca')) {
-              acc.qris_bca.amount += t.total_after_discount || 0;
-              acc.qris_bca.count += 1;
-          } else if (bank && bank.toLowerCase().includes('bri')) {
-              acc.qris_bri.amount += t.total_after_discount || 0;
-              acc.qris_bri.count += 1;
-          } else if (bank && bank.toLowerCase().includes('bsi')) {
-              acc.qris_bsi.amount += t.total_after_discount || 0;
-              acc.qris_bsi.count += 1;
-          }
-      }
-      return acc;
-  }, {
-      cash: { amount: 0, count: 0 },
-      qris: { amount: 0, count: 0 },
-      qris_bca: { amount: 0, count: 0 },
-      qris_bri: { amount: 0, count: 0 },
-      qris_bsi: { amount: 0, count: 0 },
-  });
+    const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
+
+    const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
+    const netProfit = totalRevenue - totalExpenses;
+    const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    const averageTransaction = transactions.length > 0 ? totalRevenue / transactions.length : 0;
+
+    const paymentBreakdown = transactions.reduce((acc, t) => {
+        const method = t.metode_pembayaran || 'unknown';
+        const bank = t.bank_qris || 'other';
+        
+        if (method === 'cash') {
+            acc.cash.amount += t.total_after_discount || 0;
+            acc.cash.count += 1;
+        } else if (method === 'qris') {
+            acc.qris.amount += t.total_after_discount || 0;
+            acc.qris.count += 1;
+            
+            if (bank && bank.toLowerCase().includes('bca')) {
+                acc.qris_bca.amount += t.total_after_discount || 0;
+                acc.qris_bca.count += 1;
+            } else if (bank && bank.toLowerCase().includes('bri')) {
+                acc.qris_bri.amount += t.total_after_discount || 0;
+                acc.qris_bri.count += 1;
+            } else if (bank && bank.toLowerCase().includes('bsi')) {
+                acc.qris_bsi.amount += t.total_after_discount || 0;
+                acc.qris_bsi.count += 1;
+            }
+        }
+        return acc;
+    }, {
+        cash: { amount: 0, count: 0 },
+        qris: { amount: 0, count: 0 },
+        qris_bca: { amount: 0, count: 0 },
+        qris_bri: { amount: 0, count: 0 },
+        qris_bsi: { amount: 0, count: 0 },
+    });
   
-  const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
   const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
+
+  const handleExport = () => {
+    setExporting(true);
+    
+    // 1. Summary Sheet
+    const summaryData = [
+      ["Laporan Pembukuan Sejadi Kopi"],
+      [`Periode: ${filterDateRangeStr}`],
+      [],
+      ["RINGKASAN UMUM"],
+      ["Total Pendapatan", totalRevenue],
+      ["Total Pengeluaran", totalExpenses],
+      ["Laba Bersih", netProfit],
+      ["Margin Laba", `${margin.toFixed(2)}%`],
+      ["Total Transaksi", transactions.length],
+      ["Rata-rata Transaksi", averageTransaction],
+      [],
+      ["RINCIAN PEMBAYARAN"],
+      ["Metode", "Jumlah Transaksi", "Total Nominal"],
+      ["Tunai", paymentBreakdown.cash.count, paymentBreakdown.cash.amount],
+      ["QRIS (Semua)", paymentBreakdown.qris.count, paymentBreakdown.qris.amount],
+      ["QRIS (BCA)", paymentBreakdown.qris_bca.count, paymentBreakdown.qris_bca.amount],
+      ["QRIS (BRI)", paymentBreakdown.qris_bri.count, paymentBreakdown.qris_bri.amount],
+      ["QRIS (BSI)", paymentBreakdown.qris_bsi.count, paymentBreakdown.qris_bsi.amount],
+    ];
+    const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
+
+    // 2. Transactions Sheet
+    const transactionsData = transactions.map(t => ({
+      "ID": t.id,
+      "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
+      "Meja/Pelanggan": t.no_meja,
+      "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
+      "Total": t.total,
+      "Diskon": t.discount_amount || 0,
+      "Total Akhir": t.total_after_discount,
+    }));
+    const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
+
+    // 3. Expenses Sheet
+    const expensesData = expenses.map(e => ({
+        "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
+        "Kategori": e.kategori,
+        "Deskripsi": e.deskripsi,
+        "Jumlah": e.jumlah,
+        "Dibuat oleh": e.created_by
+    }));
+    const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
+    
+    // Create workbook and append sheets
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
+    XLSX.utils.book_append_sheet(wb, transactions_ws, "Riwayat Transaksi");
+    XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
+
+    // Write file and trigger download
+    XLSX.writeFile(wb, "Laporan_Pembukuan.xlsx");
+
+    setExporting(false);
+  };
+
 
   const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [expenses]);
   const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [transactions]);
@@ -633,8 +698,17 @@ export default function ReportsPage() {
             <Button variant="secondary" onClick={handleResetFilter} className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
             </Button>
-            <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white font-bold" disabled>
-                <Download className="mr-2 h-4 w-4" /> Export
+            <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white font-bold" onClick={handleExport} disabled={exporting}>
+                {exporting ? (
+                    <>
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Mengekspor...
+                    </>
+                ) : (
+                    <>
+                        <Download className="mr-2 h-4 w-4" /> Export
+                    </>
+                )}
             </Button>
           </div>
         </CardContent>
