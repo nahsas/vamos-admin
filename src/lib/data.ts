@@ -12,6 +12,7 @@ export type MenuItem = {
   is_hidden: boolean;
   is_special: boolean;
   image_url: string;
+  foto: string; // The API seems to use 'foto' field for image path
   kategori_id: number;
   stok: number;
   kategori_struk?: 'makanan' | 'minuman';

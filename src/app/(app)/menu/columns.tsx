@@ -68,7 +68,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
         accessorKey: "image_url",
         header: "Gambar",
         cell: ({ row }) => {
-            const imageUrl = row.getValue("image_url") as string;
+            const imageUrl = row.original.foto;
             const fullUrl = imageUrl ? `https://api.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.getValue("nama")} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }

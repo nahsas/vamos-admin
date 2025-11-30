@@ -34,18 +34,11 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
     return category ? category.nama : 'N/A';
   }
 
-  const handleUpdateStock = async (menuItem: MenuItem, newStock: number) => {
+  const handleUpdateStock = async (menuItem: MenuItem, isAvailable: boolean) => {
     try {
       const payload = {
-        ...menuItem,
-        stok: newStock,
-        is_available: newStock > 0,
-        harga: Number(menuItem.harga) // Ensure harga is a number if API expects it
+        is_available: isAvailable,
       };
-       // Remove fields that shouldn't be in the PUT payload if any
-      delete payload.created_at;
-      delete payload.updated_at;
-
 
       const response = await fetch(`https://api.sejadikopi.com/api/menu/${menuItem.id}`, {
         method: 'PUT',
@@ -112,8 +105,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
         accessorKey: "is_available",
         header: "Ketersediaan",
         cell: ({ row }) => {
-          const stock = row.original.stok as number;
-          const isAvailable = stock > 0;
+          const isAvailable = row.original.is_available;
           return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? "Tersedia" : "Habis"}</Badge>
         }
       },
@@ -125,7 +117,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
             <div className="text-right space-x-2">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" disabled={(menuItem.stok || 0) === 0}>
+                    <Button variant="destructive" size="sm" disabled={!menuItem.is_available}>
                       <XCircle className="mr-2 h-4 w-4" />
                       Tandai Habis
                     </Button>
@@ -134,13 +126,13 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
                     <AlertDialogHeader>
                       <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Ini akan mengatur stok untuk "{menuItem.nama}" menjadi 0.
+                        Ini akan menandai "{menuItem.nama}" sebagai Habis.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Batal</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleUpdateStock(menuItem, 0)}
+                        onClick={() => handleUpdateStock(menuItem, false)}
                         className="bg-destructive hover:bg-destructive/90"
                       >
                         Ya, Tandai Habis
@@ -150,7 +142,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
                 </AlertDialog>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                     <Button variant="outline" size="sm" className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
+                     <Button variant="outline" size="sm" className="bg-green-600 text-white hover:bg-green-700 hover:text-white" disabled={menuItem.is_available}>
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Tandai Tersedia
                     </Button>
@@ -159,13 +151,13 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
                     <AlertDialogHeader>
                       <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
                       <AlertDialogDescription>
-                          Ini akan mengatur stok untuk "{menuItem.nama}" menjadi 1000.
+                           Ini akan menandai "{menuItem.nama}" sebagai Tersedia.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Batal</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleUpdateStock(menuItem, 1000)}
+                        onClick={() => handleUpdateStock(menuItem, true)}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         Ya, Tandai Tersedia

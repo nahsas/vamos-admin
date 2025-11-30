@@ -37,11 +37,11 @@ function StatCard({ title, value, icon: Icon, description, color }: { title: str
   );
 }
 
-function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, buttonDisabled = false }: { icon: React.ElementType, title: string, description: string, buttonText: string, onButtonClick: () => void, buttonDisabled?: boolean }) {
+function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, buttonDisabled = false, children }: { icon: React.ElementType, title: string, description: string, buttonText: string, onButtonClick: () => void, buttonDisabled?: boolean, children?: React.ReactNode }) {
   return (
     <Card className="mb-6 bg-card">
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-4">
+      <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
+        <div className="flex items-center gap-4 flex-grow">
           <div className="p-3 bg-primary/10 rounded-lg">
              <Icon className="w-8 h-8 text-primary" />
           </div>
@@ -50,10 +50,12 @@ function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, 
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
         </div>
-        <Button onClick={onButtonClick} disabled={buttonDisabled}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          {buttonText}
-        </Button>
+        {children || (
+            <Button onClick={onButtonClick} disabled={buttonDisabled} className="w-full md:w-auto">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              {buttonText}
+            </Button>
+        )}
       </CardContent>
     </Card>
   )
@@ -67,6 +69,8 @@ export default function MenuPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
 
+  const [menuSearchTerm, setMenuSearchTerm] = useState('');
+  const [menuFilterCategory, setMenuFilterCategory] = useState('all');
   const [stockSearchTerm, setStockSearchTerm] = useState('');
   const [stockFilterAvailability, setStockFilterAvailability] = useState('all');
 
@@ -159,12 +163,18 @@ export default function MenuPage() {
   const menuColumnsWithCategories = menuColumns({ onEdit: handleMenuFormOpen, onDeleteSuccess: fetchData, categories });
   const stockColumnsWithHandlers = stockColumns({ onUpdateSuccess: fetchData, categories });
 
+  const filteredMenuItems = menuItems.filter(item => {
+    const nameMatch = item.nama.toLowerCase().includes(menuSearchTerm.toLowerCase());
+    const categoryMatch = menuFilterCategory === 'all' || item.kategori_id.toString() === menuFilterCategory;
+    return nameMatch && categoryMatch;
+  });
+  
   const filteredStockItems = menuItems.filter(item => {
     const nameMatch = item.nama.toLowerCase().includes(stockSearchTerm.toLowerCase());
     
     const availabilityMatch = stockFilterAvailability === 'all' 
-      || (stockFilterAvailability === 'available' && item.stok > 0)
-      || (stockFilterAvailability === 'unavailable' && (item.stok === 0 || item.stok === null));
+      || (stockFilterAvailability === 'available' && item.is_available)
+      || (stockFilterAvailability === 'unavailable' && !item.is_available);
 
     return nameMatch && availabilityMatch;
   });
@@ -218,10 +228,40 @@ export default function MenuPage() {
           <TabsTrigger value="category">Kategori</TabsTrigger>
         </TabsList>
         <TabsContent value="menu" className="mt-6">
-           <TabHeader icon={BookOpen} title="Kelola Menu" description="Tambah dan kelola menu kopi & makanan" buttonText="Buat Menu Baru" onButtonClick={() => handleMenuFormOpen()} />
+           <TabHeader icon={BookOpen} title="Kelola Menu" description="Tambah dan kelola menu kopi & makanan" buttonText="Buat Menu Baru" onButtonClick={() => handleMenuFormOpen()}>
+              <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                 <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari menu..."
+                    className="pl-10 w-full"
+                    value={menuSearchTerm}
+                    onChange={(e) => setMenuSearchTerm(e.target.value)}
+                  />
+                </div>
+                <Select value={menuFilterCategory} onValueChange={setMenuFilterCategory}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                     <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter Kategori" />
+                      </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Kategori</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                 <Button onClick={() => handleMenuFormOpen()} className="w-full md:w-auto">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Buat Menu
+                </Button>
+              </div>
+           </TabHeader>
            <DataTable 
               columns={menuColumnsWithCategories} 
-              data={menuItems} 
+              data={filteredMenuItems} 
             />
         </TabsContent>
         <TabsContent value="stock" className="mt-6">
