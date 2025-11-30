@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   Card,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,12 +25,14 @@ import {
   Wallet,
   Receipt,
   AlertTriangle,
+  Eye,
 } from "lucide-react";
 import { Order, MenuItem } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfToday } from "date-fns";
 import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { OrderDetailModal } from "@/components/ui/order-detail-modal";
 
 function StatCard({
   title,
@@ -59,7 +62,7 @@ function StatCard({
   );
 }
 
-function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }) {
+function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void }) {
   const getMenuItemName = (id: number) => {
     return menuItems.find((item) => item.id === id)?.nama || "Item Tidak Dikenal";
   };
@@ -85,8 +88,8 @@ function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }
   }
 
   return (
-    <Card className={cn("shadow-md border-l-4", statusBorder[order.status.toLowerCase()])}>
-      <CardContent className="p-4 space-y-4">
+    <Card className={cn("shadow-md border-l-4 flex flex-col", statusBorder[order.status.toLowerCase()])}>
+      <CardContent className="p-4 space-y-4 flex-grow">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2">
@@ -148,6 +151,12 @@ function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }
         </div>
 
       </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <Button className="w-full" variant="outline" onClick={() => onDetailClick(order)}>
+          <Eye className="mr-2 h-4 w-4" />
+          Lihat Detail
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
@@ -160,6 +169,10 @@ export default function HistoryPage() {
 
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterStatus, setFilterStatus] = React.useState('all');
+  
+  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -199,6 +212,15 @@ export default function HistoryPage() {
     return menuItems.find((item) => item.id === id)?.nama || "";
   };
 
+  const handleDetailClick = (order: Order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+  
+  const handleOrderAction = () => {
+    fetchData();
+  };
+
   const filteredOrders = orders.filter(order => {
     const statusMatch = filterStatus === 'all' || order.status.toLowerCase() === filterStatus;
     
@@ -223,6 +245,15 @@ export default function HistoryPage() {
 
   return (
     <div className="space-y-6">
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          menuItems={menuItems}
+          onOrderDeleted={handleOrderAction}
+        />
+      )}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -307,7 +338,7 @@ export default function HistoryPage() {
         <div className="space-y-4">
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
-              <OrderCard key={order.id} order={order} menuItems={menuItems}/>
+              <OrderCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
             ))
           ) : (
             <div className="text-center py-16 text-muted-foreground">
@@ -319,5 +350,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
-    
