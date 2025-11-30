@@ -27,17 +27,19 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
+import { Category } from "@/lib/types"
 
 type MenuColumnsProps = {
   onEdit: (menuItem: MenuItem) => void;
   onDeleteSuccess: () => void;
-  categories: any[];
+  categories: Category[];
 }
 
 export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProps): ColumnDef<MenuItem>[] => {
   const { toast } = useToast();
 
   const getCategoryName = (kategori_id: number) => {
+    if (!categories) return 'N/A';
     const category = categories.find(c => c.id === kategori_id);
     return category ? category.nama : 'N/A';
   }
