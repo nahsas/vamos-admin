@@ -255,7 +255,7 @@ export default function MenuPage() {
         <TabsContent value="stock" className="mt-6">
            <TabHeader icon={Archive} title="Kelola Stok" description="Atur dan perbarui jumlah stok untuk setiap item" buttonText="Update All Stock" onButtonClick={() => {}} buttonDisabled={true} />
            <DataTable 
-              columns={stockColumns({ onEdit: handleStockFormOpen })} 
+              columns={stockColumns({ onEdit: handleStockFormOpen, onUpdateSuccess: fetchData })} 
               data={menuItems} 
             />
         </TabsContent>
