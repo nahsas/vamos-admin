@@ -331,3 +331,4 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], paymentAm
     }
 };
 
+
