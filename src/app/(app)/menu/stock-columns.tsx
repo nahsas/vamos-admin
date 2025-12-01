@@ -102,14 +102,6 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
       },
     },
     {
-        accessorKey: "is_available",
-        header: "Ketersediaan",
-        cell: ({ row }) => {
-          const isAvailable = row.original.is_available;
-          return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? "Tersedia" : "Habis"}</Badge>
-        }
-      },
-    {
       id: "actions",
       cell: ({ row }) => {
         const menuItem = row.original

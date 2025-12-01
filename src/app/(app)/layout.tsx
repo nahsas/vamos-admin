@@ -23,6 +23,32 @@ export default function AppLayout({
     }
   }, [user, loading, router]);
 
+  useEffect(() => {
+    const requestFullscreen = () => {
+      const element = document.documentElement;
+      if (element.requestFullscreen) {
+        element.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+      }
+    };
+    
+    // Add a one-time event listener to trigger fullscreen on the first user interaction
+    const triggerFullscreen = () => {
+      requestFullscreen();
+      window.removeEventListener('click', triggerFullscreen);
+      window.removeEventListener('keydown', triggerFullscreen);
+    };
+
+    window.addEventListener('click', triggerFullscreen);
+    window.addEventListener('keydown', triggerFullscreen);
+
+    return () => {
+      window.removeEventListener('click', triggerFullscreen);
+      window.removeEventListener('keydown', triggerFullscreen);
+    };
+  }, []);
+
   if (loading || !user) {
      return <div className="flex items-center justify-center h-screen">Loading...</div>; // Or a proper loading spinner
   }
@@ -36,7 +62,6 @@ export default function AppLayout({
            <SidebarTrigger />
            <div className="flex items-center gap-2">
              <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={32} height={32} className="rounded-md" unoptimized/>
-             <h1 className="text-lg font-headline font-bold">SejadiKopi</h1>
            </div>
         </header>
         <div className="p-4 sm:p-6 lg:p-8">
