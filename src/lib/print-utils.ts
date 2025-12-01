@@ -1,6 +1,6 @@
 
 
-import { Order, OrderItem, MenuItem } from './data';
+import { Order, OrderItem, MenuItem, Additional } from './data';
 import { appEventEmitter } from './event-emitter';
 
 const paperWidth = 32;
@@ -24,6 +24,7 @@ interface ReceiptOptions {
     showPrices: boolean;
     itemsToPrint: OrderItem[];
     paymentAmount?: number;
+    additionals: Additional[]; // Add this to pass additional names
 }
 
 const updatePrintedStatus = async (items: OrderItem[]) => {
@@ -57,7 +58,7 @@ const generateReceiptText = (
     options: ReceiptOptions
 ): string => {
   
-  const { title, showPrices, itemsToPrint, paymentAmount } = options;
+  const { title, showPrices, itemsToPrint, paymentAmount, additionals } = options;
 
   const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
@@ -101,6 +102,23 @@ const generateReceiptText = (
   receipt += createLine("Tipe", tipeText) + "\n";
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
+  
+  const renderItemDetails = (item: OrderItem, menuItem: MenuItem) => {
+      let details = '';
+      const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
+      for (const id in itemAdditionals) {
+          if (itemAdditionals[id]) {
+              const additional = additionals.find(add => add.id === parseInt(id));
+              if (additional) {
+                  details += `  + ${additional.nama}\n`;
+              }
+          }
+      }
+      if (item.note) {
+        details += `  *Note: ${item.note}\n`;
+      }
+      return details;
+  }
 
   // --- Items ---
   const makananItems = itemsToPrint.filter(item => {
@@ -122,18 +140,24 @@ const generateReceiptText = (
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
         if (item.varian) itemName += ` (${item.varian})`;
         receipt += itemName + "\n";
-        // Additionals and notes could be added here if needed for main checker
+        receipt += renderItemDetails(item, menuItem);
       });
       receipt += "\n\n"; // Wide spacing
     }
     
-    receipt += "--- SEMUA ITEM ---\n";
-    itemsToPrint.forEach(item => {
+    receipt += "--- SEMUA ITEM LAINNYA ---\n";
+    const otherItems = itemsToPrint.filter(item => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+        return menuItem?.kategori_struk !== 'minuman';
+    });
+
+    otherItems.forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem) return;
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
         if (item.varian) itemName += ` (${item.varian})`;
         receipt += itemName + "\n";
+        receipt += renderItemDetails(item, menuItem);
     });
 
   } else {
@@ -156,20 +180,8 @@ const generateReceiptText = (
       } else {
           receipt += itemLine + "\n";
       }
-
-      // This part is for kitchen/bar receipts, so additionals and notes are important
-      const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
-       for (const id in itemAdditionals) {
-          if (itemAdditionals[id]) {
-              // We need to fetch additionals info if not available
-              // This is a simplification. For a real app, you'd load this data once.
-              receipt += `  + Tambahan\n`; 
-          }
-      }
-
-      if (item.note) {
-        receipt += `  *Note: ${item.note}\n`;
-      }
+      
+      receipt += renderItemDetails(item, menuItem);
     });
   }
 
@@ -227,6 +239,7 @@ const printJob = (receiptContent: string) => {
 export const printOperationalStruk = async (
   order: Order, 
   menuItems: MenuItem[],
+  additionals: Additional[], // Pass additionals here
   onNextPrint: (nextPrintFn: (() => void), title: string) => void
 ) => {
   try {
@@ -262,7 +275,8 @@ export const printOperationalStruk = async (
         const receiptText = generateReceiptText(order, menuItems, {
             title: "CHECKER DAPUR",
             showPrices: false,
-            itemsToPrint: makananItems
+            itemsToPrint: makananItems,
+            additionals
         });
         printJob(receiptText);
         updatePrintedStatus(makananItems);
@@ -272,7 +286,8 @@ export const printOperationalStruk = async (
         const receiptText = generateReceiptText(order, menuItems, {
             title: "MAIN CHECKER",
             showPrices: false,
-            itemsToPrint: order.detail_pesanans // Main checker gets all items
+            itemsToPrint: order.detail_pesanans, // Main checker gets all items
+            additionals
         });
         printJob(receiptText);
         // Only update printed status for the items belonging to this station
@@ -316,13 +331,14 @@ export const printOperationalStruk = async (
 };
 
 
-export const printPaymentStruk = (order: Order, menuItems: MenuItem[], paymentAmount?: number) => {
+export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additionals: Additional[], paymentAmount?: number) => {
     try {
         const receiptText = generateReceiptText(order, menuItems, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
             itemsToPrint: order.detail_pesanans,
             paymentAmount: paymentAmount,
+            additionals
         });
         printJob(receiptText);
     } catch(error) {
@@ -330,5 +346,6 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], paymentAm
         alert("Gagal mencetak struk pembayaran.");
     }
 };
+
 
 

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -14,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Order, MenuItem } from '@/lib/data';
+import { Order, MenuItem, Additional } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { X, Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -49,10 +50,14 @@ export function PaymentModal({
   
   // Need menuItems for printing
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
+  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
   React.useEffect(() => {
     fetch('https://api.sejadikopi.com/api/menu')
         .then(res => res.json())
         .then(data => setMenuItems(data.data || []));
+    fetch('https://api.sejadikopi.com/api/additionals')
+        .then(res => res.json())
+        .then(data => setAdditionals(data.data || []));
   }, []);
 
   const orderTotal = order ? parseInt(order.total, 10) : 0;
@@ -166,7 +171,7 @@ export function PaymentModal({
         });
         
         // Print the payment receipt with the final order details
-        printPaymentStruk({ ...order, ...finalPayload, detail_pesanans: order.detail_pesanans }, menuItems, paymentMethod === 'Cash' ? Number(paymentAmount) : undefined);
+        printPaymentStruk({ ...order, ...finalPayload, detail_pesanans: order.detail_pesanans }, menuItems, additionals, paymentMethod === 'Cash' ? Number(paymentAmount) : undefined);
         
         onOpenChange(false);
         appEventEmitter.emit('new-order'); // To refetch data on pages

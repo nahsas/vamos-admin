@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { Order, MenuItem } from '@/lib/data';
+import { Order, MenuItem, Additional } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,13 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   
   const [showSequentialPrintDialog, setShowSequentialPrintDialog] = React.useState(false);
   const [sequentialPrintJob, setSequentialPrintJob] = React.useState<{ fn: (() => void) | null, title: string }>({ fn: null, title: '' });
+  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
+
+  React.useEffect(() => {
+    fetch('https://api.sejadikopi.com/api/additionals')
+      .then(res => res.json())
+      .then(data => setAdditionals(data.data || []));
+  }, []);
 
   const hasNewItems = order.detail_pesanans.some(item => item.printed === 0);
 
@@ -59,7 +67,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   }
 
   const handlePrintChecker = () => {
-    printOperationalStruk(order, menuItems, (nextPrintFn, title) => {
+    printOperationalStruk(order, menuItems, additionals, (nextPrintFn, title) => {
         setSequentialPrintJob({ fn: nextPrintFn, title });
         setShowSequentialPrintDialog(true);
     });
