@@ -77,31 +77,31 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
 
   return (
     <>
-    <Card className={cn("shadow-lg border-2 relative overflow-hidden", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
-      {hasNewItems && (
-        <div className="absolute top-0 left-0 w-24 h-24 overflow-hidden z-0">
-            <div className="absolute top-[22px] left-[-42px] w-[150px] transform -rotate-45 bg-red-500 text-white text-center py-1 text-xs font-bold shadow-md">
-                <div className="flex items-center justify-center">
-                    <Bell className="w-3 h-3 mr-1" />
-                    BARU
-                </div>
-            </div>
-        </div>
-      )}
-      <CardContent className="p-4 flex flex-col h-full relative z-10">
+    <Card className={cn("shadow-lg border-2", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
+      <CardContent className="p-4 flex flex-col h-full">
         <div className="flex-grow space-y-3">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                {order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}` : order.no_meja}
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold">
+                  {order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}` : order.no_meja}
+                </h3>
+                {hasNewItems && (
+                  <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
+                    <Bell className="w-2.5 h-2.5 mr-1"/>
+                    BARU
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
                 <Badge className={cn("text-xs font-bold", statusInfo.color)}>{statusInfo.label}</Badge>
-              </h3>
-               {order.location_area && (
-                <Badge variant="outline" className="mt-2 bg-blue-100 text-blue-700 border-blue-300">
-                  <MapPin className="mr-1 h-3 w-3" />
-                  {order.location_area}
-                </Badge>
-              )}
+                {order.location_area && (
+                  <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+                    <MapPin className="mr-1 h-3 w-3" />
+                    {order.location_area}
+                  </Badge>
+                )}
+              </div>
             </div>
             <div className="text-right">
               <p className="text-sm font-medium">
