@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Camera, Folder, Calendar as CalendarIcon, Download, Filter, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, RefreshCw, Plus, UploadCloud } from "lucide-react"
-import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns"
+import { Camera, Folder, Calendar as CalendarIcon, Download, Filter, Check, RotateCcw, Wallet, DollarSign, Receipt, LineChart, ShoppingCart, Landmark, Grip, RefreshCw, Plus, UploadCloud, Search } from "lucide-react"
+import { format, startOfDay, endOfDay } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -346,8 +346,8 @@ export default function ReportsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const [startDate, setStartDate] = React.useState<Date | undefined>(startOfMonth(new Date()));
-  const [endDate, setEndDate] = React.useState<Date | undefined>(endOfMonth(new Date()));
+  const [startDate, setStartDate] = React.useState<Date | undefined>(startOfDay(new Date()));
+  const [endDate, setEndDate] = React.useState<Date | undefined>(endOfDay(new Date()));
   const [paymentMethod, setPaymentMethod] = React.useState<string>("all");
 
   const [transactions, setTransactions] = React.useState<any[]>([]);
@@ -362,6 +362,9 @@ export default function ReportsPage() {
 
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
+
+  const [transactionSearch, setTransactionSearch] = React.useState("");
+  const [expenseSearch, setExpenseSearch] = React.useState("");
   
   const { toast } = useToast();
 
@@ -456,8 +459,8 @@ export default function ReportsPage() {
   };
   
   const handleResetFilter = () => {
-    setStartDate(startOfMonth(new Date()));
-    setEndDate(endOfMonth(new Date()));
+    setStartDate(startOfDay(new Date()));
+    setEndDate(endOfDay(new Date()));
     setPaymentMethod("all");
     setTimeout(fetchData, 100);
   };
@@ -529,7 +532,7 @@ export default function ReportsPage() {
         qris_bsi: { amount: 0, count: 0 },
     });
   
-    const pettyCash = 1000000;
+    const pittyCash = 1000000;
     const setoran = paymentBreakdown.cash.amount - totalExpenses;
 
     const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
@@ -551,7 +554,7 @@ export default function ReportsPage() {
         [],
         ["RINCIAN PEMBAYARAN"],
         ["Metode", "Jumlah Transaksi", "Total Nominal"],
-        ["Pitty Cash", "", pettyCash],
+        ["Pitty Cash", "", pittyCash],
         ["Tunai", paymentBreakdown.cash.count, paymentBreakdown.cash.amount],
         ["Setoran", "", setoran],
         ["QRIS (Semua)", paymentBreakdown.qris.count, paymentBreakdown.qris.amount],
@@ -595,9 +598,18 @@ export default function ReportsPage() {
         setExporting(false);
     };
 
+    const filteredExpenses = expenses.filter(e =>
+      e.kategori.toLowerCase().includes(expenseSearch.toLowerCase()) ||
+      e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase())
+    );
 
-  const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [expenses]);
-  const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [transactions]);
+    const filteredTransactions = transactions.filter(t =>
+      t.id.toString().includes(transactionSearch) ||
+      t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase())
+    );
+
+    const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [expenses]);
+    const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [transactions]);
 
 
   return (
@@ -719,22 +731,31 @@ export default function ReportsPage() {
       </Card>
       
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <ReportStatCard
             title="Total Pendapatan"
             value={toRupiah(totalRevenue)}
             date={filterDateRangeStr}
             icon={<DollarSign className="h-5 w-5" />}
-            bgColor="bg-green-500"
+            bgColor="bg-blue-500"
             textColor="text-white"
             rightIcon={<Landmark className="h-6 w-6" />}
+          />
+           <ReportStatCard
+            title="Setoran"
+            value={toRupiah(setoran)}
+            icon={<Landmark className="h-5 w-5" />}
+            bgColor="bg-green-500"
+            date={"Uang yang harus di setor"}
+            textColor="text-white"
+            rightIcon={<Wallet className="h-6 w-6" />}
           />
           <ReportStatCard
             title="Total Pengeluaran"
             value={toRupiah(totalExpenses)}
             date={filterDateRangeStr}
             icon={<Receipt className="h-5 w-5" />}
-            bgColor="bg-blue-500"
+            bgColor="bg-purple-500"
             textColor="text-white"
             rightIcon={<Receipt className="h-6 w-6" />}
           />
@@ -743,18 +764,9 @@ export default function ReportsPage() {
             value={toRupiah(netProfit)}
             date={`Margin: ${margin.toFixed(1)}%`}
             icon={<LineChart className="h-5 w-5" />}
-            bgColor="bg-purple-500"
+            bgColor="bg-orange-500"
             textColor="text-white"
             rightIcon={<LineChart className="h-6 w-6" />}
-          />
-          <ReportStatCard
-            title="Setoran"
-            value={toRupiah(setoran)}
-            icon={<Wallet className="h-5 w-5" />}
-            bgColor="bg-orange-500"
-            date={"Uang yang harus di setor"}
-            textColor="text-white"
-            rightIcon={<Wallet className="h-6 w-6" />}
           />
         </div>
 
@@ -766,7 +778,7 @@ export default function ReportsPage() {
                 <h2 className="text-xl font-bold">Rincian Pembayaran</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <PaymentBreakdownCard title="Pity Cash" amount={toRupiah(pettyCash)} transactions="Kas tetap" icon={<Landmark className="h-6 w-6 text-gray-500"/>} borderColor="border-gray-500" />
+                <PaymentBreakdownCard title="Pitty Cash" amount={toRupiah(pittyCash)} transactions="Kas tetap" icon={<Wallet className="h-6 w-6 text-gray-500"/>} borderColor="border-gray-500" />
                 <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6 text-green-500"/>} borderColor="border-green-500" />
                 <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6 text-purple-500"/>} borderColor="border-purple-500" />
                 <PaymentBreakdownCard title="QRIS BCA" amount={toRupiah(paymentBreakdown.qris_bca.amount)} transactions={paymentBreakdown.qris_bca.count} icon={<Grip className="h-6 w-6 text-blue-500"/>} borderColor="border-blue-500" />
@@ -777,14 +789,25 @@ export default function ReportsPage() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl">Pelacakan Pengeluaran</CardTitle>
-            <div className="flex gap-2">
-                <Button variant="outline" className="bg-blue-500 hover:bg-blue-600 text-white border-none" onClick={fetchData}>
+        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+                <CardTitle className="text-xl">Pelacakan Pengeluaran</CardTitle>
+                <p className="text-sm text-muted-foreground">Cari berdasarkan kategori atau deskripsi.</p>
+            </div>
+            <div className="w-full md:w-auto md:max-w-xs">
+                 <Input
+                  placeholder="Cari pengeluaran..."
+                  value={expenseSearch}
+                  onChange={(e) => setExpenseSearch(e.target.value)}
+                  className="w-full"
+                />
+            </div>
+            <div className="flex gap-2 w-full md:w-auto">
+                <Button variant="outline" className="w-full bg-blue-500 hover:bg-blue-600 text-white border-none" onClick={fetchData}>
                     <RefreshCw className="mr-2 h-4 w-4" /> Segarkan
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90 text-white" onClick={handleAddExpense}>
-                    <Plus className="mr-2 h-4 w-4" /> Tambah Pengeluaran
+                <Button className="w-full bg-primary hover:bg-primary/90 text-white" onClick={handleAddExpense}>
+                    <Plus className="mr-2 h-4 w-4" /> Tambah
                 </Button>
             </div>
         </CardHeader>
@@ -793,22 +816,33 @@ export default function ReportsPage() {
             <div className="text-center h-24 flex items-center justify-center">Memuat data...</div>
           ) : (
             <div className="w-full overflow-x-auto">
-              <DataTable columns={memoizedExpenseColumns} data={expenses} />
+              <DataTable columns={memoizedExpenseColumns} data={filteredExpenses} />
             </div>
           )}
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader>
-            <CardTitle className="text-xl">Riwayat Transaksi</CardTitle>
+        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+                <CardTitle className="text-xl">Riwayat Transaksi</CardTitle>
+                <p className="text-sm text-muted-foreground">Cari berdasarkan ID transaksi atau nama meja/pelanggan.</p>
+            </div>
+            <div className="w-full md:w-auto md:max-w-xs">
+                <Input
+                  placeholder="Cari transaksi..."
+                  value={transactionSearch}
+                  onChange={(e) => setTransactionSearch(e.target.value)}
+                  className="w-full"
+                />
+            </div>
         </CardHeader>
         <CardContent>
           {dataLoading ? (
             <div className="text-center h-48 flex items-center justify-center">Memuat data...</div>
           ) : (
             <div className="w-full overflow-x-auto">
-              <DataTable columns={memoizedTransactionColumns} data={transactions} />
+              <DataTable columns={memoizedTransactionColumns} data={filteredTransactions} />
             </div>
           )}
         </CardContent>
@@ -816,3 +850,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
