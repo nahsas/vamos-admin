@@ -1,10 +1,18 @@
 
+
 import { Order, OrderItem, MenuItem, Additional } from './data';
 
 const paperWidth = 32;
 
-const alignCenter = (str: string): string => {
-  const padding = Math.max(0, Math.floor((paperWidth - str.length) / 2));
+const alignCenter = (str: string, isDoubleWidth = false): string => {
+  const charWidth = isDoubleWidth ? 2 : 1;
+  const effectiveWidth = str.length * charWidth;
+  if (effectiveWidth > paperWidth) {
+    // If the string is wider than the paper, just return it as is.
+    // Or implement line breaking if necessary.
+    return str;
+  }
+  const padding = Math.max(0, Math.floor((paperWidth - effectiveWidth) / 2));
   return " ".repeat(padding) + str;
 };
 
@@ -71,14 +79,20 @@ const generateReceiptText = (
 
   let receipt = "\n\n";
   receipt += "\x1B\x40"; // Initialize printer
-  receipt += "\x1B\x61\x01"; // Align center
-
+  
   // --- Header ---
-  receipt += `\x1B\x21\x10` + alignCenter(title) + `\x1B\x21\x00\n`;
+  receipt += `\x1B\x21\x10`; // Double width/height
+  receipt += alignCenter(title, true) + "\n";
+  receipt += `\x1B\x21\x00`; // Normal size
+  
   if (showPrices) {
+    receipt += "\x1B\x61\x01"; // Align center
     receipt += alignCenter("Jl. Pattimura, Air Saga") + "\n";
+    receipt += "\x1B\x61\x00"; // Align left
   }
-  receipt += "\x1B\x21\x10" + alignCenter("SEJADI KOPI") + "\x1B\x21\x00\n\n";
+
+  receipt += "\x1B\x61\x01"; // Align center
+  receipt += "\x1B\x21\x10" + alignCenter("SEJADI KOPI", true) + "\x1B\x21\x00\n\n";
   
   receipt += "\x1B\x61\x00"; // Align left
   if (showPrices) {
@@ -95,7 +109,7 @@ const generateReceiptText = (
     if (!menuItem || item.jumlah === 0) return;
 
     let qty = `${item.jumlah}x `;
-    if (item.printed === 0) {
+    if (item.printed === 0 && !showPrices) { // Only mark new on kitchen/bar receipts
       qty = `**${item.jumlah}x** `; // Mark new items
     }
     let itemName = menuItem.nama;
@@ -154,8 +168,10 @@ const generateReceiptText = (
       }
     }
     receipt += "--------------------------------\n";
+    receipt += "\x1B\x61\x01"; // Align center
     receipt += alignCenter("Sampai Jumpa") + "\n";
     receipt += alignCenter("Terima Kasih") + "\n";
+    receipt += "\x1B\x61\x00"; // Align left
   }
 
   receipt += "\n\n\n";
@@ -199,6 +215,7 @@ export const printOperationalStruk = async (
     if (unprintedItems.length > 0) {
       itemsToProcess = unprintedItems;
     } else {
+      alert("Tidak ada item baru untuk dicetak. Mencetak ulang semua item.");
       itemsToProcess = order.detail_pesanans;
     }
     
@@ -279,8 +296,6 @@ export const printOperationalStruk = async (
     
     if (printQueue.length > 0) {
       runNextPrint(0);
-    } else {
-       alert("Tidak ada item baru untuk dicetak.");
     }
 
   } catch (error) {
