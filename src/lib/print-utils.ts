@@ -1,5 +1,5 @@
 
-import { Order, OrderItem, MenuItem } from './data';
+import { Order, OrderItem, MenuItem, Additional } from './data';
 
 const paperWidth = 32;
 
@@ -47,6 +47,7 @@ const updatePrintedStatus = async (items: OrderItem[]) => {
 const generateReceiptText = (
     order: Order, 
     menuItems: MenuItem[],
+    allAdditionals: Additional[],
     options: ReceiptOptions
 ): string => {
   
@@ -109,6 +110,16 @@ const generateReceiptText = (
         receipt += itemLine + "\n";
     }
 
+    const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
+    for (const id in itemAdditionals) {
+        if (itemAdditionals[id]) {
+            const additional = allAdditionals.find(add => add.id === parseInt(id));
+            if (additional) {
+                receipt += `  + ${additional.nama}\n`;
+            }
+        }
+    }
+
     if (item.note) {
       receipt += `  *Note: ${item.note}\n`;
     }
@@ -162,12 +173,26 @@ const printJob = (receiptContent: string) => {
     window.location.href = url;
 };
 
-export const printOperationalStruk = (
+const fetchAllAdditionals = async (): Promise<Additional[]> => {
+    try {
+        const response = await fetch('https://api.sejadikopi.com/api/additionals');
+        if (!response.ok) return [];
+        const data = await response.json();
+        return data.data || [];
+    } catch (error) {
+        console.error("Failed to fetch additionals:", error);
+        return [];
+    }
+}
+
+export const printOperationalStruk = async (
   order: Order, 
   menuItems: MenuItem[],
   onNextPrint: (nextPrintFn: (() => void), title: string) => void
 ) => {
   try {
+    const allAdditionals = await fetchAllAdditionals();
+    
     const unprintedItems = order.detail_pesanans.filter(item => item.printed === 0);
     let itemsToProcess: OrderItem[];
 
@@ -196,7 +221,7 @@ export const printOperationalStruk = (
     const hasMinuman = minumanItems.length > 0;
 
     const kitchenPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, {
+        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
             title: "CHECKER DAPUR",
             showPrices: false,
             itemsToPrint: makananItems
@@ -206,7 +231,7 @@ export const printOperationalStruk = (
     }
     
     const barPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, {
+        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
             title: "CHECKER BAR",
             showPrices: false,
             itemsToPrint: minumanItems
@@ -216,7 +241,7 @@ export const printOperationalStruk = (
     }
     
     const waiterPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, {
+        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
             title: "CHECKER PELAYAN",
             showPrices: false,
             itemsToPrint: itemsToProcess
@@ -265,9 +290,10 @@ export const printOperationalStruk = (
 };
 
 
-export const printPaymentStruk = (order: Order, menuItems: MenuItem[], paymentAmount?: number) => {
+export const printPaymentStruk = async (order: Order, menuItems: MenuItem[], paymentAmount?: number) => {
     try {
-        const receiptText = generateReceiptText(order, menuItems, {
+        const allAdditionals = await fetchAllAdditionals();
+        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
             itemsToPrint: order.detail_pesanans,
