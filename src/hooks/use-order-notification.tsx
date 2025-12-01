@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { appEventEmitter } from '@/lib/event-emitter';
 
 export function useOrderNotification() {
-  const [lastKnownOrderIds, setLastKnownOrderIds] = useState<Set<number>>(new Set());
+  const [lastKnownOrdersState, setLastKnownOrdersState] = useState<Map<number, number>>(new Map());
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
@@ -48,7 +48,6 @@ export function useOrderNotification() {
     try {
       const response = await fetch('https://api.sejadikopi.com/api/pesanans?status=pending');
       if (!response.ok) {
-        // Silently fail, no need to bother user with failed polling.
         console.error('Failed to fetch pending orders');
         return;
       }
@@ -58,17 +57,35 @@ export function useOrderNotification() {
         return;
       }
       
-      const currentOrderIds = new Set(pendingOrders.map(order => order.id));
+      const currentOrdersState = new Map(pendingOrders.map(order => [order.id, order.detail_pesanans.length]));
 
       if (isFirstLoad.current) {
-        setLastKnownOrderIds(currentOrderIds);
+        setLastKnownOrdersState(currentOrdersState);
         isFirstLoad.current = false;
         return;
       }
+      
+      let hasNewActivity = false;
+      const ordersWithNewActivity: Order[] = [];
 
-      const newOrderIds = [...currentOrderIds].filter(id => !lastKnownOrderIds.has(id));
+      for (const order of pendingOrders) {
+          const lastItemCount = lastKnownOrdersState.get(order.id);
+          const currentItemCount = order.detail_pesanans.length;
 
-      if (newOrderIds.length > 0) {
+          // Case 1: A completely new order has arrived.
+          if (lastItemCount === undefined) {
+              hasNewActivity = true;
+              ordersWithNewActivity.push(order);
+          } 
+          // Case 2: An existing order has new items added.
+          else if (currentItemCount > lastItemCount) {
+              hasNewActivity = true;
+              ordersWithNewActivity.push(order);
+          }
+      }
+
+
+      if (hasNewActivity) {
         if (audioRef.current) {
           audioRef.current.currentTime = 0;
           audioRef.current.play().catch(error => {
@@ -76,13 +93,14 @@ export function useOrderNotification() {
           });
         }
         
-        const newOrders = pendingOrders.filter(order => newOrderIds.includes(order.id));
-
-        newOrders.forEach(newOrder => {
+        ordersWithNewActivity.forEach(newOrder => {
             const customer = newOrder.location_type.toLowerCase() === 'dine_in' ? `Meja ${newOrder.no_meja}`: newOrder.no_meja;
+            const title = lastKnownOrdersState.has(newOrder.id) ? '🔔 Item Baru Ditambahkan!' : '🔔 Pesanan Baru Diterima!';
+            const description = lastKnownOrdersState.has(newOrder.id) ? `Item baru ditambahkan ke pesanan ${customer}.` : `Pesanan baru dari ${customer} telah diterima.`;
+
             toast({
-                title: '🔔 Pesanan Baru Diterima!',
-                description: `Pesanan baru dari ${customer} telah diterima.`,
+                title: title,
+                description: description,
                 action: (
                     <Button onClick={() => router.push('/orders')} size="sm">
                         Lihat Pesanan
@@ -93,16 +111,16 @@ export function useOrderNotification() {
         });
         
         appEventEmitter.emit('new-order');
-        setLastKnownOrderIds(currentOrderIds);
-      } else if (currentOrderIds.size !== lastKnownOrderIds.size) {
-        // Also update if orders were processed/cancelled elsewhere
-        setLastKnownOrderIds(currentOrderIds);
+        setLastKnownOrdersState(currentOrdersState);
+      } else if (currentOrdersState.size !== lastKnownOrdersState.size) {
+        // This handles cases where orders were completed/cancelled elsewhere.
+        setLastKnownOrdersState(currentOrdersState);
       }
 
     } catch (error) {
       console.error('Error fetching pending orders:', error);
     }
-  }, [lastKnownOrderIds, toast, router]);
+  }, [lastKnownOrdersState, toast, router]);
 
   useEffect(() => {
     const interval = setInterval(() => {
