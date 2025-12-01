@@ -165,7 +165,7 @@ export default function MenuPage() {
 
   const filteredMenuItems = menuItems.filter(item => {
     const nameMatch = item.nama.toLowerCase().includes(menuSearchTerm.toLowerCase());
-    const categoryMatch = menuFilterCategory === 'all' || item.kategori_id.toString() === menuFilterCategory;
+    const categoryMatch = menuFilterCategory === 'all' || (item.kategori_id !== null && item.kategori_id.toString() === menuFilterCategory);
     return nameMatch && categoryMatch;
   });
   
