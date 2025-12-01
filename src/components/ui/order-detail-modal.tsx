@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Order, MenuItem, OrderItem, Additional } from '@/lib/data';
+import { Order, MenuItem, Additional } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -114,50 +114,6 @@ export function OrderDetailModal({
     }
   };
   
-  const handleCancelOrder = async () => {
-    if (!currentOrder) return;
-  
-    try {
-      const getOrderResponse = await fetch(`https://api.sejadikopi.com/api/pesanan/${currentOrder.id}`);
-      if (!getOrderResponse.ok) {
-        throw new Error('Gagal mengambil data pesanan terbaru sebelum membatalkan.');
-      }
-      const fullOrderData = await getOrderResponse.json();
-  
-      const updatedOrder = {
-        ...fullOrderData.data,
-        status: 'cancelled',
-      };
-  
-      const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${currentOrder.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedOrder),
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error:", errorText);
-        throw new Error(`Gagal membatalkan pesanan. Status: ${response.status}`);
-      }
-      
-      toast({
-        title: 'Sukses',
-        description: `Pesanan #${currentOrder.id} telah dibatalkan.`,
-      });
-      onOpenChange(false);
-      onOrderDeleted();
-  
-    } catch (error) {
-       console.error('Error cancelling order:', error);
-       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: (error as Error).message || 'Tidak dapat membatalkan pesanan.',
-      });
-    }
-  };
-
   const handleDeleteItem = async (itemId: number) => {
     if (!currentOrder) return;
     try {
@@ -243,28 +199,6 @@ export function OrderDetailModal({
                     ? `Meja ${currentOrder.no_meja}`
                     : currentOrder.no_meja}
                 </DialogTitle>
-                <div className="flex items-center gap-2">
-                   <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive-foreground/70 hover:text-destructive-foreground hover:bg-destructive-foreground/10 mr-8">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Apakah Anda yakin ingin menghapus pesanan ini?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tindakan ini tidak dapat dibatalkan. Ini akan menghapus pesanan secara permanen
-                          dan menghapus datanya dari server kami.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
               </div>
               <DialogClose className="absolute right-4 top-4 rounded-full p-1 bg-white/20 text-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
                 <X className="h-4 w-4" />
@@ -391,13 +325,13 @@ export function OrderDetailModal({
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                    Tindakan ini akan membatalkan pesanan. Ini tidak bisa dibatalkan.
+                                    Tindakan ini akan menghapus pesanan secara permanen. Ini tidak bisa dibatalkan.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Batal</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleCancelOrder} className="bg-destructive hover:bg-destructive/90">
-                                    Ya, Batalkan
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                                    Ya, Batalkan & Hapus
                                     </AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
