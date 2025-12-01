@@ -35,7 +35,7 @@ export default function AppLayout({
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:h-16 sm:px-6 md:hidden">
            <SidebarTrigger />
            <div className="flex items-center gap-2">
-             <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={32} height={32} className="rounded-md" />
+             <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={32} height={32} className="rounded-md" unoptimized/>
              <h1 className="text-lg font-headline font-bold">SejadiKopi</h1>
            </div>
         </header>
