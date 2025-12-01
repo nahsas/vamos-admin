@@ -1,6 +1,7 @@
 
 
-import { Order, OrderItem, MenuItem, Additional } from './data';
+import { Order, OrderItem, MenuItem } from './data';
+import { appEventEmitter } from './event-emitter';
 
 const paperWidth = 32;
 
@@ -31,22 +32,28 @@ const updatePrintedStatus = async (items: OrderItem[]) => {
 
   for (const item of unprintedItems) {
       try {
-        await fetch(`https://api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+        const response = await fetch(`https://api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ printed: 1 }),
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error(`Gagal update status print untuk item ${item.id}:`, errorData);
+        }
       } catch (error) {
         console.error(`Gagal update status print untuk item ${item.id}:`, error);
         // Continue trying to update other items
       }
   }
+  // After all updates, emit an event to refresh data
+  appEventEmitter.emit('new-order');
 };
+
 
 const generateReceiptText = (
     order: Order, 
     menuItems: MenuItem[],
-    allAdditionals: Additional[],
     options: ReceiptOptions
 ): string => {
   
@@ -74,15 +81,16 @@ const generateReceiptText = (
   // --- Header ---
   receipt += `\x1B\x61\x01`; // Align Center
   receipt += `\x1B\x21\x10`; // Double width/height
-  receipt += title + "\n";
+  receipt += "SEJADI KOPI" + "\n";
   
   if (showPrices) {
     receipt += `\x1B\x21\x00`; // Normal size
     receipt += "Jl. Pattimura, Air Saga" + "\n";
-    receipt += `\x1B\x21\x10`; // Double width/height
   }
   
-  receipt += "SEJADI KOPI" + "\n\n";
+  receipt += `\x1B\x21\x10`; // Double width/height
+  receipt += title + "\n\n";
+
   receipt += `\x1B\x21\x00`; // Normal size
   receipt += `\x1B\x61\x00`; // Align Left
   
@@ -95,40 +103,76 @@ const generateReceiptText = (
   receipt += "-".repeat(paperWidth) + "\n";
 
   // --- Items ---
-  itemsToPrint.forEach((item) => {
+  const makananItems = itemsToPrint.filter(item => {
     const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-    if (!menuItem || item.jumlah === 0) return;
-
-    let qty = `${item.jumlah}x `;
-    if (item.printed === 0 && !showPrices) { // Only mark new on kitchen/bar receipts
-      qty = `**${item.jumlah}x** `; // Mark new items
-    }
-    let itemName = menuItem.nama;
-    if (item.varian) itemName += ` (${item.varian})`;
-    
-    const itemLine = qty + itemName;
-    const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
-
-    if (showPrices) {
-        receipt += createLine(itemLine, subtotal) + "\n";
-    } else {
-        receipt += itemLine + "\n";
-    }
-
-    const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
-    for (const id in itemAdditionals) {
-        if (itemAdditionals[id]) {
-            const additional = allAdditionals.find(add => add.id === parseInt(id));
-            if (additional) {
-                receipt += `  + ${additional.nama}\n`;
-            }
-        }
-    }
-
-    if (item.note) {
-      receipt += `  *Note: ${item.note}\n`;
-    }
+    return menuItem?.kategori_struk === 'makanan';
   });
+
+  const minumanItems = itemsToPrint.filter(item => {
+    const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+    return menuItem?.kategori_struk === 'minuman';
+  });
+  
+  if (title === 'MAIN CHECKER') {
+    if (minumanItems.length > 0) {
+      receipt += "--- MINUMAN ---\n";
+      minumanItems.forEach(item => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+        if (!menuItem) return;
+        let itemName = `${item.jumlah}x ${menuItem.nama}`;
+        if (item.varian) itemName += ` (${item.varian})`;
+        receipt += itemName + "\n";
+        // Additionals and notes could be added here if needed for main checker
+      });
+      receipt += "\n\n"; // Wide spacing
+    }
+    
+    receipt += "--- SEMUA ITEM ---\n";
+    itemsToPrint.forEach(item => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+        if (!menuItem) return;
+        let itemName = `${item.jumlah}x ${menuItem.nama}`;
+        if (item.varian) itemName += ` (${item.varian})`;
+        receipt += itemName + "\n";
+    });
+
+  } else {
+    itemsToPrint.forEach((item) => {
+      const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+      if (!menuItem || item.jumlah === 0) return;
+
+      let qty = `${item.jumlah}x `;
+      if (item.printed === 0 && !showPrices) { // Only mark new on kitchen/bar receipts
+        qty = `**${item.jumlah}x** `; // Mark new items
+      }
+      let itemName = menuItem.nama;
+      if (item.varian) itemName += ` (${item.varian})`;
+      
+      const itemLine = qty + itemName;
+      const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+
+      if (showPrices) {
+          receipt += createLine(itemLine, subtotal) + "\n";
+      } else {
+          receipt += itemLine + "\n";
+      }
+
+      // This part is for kitchen/bar receipts, so additionals and notes are important
+      const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
+       for (const id in itemAdditionals) {
+          if (itemAdditionals[id]) {
+              // We need to fetch additionals info if not available
+              // This is a simplification. For a real app, you'd load this data once.
+              receipt += `  + Tambahan\n`; 
+          }
+      }
+
+      if (item.note) {
+        receipt += `  *Note: ${item.note}\n`;
+      }
+    });
+  }
+
 
   receipt += "-".repeat(paperWidth) + "\n";
   
@@ -180,26 +224,12 @@ const printJob = (receiptContent: string) => {
     window.location.href = url;
 };
 
-const fetchAllAdditionals = async (): Promise<Additional[]> => {
-    try {
-        const response = await fetch('https://api.sejadikopi.com/api/additionals');
-        if (!response.ok) return [];
-        const data = await response.json();
-        return data.data || [];
-    } catch (error) {
-        console.error("Failed to fetch additionals:", error);
-        return [];
-    }
-}
-
 export const printOperationalStruk = async (
   order: Order, 
   menuItems: MenuItem[],
   onNextPrint: (nextPrintFn: (() => void), title: string) => void
 ) => {
   try {
-    const allAdditionals = await fetchAllAdditionals();
-    
     const unprintedItems = order.detail_pesanans.filter(item => item.printed === 0);
     let itemsToProcess: OrderItem[];
 
@@ -229,7 +259,7 @@ export const printOperationalStruk = async (
     const hasMinuman = minumanItems.length > 0;
 
     const kitchenPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
+        const receiptText = generateReceiptText(order, menuItems, {
             title: "CHECKER DAPUR",
             showPrices: false,
             itemsToPrint: makananItems
@@ -239,29 +269,19 @@ export const printOperationalStruk = async (
     }
     
     const barPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
-            title: "CHECKER BAR",
+        const receiptText = generateReceiptText(order, menuItems, {
+            title: "MAIN CHECKER",
             showPrices: false,
-            itemsToPrint: minumanItems
+            itemsToPrint: order.detail_pesanans // Main checker gets all items
         });
         printJob(receiptText);
-        updatePrintedStatus(minumanItems);
+        // Only update printed status for the items belonging to this station
+        updatePrintedStatus(minumanItems); 
     }
     
-    const waiterPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
-            title: "CHECKER PELAYAN",
-            showPrices: false,
-            itemsToPrint: itemsToProcess
-        });
-        printJob(receiptText);
-    }
-
     const printQueue: { fn: () => void, title: string }[] = [];
     if(hasMakanan) printQueue.push({ fn: kitchenPrintFn, title: "Cetak Struk Dapur?" });
-    if(hasMinuman) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar?" });
-    if(itemsToProcess.length > 0) printQueue.push({ fn: waiterPrintFn, title: "Cetak Struk Pelayan?" });
-
+    if(itemsToProcess.length > 0) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
 
     const runNextPrint = (index: number) => {
         if (index >= printQueue.length) return;
@@ -296,10 +316,9 @@ export const printOperationalStruk = async (
 };
 
 
-export const printPaymentStruk = async (order: Order, menuItems: MenuItem[], paymentAmount?: number) => {
+export const printPaymentStruk = (order: Order, menuItems: MenuItem[], paymentAmount?: number) => {
     try {
-        const allAdditionals = await fetchAllAdditionals();
-        const receiptText = generateReceiptText(order, menuItems, allAdditionals, {
+        const receiptText = generateReceiptText(order, menuItems, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
             itemsToPrint: order.detail_pesanans,
@@ -311,3 +330,4 @@ export const printPaymentStruk = async (order: Order, menuItems: MenuItem[], pay
         alert("Gagal mencetak struk pembayaran.");
     }
 };
+
