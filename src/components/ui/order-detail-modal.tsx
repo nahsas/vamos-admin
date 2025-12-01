@@ -288,9 +288,9 @@ export function OrderDetailModal({
                     ...parseAdditionals(item.dimsum_additionals)
                 ];
                 return (
-                    <div key={item.id} className="bg-slate-50 rounded-lg p-3 relative">
-                        <div className="flex justify-between items-start">
-                            <div>
+                    <div key={item.id} className="bg-slate-50 rounded-lg p-3">
+                        <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1">
                                 <p className="font-bold flex items-center gap-2">
                                     {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
                                     <Utensils className="w-4 h-4 text-amber-600" />
@@ -305,13 +305,36 @@ export function OrderDetailModal({
                                     ))}
                                 </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right flex-shrink-0">
                                 <p className="font-semibold">x {item.jumlah}</p>
                                 <p className="font-bold text-lg text-primary">
                                     Rp{' '}
                                     {parseInt(item.subtotal, 10).toLocaleString('id-ID')}
                                 </p>
                             </div>
+                            {!isCompleted && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/50 hover:text-destructive hover:bg-destructive/10 -mr-2">
+                                            <Trash2 className="h-4 w-4"/>
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Hapus item ini?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Yakin ingin menghapus item "{menuItem?.nama || 'Item'}" dari pesanan?
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-destructive hover:bg-destructive/90">
+                                                Ya, Hapus
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
                         </div>
                         <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
                             <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
@@ -333,29 +356,6 @@ export function OrderDetailModal({
                                  <span>Rp {parseInt(item.subtotal, 10).toLocaleString('id-ID')}</span>
                              </div>
                         </div>
-                         {!isCompleted && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7 text-destructive/50 hover:text-destructive hover:bg-destructive/10">
-                                        <Trash2 className="h-4 w-4"/>
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Hapus item ini?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Yakin ingin menghapus item "{menuItem?.nama || 'Item'}" dari pesanan?
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-destructive hover:bg-destructive/90">
-                                            Ya, Hapus
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        )}
                     </div>
                 );
                 })}
