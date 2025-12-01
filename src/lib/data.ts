@@ -27,8 +27,8 @@ export type OrderItem = {
   subtotal: string;
   note: string | null;
   varian: string | null;
-  additionals: any;
-  dimsum_additionals: any;
+  additionals: { [key: string]: boolean } | null;
+  dimsum_additionals: { [key: string]: boolean } | null;
   additional_price: string;
   base_price: number;
   is_locked: boolean;
@@ -63,6 +63,17 @@ export type Order = {
   bank_qris: string | null;
   is_final: boolean | null;
   detail_pesanans: OrderItem[];
+};
+
+export type Additional = {
+    id: number;
+    nama: string;
+    harga: string;
+    kategori_id: number;
+    urutan: number;
+    is_active: boolean;
+    created_at: string;
+    tipe: 'regular' | 'dimsum';
 };
 
 

@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Order, MenuItem, OrderItem } from '@/lib/data';
+import { Order, MenuItem, OrderItem, Additional } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -72,9 +72,16 @@ export function OrderDetailModal({
   const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false);
   
   const [currentOrder, setCurrentOrder] = React.useState<Order | null>(order);
+  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
 
   React.useEffect(() => {
     setCurrentOrder(order);
+    if(open) {
+      fetch('https://api.sejadikopi.com/api/additionals')
+        .then(res => res.json())
+        .then(data => setAdditionals(data.data || []))
+        .catch(console.error);
+    }
   }, [order, open]);
 
 
@@ -190,20 +197,20 @@ export function OrderDetailModal({
     return menuItems.find((item) => item.id === menuId);
   };
 
-  const parseAdditionals = (additionals: string | null | undefined): string[] => {
-    if (!additionals || typeof additionals !== 'string') return [];
-    try {
-      // Handles cases like "['item1', 'item2']" or "'item1', 'item2'"
-      const cleanedString = additionals.replace(/'/g, '"');
-      const parsed = JSON.parse(cleanedString.startsWith('[') ? cleanedString : `[${cleanedString}]`);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      if (typeof additionals === 'string') {
-        return additionals.split(',').map(s => s.trim());
+  const getAdditionalNames = (item: OrderItem): string[] => {
+    const names: string[] = [];
+    const allAddons = { ...item.additionals, ...item.dimsum_additionals };
+
+    for (const id in allAddons) {
+      if (allAddons[id]) {
+        const additional = additionals.find(add => add.id === parseInt(id));
+        if (additional) {
+          names.push(additional.nama);
+        }
       }
-      return [];
     }
-  };
+    return names;
+  }
   
   const totalItems = currentOrder?.detail_pesanans.reduce((sum, item) => sum + item.jumlah, 0) || 0;
   const isProcessing = currentOrder?.status.toLowerCase() === 'diproses';
@@ -286,17 +293,13 @@ export function OrderDetailModal({
             <div className="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
                 {currentOrder.detail_pesanans.map((item) => {
                 const menuItem = getMenuDetails(item.menu_id);
-                const allAdditionals = [
-                    ...parseAdditionals(item.additionals),
-                    ...parseAdditionals(item.dimsum_additionals)
-                ];
+                const addonNames = getAdditionalNames(item);
                 return (
                     <div key={item.id} className="bg-slate-50 rounded-lg p-3">
                         <div className="flex justify-between items-start gap-4">
-                           <div className="flex-1">
+                           <div className="flex-1 space-y-1">
                                 <p className="font-bold flex items-center gap-2">
                                     {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
-                                    <Utensils className="w-4 h-4 text-amber-600" />
                                      {item.printed === 0 && !isCompleted && (
                                       <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
                                           <Bell className="w-2.5 h-2.5 mr-1"/>
@@ -304,9 +307,9 @@ export function OrderDetailModal({
                                       </Badge>
                                     )}
                                 </p>
-                                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                <div className="flex items-center gap-1 flex-wrap">
                                     {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
-                                    {allAdditionals.map((add, index) => (
+                                    {addonNames.map((add, index) => (
                                         <Badge key={index} variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
                                             <PlusCircle className="mr-1 h-3 w-3" />
                                             {add}
@@ -314,12 +317,8 @@ export function OrderDetailModal({
                                     ))}
                                 </div>
                             </div>
-                            <div className="text-right flex-shrink-0">
+                             <div className="text-right flex-shrink-0">
                                 <p className="font-semibold">x {item.jumlah}</p>
-                                <p className="font-bold text-lg text-primary">
-                                    Rp{' '}
-                                    {parseInt(item.subtotal, 10).toLocaleString('id-ID')}
-                                </p>
                             </div>
                             {!isCompleted && (
                                 <AlertDialog>
@@ -345,10 +344,12 @@ export function OrderDetailModal({
                                 </AlertDialog>
                             )}
                         </div>
-                        <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
-                            <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
-                            <span>{item.note || "Tidak ada catatan."}</span>
-                        </div>
+                        {item.note && (
+                            <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
+                                <MessageSquare className="w-4 h-4 mt-0.5 shrink-0" />
+                                <span>{item.note || "Tidak ada catatan."}</span>
+                            </div>
+                        )}
                         <div className="text-sm mt-2 pt-2 border-t border-dashed">
                              <div className="flex justify-between">
                                  <span>Harga satuan:</span>
@@ -360,7 +361,7 @@ export function OrderDetailModal({
                                     <span>Rp {parseInt(item.additional_price, 10).toLocaleString('id-ID')}</span>
                                 </div>
                               )}
-                             <div className="flex justify-between">
+                             <div className="flex justify-between font-bold text-primary">
                                  <span>Subtotal ({item.jumlah}x):</span>
                                  <span>Rp {parseInt(item.subtotal, 10).toLocaleString('id-ID')}</span>
                              </div>
