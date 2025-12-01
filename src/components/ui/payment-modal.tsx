@@ -203,8 +203,8 @@ export function PaymentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0">
-        <DialogHeader className="p-4 text-center items-center">
+      <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[90vh]">
+        <DialogHeader className="p-4 text-center items-center sticky top-0 bg-background z-10 border-b">
             <div className="p-3 bg-green-100 rounded-full mb-2">
                 <Receipt className="w-6 h-6 text-green-600" />
             </div>
@@ -215,9 +215,13 @@ export function PaymentModal({
               : order.no_meja}
           </DialogTitle>
           <p className="text-muted-foreground text-sm">Silakan pilih metode pembayaran</p>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+            </DialogClose>
         </DialogHeader>
 
-        <div className="px-4 pb-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="px-4 pb-4 space-y-4 overflow-y-auto flex-grow">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 space-y-2">
              <div className="flex justify-between items-center text-sm">
                 <span className="font-medium text-yellow-800">Subtotal:</span>
@@ -390,7 +394,7 @@ export function PaymentModal({
             )}
         </div>
 
-        <DialogFooter className="p-4 bg-slate-50 border-t grid grid-cols-2 gap-2">
+        <DialogFooter className="p-4 bg-slate-50 border-t grid grid-cols-2 gap-2 sticky bottom-0">
             <Button onClick={handleFinishPayment} className="bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
                 {isLoading ? "Memproses..." : (
                     <>
