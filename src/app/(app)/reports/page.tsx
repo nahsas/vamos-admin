@@ -93,7 +93,7 @@ const PaymentBreakdownCard = ({
 }: {
     title: string;
     amount: string;
-    transactions: number;
+    transactions: number | string;
     icon: React.ReactNode;
     borderColor: string;
 }) => (
@@ -108,7 +108,7 @@ const PaymentBreakdownCard = ({
                     <p className="font-bold text-primary">{amount}</p>
                 </div>
             </div>
-            <p className="text-sm text-muted-foreground">{transactions} transaksi</p>
+            <p className="text-sm text-muted-foreground">{transactions} {typeof transactions === 'number' && 'transaksi'}</p>
         </CardContent>
     </Card>
 )
@@ -497,8 +497,7 @@ export default function ReportsPage() {
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
     const netProfit = totalRevenue - totalExpenses;
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-    const averageTransaction = transactions.length > 0 ? totalRevenue / transactions.length : 0;
-
+    
     const paymentBreakdown = transactions.reduce((acc, t) => {
         const method = t.metode_pembayaran || 'unknown';
         const bank = t.bank_qris || 'other';
@@ -530,67 +529,71 @@ export default function ReportsPage() {
         qris_bsi: { amount: 0, count: 0 },
     });
   
-  const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
+    const pettyCash = 1000000;
+    const setoran = paymentBreakdown.cash.amount - totalExpenses;
 
-  const handleExport = () => {
-    setExporting(true);
-    
-    // 1. Summary Sheet
-    const summaryData = [
-      ["Laporan Pembukuan Sejadi Kopi"],
-      [`Periode: ${filterDateRangeStr}`],
-      [],
-      ["RINGKASAN UMUM"],
-      ["Total Pendapatan", totalRevenue],
-      ["Total Pengeluaran", totalExpenses],
-      ["Laba Bersih", netProfit],
-      ["Margin Laba", `${margin.toFixed(2)}%`],
-      ["Total Transaksi", transactions.length],
-      ["Rata-rata Transaksi", averageTransaction],
-      [],
-      ["RINCIAN PEMBAYARAN"],
-      ["Metode", "Jumlah Transaksi", "Total Nominal"],
-      ["Tunai", paymentBreakdown.cash.count, paymentBreakdown.cash.amount],
-      ["QRIS (Semua)", paymentBreakdown.qris.count, paymentBreakdown.qris.amount],
-      ["QRIS (BCA)", paymentBreakdown.qris_bca.count, paymentBreakdown.qris_bca.amount],
-      ["QRIS (BRI)", paymentBreakdown.qris_bri.count, paymentBreakdown.qris_bri.amount],
-      ["QRIS (BSI)", paymentBreakdown.qris_bsi.count, paymentBreakdown.qris_bsi.amount],
-    ];
-    const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
+    const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
 
-    // 2. Transactions Sheet
-    const transactionsData = transactions.map(t => ({
-      "ID": t.id,
-      "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
-      "Meja/Pelanggan": t.no_meja,
-      "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
-      "Total": t.total,
-      "Diskon": t.discount_amount || 0,
-      "Total Akhir": t.total_after_discount,
-    }));
-    const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
+    const handleExport = () => {
+        setExporting(true);
+        
+        // 1. Summary Sheet
+        const summaryData = [
+        ["Laporan Pembukuan Sejadi Kopi"],
+        [`Periode: ${filterDateRangeStr}`],
+        [],
+        ["RINGKASAN UMUM"],
+        ["Total Pendapatan", totalRevenue],
+        ["Total Pengeluaran", totalExpenses],
+        ["Laba Bersih", netProfit],
+        ["Margin Laba", `${margin.toFixed(2)}%`],
+        ["Total Transaksi", transactions.length],
+        [],
+        ["RINCIAN PEMBAYARAN"],
+        ["Metode", "Jumlah Transaksi", "Total Nominal"],
+        ["Petty Cash", "", pettyCash],
+        ["Tunai", paymentBreakdown.cash.count, paymentBreakdown.cash.amount],
+        ["Setoran", "", setoran],
+        ["QRIS (Semua)", paymentBreakdown.qris.count, paymentBreakdown.qris.amount],
+        ["QRIS (BCA)", paymentBreakdown.qris_bca.count, paymentBreakdown.qris_bca.amount],
+        ["QRIS (BRI)", paymentBreakdown.qris_bri.count, paymentBreakdown.qris_bri.amount],
+        ["QRIS (BSI)", paymentBreakdown.qris_bsi.count, paymentBreakdown.qris_bsi.amount],
+        ];
+        const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
 
-    // 3. Expenses Sheet
-    const expensesData = expenses.map(e => ({
-        "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
-        "Kategori": e.kategori,
-        "Deskripsi": e.deskripsi,
-        "Jumlah": e.jumlah,
-        "Dibuat oleh": e.created_by
-    }));
-    const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
-    
-    // Create workbook and append sheets
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
-    XLSX.utils.book_append_sheet(wb, transactions_ws, "Riwayat Transaksi");
-    XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
+        // 2. Transactions Sheet
+        const transactionsData = transactions.map(t => ({
+        "ID": t.id,
+        "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
+        "Meja/Pelanggan": t.no_meja,
+        "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
+        "Total": t.total,
+        "Diskon": t.discount_amount || 0,
+        "Total Akhir": t.total_after_discount,
+        }));
+        const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
 
-    // Write file and trigger download
-    XLSX.writeFile(wb, "Laporan_Pembukuan.xlsx");
+        // 3. Expenses Sheet
+        const expensesData = expenses.map(e => ({
+            "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
+            "Kategori": e.kategori,
+            "Deskripsi": e.deskripsi,
+            "Jumlah": e.jumlah,
+            "Dibuat oleh": e.created_by
+        }));
+        const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
+        
+        // Create workbook and append sheets
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
+        XLSX.utils.book_append_sheet(wb, transactions_ws, "Riwayat Transaksi");
+        XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
 
-    setExporting(false);
-  };
+        // Write file and trigger download
+        XLSX.writeFile(wb, "Laporan_Pembukuan.xlsx");
+
+        setExporting(false);
+    };
 
 
   const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [expenses]);
@@ -745,9 +748,9 @@ export default function ReportsPage() {
             rightIcon={<LineChart className="h-6 w-6" />}
           />
           <ReportStatCard
-            title="Total Transaksi"
-            value={transactions.length.toString()}
-            date={`Rata-rata: ${toRupiah(averageTransaction)}`}
+            title="Setoran"
+            value={toRupiah(setoran)}
+            date={`Total Transaksi: ${transactions.length}`}
             icon={<ShoppingCart className="h-5 w-5" />}
             bgColor="bg-orange-500"
             textColor="text-white"
@@ -762,7 +765,8 @@ export default function ReportsPage() {
                 </div>
                 <h2 className="text-xl font-bold">Rincian Pembayaran</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <PaymentBreakdownCard title="Petty Cash" amount={toRupiah(pettyCash)} transactions="Statis" icon={<Landmark className="h-6 w-6 text-gray-500"/>} borderColor="border-gray-500" />
                 <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6 text-green-500"/>} borderColor="border-green-500" />
                 <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6 text-purple-500"/>} borderColor="border-purple-500" />
                 <PaymentBreakdownCard title="QRIS BCA" amount={toRupiah(paymentBreakdown.qris_bca.amount)} transactions={paymentBreakdown.qris_bca.count} icon={<Grip className="h-6 w-6 text-blue-500"/>} borderColor="border-blue-500" />
