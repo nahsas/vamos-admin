@@ -1,9 +1,17 @@
 
+
 import type {NextConfig} from 'next';
+import createPWA from 'next-pwa';
+
+const withPWA = createPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+});
+
 
 const nextConfig: NextConfig = {
   /* config options here */
-  export:'output',
+  
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -40,4 +48,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
