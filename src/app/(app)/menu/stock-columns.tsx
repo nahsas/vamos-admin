@@ -94,12 +94,16 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
       }
     },
     {
-      accessorKey: "stok",
-      header: () => <div className="text-right">Stok</div>,
-      cell: ({ row }) => {
-        const stock = row.original.stok as number;
-        return <div className="text-right font-medium">{stock || 0}</div>
-      },
+        accessorKey: "is_available",
+        header: "Status",
+        cell: ({ row }) => {
+            const isAvailable = row.getValue("is_available");
+            return (
+                <Badge variant={isAvailable ? "outline" : "destructive"} className={isAvailable ? "bg-green-100 text-green-800 border-green-300" : ""}>
+                    {isAvailable ? 'Tersedia' : 'Habis'}
+                </Badge>
+            );
+        }
     },
     {
       id: "actions",
@@ -109,7 +113,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
             <div className="text-right space-x-2">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" disabled={!menuItem.is_available}>
+                    <Button variant="destructive" size="sm">
                       <XCircle className="mr-2 h-4 w-4" />
                       Tandai Habis
                     </Button>
@@ -134,7 +138,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
                 </AlertDialog>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                     <Button variant="outline" size="sm" className="bg-green-600 text-white hover:bg-green-700 hover:text-white" disabled={menuItem.is_available}>
+                     <Button variant="outline" size="sm" className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Tandai Tersedia
                     </Button>
