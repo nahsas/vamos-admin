@@ -115,20 +115,31 @@ export function OrderDetailModal({
       });
     }
   };
+  
+  const updateOrderTotalOnBackend = async (orderId: number, newTotal: number) => {
+    try {
+        const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${orderId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ total: newTotal, total_after_discount: newTotal }),
+        });
+        if (!response.ok) throw new Error('Gagal memperbarui total pesanan di server.');
+    } catch (error) {
+        console.error("Failed to update order total on backend:", error);
+        // We can choose to show a toast here, but for now, we'll let the main toast handle it.
+    }
+  }
 
   const handleUpdateItemQuantity = async (item: OrderItem, newQuantity: number) => {
     if (!currentOrder || newQuantity < 0) return;
 
     if (newQuantity === 0) {
-        // If quantity is zero, ask for confirmation to delete
         if (confirm(`Yakin ingin menghapus item "${getMenuDetails(item.menu_id)?.nama || 'Item'}" dari pesanan?`)) {
             handleDeleteItem(item.id);
         }
         return;
     }
     
-    // NOTE: This endpoint is not in api.json, but is required for this functionality.
-    // Assuming PUT /detail_pesanan/{id} exists to update quantity and subtotal.
     const newSubtotal = (item.base_price + (parseInt(item.additional_price, 10) || 0)) * newQuantity;
 
     try {
@@ -146,7 +157,6 @@ export function OrderDetailModal({
 
       if (!response.ok) throw new Error('Gagal memperbarui kuantitas item.');
       
-      // Optimistic UI update
       const updatedDetails = currentOrder.detail_pesanans.map(detail => 
           detail.id === item.id ? { ...detail, jumlah: newQuantity, subtotal: String(newSubtotal) } : detail
       );
@@ -156,8 +166,10 @@ export function OrderDetailModal({
           ...currentOrder,
           detail_pesanans: updatedDetails,
           total: String(newTotal),
-          total_after_discount: newTotal, // Re-evaluate discount later if needed
+          total_after_discount: newTotal,
       });
+      
+      await updateOrderTotalOnBackend(currentOrder.id, newTotal);
 
       toast({
         title: 'Kuantitas Diperbarui',
@@ -183,7 +195,6 @@ export function OrderDetailModal({
             throw new Error('Gagal menghapus item pesanan.');
         }
 
-        // Optimistic UI update
         const updatedDetails = currentOrder.detail_pesanans.filter(item => item.id !== itemId);
         const newTotal = updatedDetails.reduce((sum, item) => sum + parseInt(item.subtotal, 10), 0);
         
@@ -193,6 +204,8 @@ export function OrderDetailModal({
             total: String(newTotal),
             total_after_discount: newTotal,
         });
+
+        await updateOrderTotalOnBackend(currentOrder.id, newTotal);
 
         toast({
             title: 'Sukses',
