@@ -98,7 +98,7 @@ const generateReceiptText = (
   receipt += `\x1B\x21\x00`; // Normal size
   receipt += `\x1B\x61\x00`; // Align Left
   
-  if (showPrices) {
+  if (showPrices || title === 'MAIN CHECKER') {
       receipt += createLine("No", `#${order.id}`) + "\n";
   }
   receipt += createLine("Meja", order.no_meja ? order.no_meja.toString() : "-") + "\n";
@@ -135,6 +135,8 @@ const generateReceiptText = (
   });
   
   if (title === 'MAIN CHECKER') {
+    const allItems = [...minumanItems, ...makananItems];
+    
     if (minumanItems.length > 0) {
       receipt += "--- MINUMAN ---\n";
       minumanItems.forEach(item => {
@@ -149,12 +151,14 @@ const generateReceiptText = (
     }
     
     receipt += "--- SEMUA ITEM ---\n";
-    itemsToPrint.forEach(item => {
+    allItems.forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem) return;
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
         if (item.varian) itemName += ` (${item.varian})`;
-        receipt += itemName + "\n";
+        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+        
+        receipt += createLine(itemName, subtotal) + "\n";
         receipt += renderItemDetails(item, menuItem);
     });
 
@@ -187,7 +191,7 @@ const generateReceiptText = (
   receipt += "-".repeat(paperWidth) + "\n";
   
   // --- Footer ---
-  if (showPrices) {
+  if (showPrices || title === 'MAIN CHECKER') {
     const total = order.total_after_discount ?? parseInt(order.total, 10);
     receipt += createLine("TOTAL", `Rp${formatCurrency(parseInt(order.total, 10))}`) + "\n";
     if (order.discount_amount && order.discount_amount > 0) {
@@ -196,7 +200,7 @@ const generateReceiptText = (
     }
     receipt += createLine("TOTAL BAYAR", `Rp${formatCurrency(total)}`) + "\n";
 
-    if (order.metode_pembayaran) {
+    if (showPrices && order.metode_pembayaran) {
       let metodeLabel = "";
       if (order.metode_pembayaran === "cash") {
         metodeLabel = "CASH";
@@ -213,14 +217,13 @@ const generateReceiptText = (
       }
     }
     receipt += "--------------------------------\n";
-    receipt += "\x1B\x61\x01"; // Align center
-    receipt += "Sampai Jumpa" + "\n";
-    receipt += "Terima Kasih" + "\n";
-    receipt += "\x1B\x61\x00"; // Align left
-  } else if (title === 'MAIN CHECKER') {
-    const total = order.total_after_discount ?? parseInt(order.total, 10);
-    receipt += createLine("TOTAL", `Rp${formatCurrency(total)}`) + "\n";
-    receipt += "-".repeat(paperWidth) + "\n";
+    
+    if (showPrices) {
+        receipt += "\x1B\x61\x01"; // Align center
+        receipt += "Sampai Jumpa" + "\n";
+        receipt += "Terima Kasih" + "\n";
+        receipt += "\x1B\x61\x00"; // Align left
+    }
   }
 
   receipt += "\n\n\n";
@@ -248,14 +251,10 @@ export const printOperationalStruk = async (
     const unprintedItems = order.detail_pesanans.filter(item => item.printed === 0);
     let itemsToProcess: OrderItem[];
 
-    if (unprintedItems.length > 0) {
-      itemsToProcess = unprintedItems;
-    } else {
-      itemsToProcess = order.detail_pesanans;
-    }
+    // If there are unprinted items, process only them. Otherwise, process all items (for re-printing).
+    itemsToProcess = unprintedItems.length > 0 ? unprintedItems : order.detail_pesanans;
     
     if (itemsToProcess.length === 0) {
-      // No alert if no new items, just don't print
       return;
     }
 
@@ -297,6 +296,7 @@ export const printOperationalStruk = async (
     
     const printQueue: { fn: () => void, title: string }[] = [];
     if(hasMakanan) printQueue.push({ fn: kitchenPrintFn, title: "Cetak Struk Dapur?" });
+    // Always add bar/main checker if there are items, regardless of type
     if(itemsToProcess.length > 0) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
 
     const runNextPrint = (index: number) => {
@@ -347,6 +347,7 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additiona
         alert("Gagal mencetak struk pembayaran.");
     }
 };
+
 
 
 
