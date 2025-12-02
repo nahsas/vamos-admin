@@ -136,8 +136,7 @@ const generateReceiptText = (
   });
   
   if (title === 'MAIN CHECKER') {
-      const unprintedMinumanItems = minumanItems.filter(item => item.printed === 0);
-      const itemsForMinumanSection = unprintedMinumanItems.length > 0 ? unprintedMinumanItems : minumanItems;
+    const itemsForMinumanSection = minumanItems;
 
     // For MINUMAN section, only show new drinks if any exist.
     if (itemsForMinumanSection.length > 0) {
@@ -147,7 +146,9 @@ const generateReceiptText = (
         if (!menuItem) return;
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
         if (item.varian) itemName += ` (${item.varian})`;
-        receipt += itemName + "\n";
+        
+        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+        receipt += createLine(itemName, subtotal) + "\n";
         receipt += renderItemDetails(item, menuItem);
       });
       receipt += "\n";
@@ -293,10 +294,13 @@ export const printOperationalStruk = async (
     }
     
     const barPrintFn = () => {
+        const unprintedMinuman = minumanItems.filter(item => item.printed === 0);
+        const itemsToPrintForBar = unprintedMinuman.length > 0 ? unprintedMinuman : minumanItems;
+
         const receiptText = generateReceiptText(order, menuItems, {
             title: "MAIN CHECKER",
             showPrices: true,
-            itemsToPrint: minumanItems,
+            itemsToPrint: itemsToPrintForBar,
             allItemsForMainChecker: order.detail_pesanans, // Always pass all items for the "SEMUA ITEM" list
             additionals
         });
@@ -310,39 +314,27 @@ export const printOperationalStruk = async (
     if(hasMinuman) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
 
     const runNextPrint = (index: number) => {
-        if (index >= printQueue.length) return;
+        if (index >= printQueue.length) return; // Stop when queue is empty
 
         const currentPrint = printQueue[index];
         const nextPrint = printQueue[index + 1];
 
         if (nextPrint) {
-            // Show confirmation dialog that chains to the next print job
+            // More than one job left, show confirmation to chain them.
             onNextPrint(() => {
-                currentPrint.fn(); // Print current
-                setTimeout(() => runNextPrint(index + 1), 500); // Queue up next after a delay
+                currentPrint.fn(); // Print the current job
+                setTimeout(() => runNextPrint(index + 1), 500); // And then immediately process the next one
             }, currentPrint.title);
         } else {
-            // This is the last item, just print it directly or show a final confirmation
-             onNextPrint(() => {
+            // This is the last job in the queue, just confirm and print.
+            onNextPrint(() => {
                 currentPrint.fn();
-             }, currentPrint.title);
+            }, currentPrint.title);
         }
     }
     
     if (printQueue.length > 0) {
-      const firstPrint = printQueue[0];
-       if (printQueue.length > 1) {
-            onNextPrint(() => {
-                firstPrint.fn();
-                // Use a short delay to allow the intent to fire, then show the confirmation dialog for the next job.
-                setTimeout(() => {
-                    const nextPrint = printQueue[1];
-                     onNextPrint(() => runNextPrint(1), nextPrint.title);
-                }, 500); 
-            }, firstPrint.title);
-       } else {
-            onNextPrint(firstPrint.fn, firstPrint.title);
-       }
+      runNextPrint(0); // Start the print queue from the first job
     }
 
   } catch (error) {
