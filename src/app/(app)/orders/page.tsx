@@ -85,33 +85,23 @@ export default function OrdersPage() {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [
-        dineInPendingRes,
-        dineInProcessingRes,
-        takeawayPendingRes,
-        takeawayProcessingRes,
-        menuRes
-      ] = await Promise.all([
-        fetch("https://api.sejadikopi.com/api/pesanans?status=pending&location_type=dine_in"),
-        fetch("https://api.sejadikopi.com/api/pesanans?status=diproses&location_type=dine_in"),
-        fetch("https://api.sejadikopi.com/api/pesanans?status=pending&location_type=takeaway"),
-        fetch("https://api.sejadikopi.com/api/pesanans?status=diproses&location_type=takeaway"),
+      const [ordersRes, menuRes] = await Promise.all([
+        fetch("https://api.sejadikopi.com/api/pesanans?order=updated_at.desc&status=pending,diproses"),
         fetch("https://api.sejadikopi.com/api/menu")
       ]);
       
-      const dineInPending = dineInPendingRes.ok ? (await dineInPendingRes.json()).data : [];
-      const dineInProcessing = dineInProcessingRes.ok ? (await dineInProcessingRes.json()).data : [];
-      const allDineInOrders = [...dineInPending, ...dineInProcessing];
-      setDineInOrders(allDineInOrders);
+      const allActiveOrders = ordersRes.ok ? (await ordersRes.json()).data : [];
+      
+      const allDineInOrders = allActiveOrders.filter((o: Order) => o.location_type.toLowerCase() === 'dine-in');
+      const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.location_type.toLowerCase() === 'takeaway');
 
-      const takeawayPending = takeawayPendingRes.ok ? (await takeawayPendingRes.json()).data : [];
-      const takeawayProcessing = takeawayProcessingRes.ok ? (await takeawayProcessingRes.json()).data : [];
-      setTakeawayOrders([...takeawayPending, ...takeawayProcessing]);
+      setDineInOrders(allDineInOrders);
+      setTakeawayOrders(allTakeawayOrders);
 
       if (menuRes.ok) setMenuItems((await menuRes.json()).data);
 
       const uniqueTables = new Set(
-        allDineInOrders.map((order) => order.no_meja)
+        allDineInOrders.map((order: Order) => order.no_meja)
       );
       setOccupiedTablesCount(uniqueTables.size);
       

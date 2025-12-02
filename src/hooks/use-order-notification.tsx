@@ -21,27 +21,6 @@ export function useOrderNotification() {
         audioRef.current = new Audio('/notification.mp3');
         audioRef.current.preload = 'auto'; // Preload the audio file
     }
-
-    // Function to unlock audio on first user interaction
-    const unlockAudio = () => {
-        if (audioRef.current && audioRef.current.paused) {
-            audioRef.current.play().catch(() => {});
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-            // Remove the listener after the first interaction
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('keydown', unlockAudio);
-        }
-    };
-
-    document.addEventListener('click', unlockAudio);
-    document.addEventListener('keydown', unlockAudio);
-
-    return () => {
-        document.removeEventListener('click', unlockAudio);
-        document.removeEventListener('keydown', unlockAudio);
-    };
-
   }, []);
 
   const fetchActiveOrders = useCallback(async () => {

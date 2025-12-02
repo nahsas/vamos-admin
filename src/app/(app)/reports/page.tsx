@@ -316,7 +316,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                                           type="file"
                                           ref={galleryInputRef}
                                           className="hidden"
-                                          accept="image/jpeg,image/png,image/jpg,image/webp"
+                                          accept="image/*"
                                           onChange={handleImageChange}
                                       />
                                       <input
