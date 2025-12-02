@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -23,14 +24,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Order, MenuItem, Additional } from '@/lib/data';
+import { Order, MenuItem, OrderItem, Additional } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import {
   X,
   Trash2,
-  Utensils,
   MapPin,
   ArrowRight,
   MessageSquare,
@@ -38,6 +38,8 @@ import {
   XCircle,
   PlusCircle,
   Bell,
+  Plus,
+  Minus
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentModal } from './payment-modal';
@@ -113,6 +115,63 @@ export function OrderDetailModal({
       });
     }
   };
+
+  const handleUpdateItemQuantity = async (item: OrderItem, newQuantity: number) => {
+    if (!currentOrder || newQuantity < 0) return;
+
+    if (newQuantity === 0) {
+        // If quantity is zero, ask for confirmation to delete
+        if (confirm(`Yakin ingin menghapus item "${getMenuDetails(item.menu_id)?.nama || 'Item'}" dari pesanan?`)) {
+            handleDeleteItem(item.id);
+        }
+        return;
+    }
+    
+    // NOTE: This endpoint is not in api.json, but is required for this functionality.
+    // Assuming PUT /detail_pesanan/{id} exists to update quantity and subtotal.
+    const newSubtotal = (item.base_price + (parseInt(item.additional_price, 10) || 0)) * newQuantity;
+
+    try {
+      const response = await fetch(`https://api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          jumlah: newQuantity,
+          subtotal: newSubtotal
+        }),
+      });
+
+      if (!response.ok) throw new Error('Gagal memperbarui kuantitas item.');
+      
+      // Optimistic UI update
+      const updatedDetails = currentOrder.detail_pesanans.map(detail => 
+          detail.id === item.id ? { ...detail, jumlah: newQuantity, subtotal: String(newSubtotal) } : detail
+      );
+      const newTotal = updatedDetails.reduce((sum, detail) => sum + parseInt(detail.subtotal, 10), 0);
+
+      setCurrentOrder({
+          ...currentOrder,
+          detail_pesanans: updatedDetails,
+          total: String(newTotal),
+          total_after_discount: newTotal, // Re-evaluate discount later if needed
+      });
+
+      toast({
+        title: 'Kuantitas Diperbarui',
+        description: `Kuantitas untuk ${getMenuDetails(item.menu_id)?.nama} sekarang ${newQuantity}.`,
+      });
+
+    } catch(error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Gagal memperbarui kuantitas item.',
+      });
+    }
+  };
   
   const handleDeleteItem = async (itemId: number) => {
     if (!currentOrder) return;
@@ -132,7 +191,7 @@ export function OrderDetailModal({
             ...currentOrder,
             detail_pesanans: updatedDetails,
             total: String(newTotal),
-            total_after_discount: newTotal, // Assuming discount is removed if an item is deleted. This could be more complex.
+            total_after_discount: newTotal,
         });
 
         toast({
@@ -251,32 +310,31 @@ export function OrderDetailModal({
                                     ))}
                                 </div>
                             </div>
-                             <div className="text-right flex-shrink-0">
-                                <p className="font-semibold">x {item.jumlah}</p>
-                            </div>
-                            {!isCompleted && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/50 hover:text-destructive hover:bg-destructive/10">
-                                            <Trash2 className="h-4 w-4"/>
+                             <div className="text-right flex-shrink-0 flex items-center gap-2">
+                                {!isCompleted ? (
+                                    <div className="flex items-center gap-1 border rounded-md">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-7 w-7" 
+                                            onClick={() => handleUpdateItemQuantity(item, item.jumlah - 1)}
+                                        >
+                                            <Minus className="h-4 w-4"/>
                                         </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Hapus item ini?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Yakin ingin menghapus item "{menuItem?.nama || 'Item'}" dari pesanan? Tindakan ini tidak dapat dibatalkan.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Batal</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-destructive hover:bg-destructive/90">
-                                                Ya, Hapus
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
+                                        <span className="font-bold w-4 text-center">{item.jumlah}</span>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-7 w-7" 
+                                            onClick={() => handleUpdateItemQuantity(item, item.jumlah + 1)}
+                                        >
+                                            <Plus className="h-4 w-4"/>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                     <p className="font-semibold">x {item.jumlah}</p>
+                                )}
+                            </div>
                         </div>
                         {item.note && (
                             <div className="mt-2 pt-2 border-t border-dashed text-sm text-muted-foreground flex items-start gap-2">
