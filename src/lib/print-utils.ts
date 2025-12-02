@@ -136,10 +136,13 @@ const generateReceiptText = (
   });
   
   if (title === 'MAIN CHECKER') {
+      const unprintedMinumanItems = minumanItems.filter(item => item.printed === 0);
+      const itemsForMinumanSection = unprintedMinumanItems.length > 0 ? unprintedMinumanItems : minumanItems;
+
     // For MINUMAN section, only show new drinks if any exist.
-    if (minumanItems.length > 0) {
+    if (itemsForMinumanSection.length > 0) {
       receipt += "--- MINUMAN ---\n";
-      minumanItems.forEach(item => {
+      itemsForMinumanSection.forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem) return;
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
@@ -216,10 +219,16 @@ const generateReceiptText = (
       if (metodeLabel) {
         receipt += createLine("Metode", metodeLabel) + "\n";
       }
+    } else if (showPrices && !order.metode_pembayaran && title !== 'BILL') {
+        receipt += "--------------------------------\n";
+        receipt += "\x1B\x61\x01"; // Align center
+        receipt += "Sampai Jumpa" + "\n";
+        receipt += "Terima Kasih" + "\n";
+        receipt += "\x1B\x61\x00"; // Align left
     }
-    receipt += "--------------------------------\n";
-    
-    if (showPrices) {
+
+    if (showPrices && title !== 'BILL') {
+         receipt += "--------------------------------\n";
         receipt += "\x1B\x61\x01"; // Align center
         receipt += "Sampai Jumpa" + "\n";
         receipt += "Terima Kasih" + "\n";
@@ -229,7 +238,7 @@ const generateReceiptText = (
 
   receipt += "\n\n\n";
   receipt += "\x1D\x56\x41"; // Cut paper
-  if (showPrices) {
+  if (showPrices && title !== 'BILL' && title !== 'MAIN CHECKER') {
     receipt += "\x1B\x70\x00\x19\xFA"; // open drawer
   }
 
@@ -298,27 +307,42 @@ export const printOperationalStruk = async (
     
     const printQueue: { fn: () => void, title: string }[] = [];
     if(hasMakanan) printQueue.push({ fn: kitchenPrintFn, title: "Cetak Struk Dapur?" });
-    // Always add bar/main checker if there are any items to process (new or reprint)
     if(hasMinuman) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
 
     const runNextPrint = (index: number) => {
         if (index >= printQueue.length) return;
 
         const currentPrint = printQueue[index];
-        currentPrint.fn(); // Execute the print job immediately
+        const nextPrint = printQueue[index + 1];
 
-        // Check if there is a next print job in the queue
-        if (index + 1 < printQueue.length) {
-            // Use a short delay to allow the intent to fire, then show the confirmation dialog for the next job.
-            setTimeout(() => {
-                const nextPrint = printQueue[index + 1];
-                onNextPrint(() => runNextPrint(index + 1), nextPrint.title);
-            }, 500); 
+        if (nextPrint) {
+            // Show confirmation dialog that chains to the next print job
+            onNextPrint(() => {
+                currentPrint.fn(); // Print current
+                setTimeout(() => runNextPrint(index + 1), 500); // Queue up next after a delay
+            }, currentPrint.title);
+        } else {
+            // This is the last item, just print it directly or show a final confirmation
+             onNextPrint(() => {
+                currentPrint.fn();
+             }, currentPrint.title);
         }
     }
     
     if (printQueue.length > 0) {
-      runNextPrint(0);
+      const firstPrint = printQueue[0];
+       if (printQueue.length > 1) {
+            onNextPrint(() => {
+                firstPrint.fn();
+                // Use a short delay to allow the intent to fire, then show the confirmation dialog for the next job.
+                setTimeout(() => {
+                    const nextPrint = printQueue[1];
+                     onNextPrint(() => runNextPrint(1), nextPrint.title);
+                }, 500); 
+            }, firstPrint.title);
+       } else {
+            onNextPrint(firstPrint.fn, firstPrint.title);
+       }
     }
 
   } catch (error) {
@@ -341,5 +365,20 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additiona
     } catch(error) {
         console.error("Error printing payment receipt:", error);
         alert("Gagal mencetak struk pembayaran.");
+    }
+};
+
+export const printBillStruk = (order: Order, menuItems: MenuItem[], additionals: Additional[]) => {
+    try {
+        const receiptText = generateReceiptText(order, menuItems, {
+            title: "BILL",
+            showPrices: true,
+            itemsToPrint: order.detail_pesanans,
+            additionals: additionals,
+        });
+        printJob(receiptText);
+    } catch(error) {
+        console.error("Error printing bill:", error);
+        alert("Gagal mencetak bill.");
     }
 };

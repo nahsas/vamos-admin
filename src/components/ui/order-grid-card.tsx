@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { MapPin, FileText, Info, ArrowRight, Wallet, Bell } from 'lucide-react';
-import { printOperationalStruk } from '@/lib/print-utils';
+import { MapPin, FileText, Info, ArrowRight, Wallet, Bell, Printer } from 'lucide-react';
+import { printOperationalStruk, printBillStruk } from '@/lib/print-utils';
 import React from 'react';
 import {
   AlertDialog,
@@ -64,6 +64,10 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     } else {
       onUpdateStatus(order.id);
     }
+  }
+  
+  const handlePrintBill = () => {
+    printBillStruk(order, menuItems, additionals);
   }
 
   const handlePrintChecker = () => {
@@ -152,10 +156,14 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
               Rp {parseInt(order.total, 10).toLocaleString('id-ID')}
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <Button onClick={handlePrintChecker} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
               <FileText className="h-3 w-3" />
               Checker
+            </Button>
+             <Button onClick={handlePrintBill} size="sm" variant="outline" className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
+              <Printer className="h-3 w-3" />
+              Bill
             </Button>
             <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order)}>
               <Info className="h-3 w-3" />
