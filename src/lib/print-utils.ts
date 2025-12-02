@@ -26,6 +26,7 @@ interface ReceiptOptions {
     title: string;
     showPrices: boolean;
     itemsToPrint: OrderItem[];
+    allItemsForMainChecker?: OrderItem[]; // Specifically for the "SEMUA ITEM" list
     paymentAmount?: number;
     additionals: Additional[]; // Add this to pass additional names
 }
@@ -61,7 +62,7 @@ const generateReceiptText = (
     options: ReceiptOptions
 ): string => {
   
-  const { title, showPrices, itemsToPrint, paymentAmount, additionals } = options;
+  const { title, showPrices, itemsToPrint, allItemsForMainChecker, paymentAmount, additionals } = options;
 
   const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
@@ -135,8 +136,7 @@ const generateReceiptText = (
   });
   
   if (title === 'MAIN CHECKER') {
-    const allItems = [...minumanItems, ...makananItems];
-    
+    // For MINUMAN section, only show new drinks if any exist.
     if (minumanItems.length > 0) {
       receipt += "--- MINUMAN ---\n";
       minumanItems.forEach(item => {
@@ -150,8 +150,9 @@ const generateReceiptText = (
       receipt += "\n";
     }
     
+    // For SEMUA ITEM, always show all items from the original order
     receipt += "--- SEMUA ITEM ---\n";
-    allItems.forEach(item => {
+    (allItemsForMainChecker || order.detail_pesanans).forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem) return;
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
@@ -285,8 +286,9 @@ export const printOperationalStruk = async (
     const barPrintFn = () => {
         const receiptText = generateReceiptText(order, menuItems, {
             title: "MAIN CHECKER",
-            showPrices: false,
-            itemsToPrint: order.detail_pesanans, // Main checker gets all items
+            showPrices: true,
+            itemsToPrint: minumanItems,
+            allItemsForMainChecker: order.detail_pesanans, // Always pass all items for the "SEMUA ITEM" list
             additionals
         });
         printJob(receiptText);
@@ -296,8 +298,8 @@ export const printOperationalStruk = async (
     
     const printQueue: { fn: () => void, title: string }[] = [];
     if(hasMakanan) printQueue.push({ fn: kitchenPrintFn, title: "Cetak Struk Dapur?" });
-    // Always add bar/main checker if there are items, regardless of type
-    if(itemsToProcess.length > 0) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
+    // Always add bar/main checker if there are any items to process (new or reprint)
+    if(hasMinuman) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
 
     const runNextPrint = (index: number) => {
         if (index >= printQueue.length) return;
@@ -347,6 +349,7 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additiona
         alert("Gagal mencetak struk pembayaran.");
     }
 };
+
 
 
 
