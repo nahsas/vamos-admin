@@ -167,7 +167,7 @@ export function MenuForm({
         nama: values.nama,
         harga: Number(values.harga),
         kategori_id: values.kategori_id,
-        available_variants: values.available_variants ? JSON.stringify(values.available_variants) : null,
+        available_variants: values.available_variants || null,
         foto: imageUrl,
         stok: 1000,
         is_available: true,
