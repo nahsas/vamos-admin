@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --background: 210 29% 97%; /* #f7f9fa - Very Light Gray */
-    --foreground: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
-    --card: 0 0% 100%; /* #FFFFFF - White */
-    --card-foreground: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
-    --popover: 0 0% 100%; /* #FFFFFF - White */
-    --popover-foreground: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
+    --background: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
+    --foreground: 0 0% 98%; /* #fafafa - Almost White */
+    --card: 210 29% 15%; /* #223344 - Lighter Dark Blue-Gray */
+    --card-foreground: 0 0% 98%; /* #fafafa */
+    --popover: 210 29% 15%; /* #223344 */
+    --popover-foreground: 0 0% 98%; /* #fafafa */
     --primary: 34 83% 50%; /* #F5A623 - Orange Accent */
-    --primary-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --secondary: 0 0% 95%; /* #F2F2F2 - Light Gray */
-    --secondary-foreground: 210 29% 25%; /* #34495e - Slate Blue */
-    --muted: 0 0% 95%; /* #F2F2F2 - Light Gray */
-    --muted-foreground: 0 0% 40%; /* #666666 - Medium Gray */
-    --accent: 0 0% 97%; /* #F7F7F7 - Off-White */
-    --accent-foreground: 34 83% 50%; /* #F5A623 - Orange Accent */
+    --primary-foreground: 210 29% 10%; /* #1a252f */
+    --secondary: 210 29% 25%; /* #34495e - Slate Blue */
+    --secondary-foreground: 0 0% 98%; /* #fafafa */
+    --muted: 210 29% 25%; /* #34495e */
+    --muted-foreground: 0 0% 60%; /* #999999 - Lighter Gray for muted text */
+    --accent: 210 29% 25%; /* #34495e */
+    --accent-foreground: 0 0% 98%; /* #fafafa */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%; /* #E5E5E5 - Light Gray Border */
-    --input: 0 0% 93%; /* #EDEDED - Lighter Gray for input */
+    --border: 210 29% 20%; /* #2c3e50 */
+    --input: 210 29% 20%; /* #2c3e50 */
     --ring: 34 83% 50%; /* #F5A623 - Orange Accent */
     --chart-1: 34 83% 50%;
     --chart-2: 34 83% 60%;
