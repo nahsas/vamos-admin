@@ -14,7 +14,7 @@ import { useAuth } from "@/context/auth-context";
 
 function StatCard({ title, value, icon: Icon, description, bgColor = "bg-white", textColor = "text-black" }: { title:string, value:string, icon: React.ElementType, description: string, bgColor?: string, textColor?: string }) {
   return (
-    <Card className={cn("shadow-lg", bgColor, textColor)}>
+    <Card className={cn("shadow-lg rounded-xl", bgColor, textColor)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <div className="p-2 bg-black/10 rounded-md">
@@ -256,3 +256,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
