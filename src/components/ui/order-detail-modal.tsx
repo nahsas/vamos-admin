@@ -328,7 +328,7 @@ export function OrderDetailModal({
                 const menuItem = getMenuDetails(item.menu_id);
                 const addonNames = getAdditionalNames(item);
                 return (
-                    <div key={item.id} className="bg-slate-50 rounded-lg p-3">
+                    <div key={item.id} className="bg-card rounded-lg p-3">
                         <div className="flex justify-between items-start gap-4">
                            <div className="flex-1 space-y-1">
                                 <div className="font-bold flex items-center gap-2">
@@ -403,7 +403,7 @@ export function OrderDetailModal({
                 })}
             </div>
 
-            <div className="p-4 bg-slate-50 border-t rounded-b-lg space-y-4">
+            <div className="p-4 bg-background border-t rounded-b-lg space-y-4">
                 <div className="w-full flex justify-between items-center">
                     <div>
                         <p className="text-sm text-muted-foreground">Total Pembayaran:</p>
