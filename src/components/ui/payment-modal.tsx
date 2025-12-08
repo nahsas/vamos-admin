@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Order, MenuItem, Additional } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2 } from 'lucide-react';
+import { Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { printPaymentStruk } from '@/lib/print-utils';
@@ -389,7 +389,7 @@ export function PaymentModal({
         </div>
 
         <DialogFooter className="p-4 bg-background border-t grid grid-cols-2 gap-2">
-            <Button onClick={handleFinishPayment} variant="default" disabled={isLoading}>
+            <Button onClick={handleFinishPayment} variant="default" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {isLoading ? "Memproses..." : (
                     <>
                         <Check className="mr-2 h-4 w-4" />
