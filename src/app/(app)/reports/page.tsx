@@ -89,23 +89,21 @@ const PaymentBreakdownCard = ({
     amount,
     transactions,
     icon,
-    borderColor
 }: {
     title: string;
     amount: string;
     transactions: number | string;
     icon: React.ReactNode;
-    borderColor: string;
 }) => (
-    <Card className={cn("bg-card border-2", borderColor)}>
+    <Card className="bg-background/50">
         <CardContent className="p-4 flex flex-col gap-2">
             <div className="flex items-center gap-2">
-                <div className="p-2 bg-slate-100 rounded-md">
+                <div className="p-2 bg-primary/20 rounded-md text-primary-foreground">
                     {icon}
                 </div>
                 <div>
                     <p className="text-sm text-muted-foreground">{title}</p>
-                    <p className="font-bold text-primary">{amount}</p>
+                    <p className="font-bold text-primary-foreground">{amount}</p>
                 </div>
             </div>
             <p className="text-sm text-muted-foreground">{transactions} {typeof transactions === 'number' && 'transaksi'}</p>
@@ -781,18 +779,18 @@ export default function ReportsPage() {
 
         <div>
             <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-purple-100 rounded-md">
-                    <Wallet className="w-5 h-5 text-purple-600" />
+                <div className="p-2 bg-primary/20 rounded-md">
+                    <Wallet className="w-5 h-5 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold">Rincian Pembayaran</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <PaymentBreakdownCard title="Pitty Cash" amount={toRupiah(pittyCash)} transactions="Kas tetap" icon={<Wallet className="h-6 w-6 text-gray-500"/>} borderColor="border-gray-500" />
-                <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6 text-green-500"/>} borderColor="border-green-500" />
-                <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6 text-purple-500"/>} borderColor="border-purple-500" />
-                <PaymentBreakdownCard title="QRIS BCA" amount={toRupiah(paymentBreakdown.qris_bca.amount)} transactions={paymentBreakdown.qris_bca.count} icon={<Grip className="h-6 w-6 text-blue-500"/>} borderColor="border-blue-500" />
-                <PaymentBreakdownCard title="QRIS BRI" amount={toRupiah(paymentBreakdown.qris_bri.amount)} transactions={paymentBreakdown.qris_bri.count} icon={<Grip className="h-6 w-6 text-sky-500"/>} borderColor="border-sky-500" />
-                <PaymentBreakdownCard title="QRIS BSI" amount={toRupiah(paymentBreakdown.qris_bsi.amount)} transactions={paymentBreakdown.qris_bsi.count} icon={<Grip className="h-6 w-6 text-orange-500"/>} borderColor="border-orange-500" />
+                <PaymentBreakdownCard title="Pitty Cash" amount={toRupiah(pittyCash)} transactions="Kas tetap" icon={<Wallet className="h-6 w-6"/>} />
+                <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6"/>} />
+                <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6"/>} />
+                <PaymentBreakdownCard title="QRIS BCA" amount={toRupiah(paymentBreakdown.qris_bca.amount)} transactions={paymentBreakdown.qris_bca.count} icon={<Grip className="h-6 w-6"/>} />
+                <PaymentBreakdownCard title="QRIS BRI" amount={toRupiah(paymentBreakdown.qris_bri.amount)} transactions={paymentBreakdown.qris_bri.count} icon={<Grip className="h-6 w-6"/>} />
+                <PaymentBreakdownCard title="QRIS BSI" amount={toRupiah(paymentBreakdown.qris_bsi.amount)} transactions={paymentBreakdown.qris_bsi.count} icon={<Grip className="h-6 w-6"/>} />
             </div>
         </div>
       </div>
@@ -863,3 +861,4 @@ export default function ReportsPage() {
     
 
     
+
