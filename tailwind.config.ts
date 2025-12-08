@@ -66,6 +66,9 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+      backgroundImage: {
+        'main-gradient': 'linear-gradient(to bottom right, #2c3e50, #34495e, #1a252f)',
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

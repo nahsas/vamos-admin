@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%; /* #000000 - Black */
+    --background: 210 29% 19%; /* #2c3e50 */
     --foreground: 0 0% 100%; /* #FFFFFF - White */
-    --card: 0 0% 18%; /* #2E2E2E - Medium Gray */
+    --card: 210 22% 28%; /* #34495e */
     --card-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --popover: 0 0% 10%; /* #1A1A1A - Dark Gray */
+    --popover: 210 29% 15%; /* #1a252f */
     --popover-foreground: 0 0% 100%; /* #FFFFFF - White */
     --primary: 147 83% 34%; /* #0F9D58 - Green Accent */
     --primary-foreground: 0 0% 100%; /* #FFFFFF - White */
@@ -37,9 +37,6 @@
     --sidebar-border: 0 0% 18%; /* #2E2E2E - Medium Gray */
     --sidebar-ring: 147 83% 34%; /* #0F9D58 - Green Accent */
   }
-  .dark {
-    /* Kept empty as the dark theme is now the default */
-  }
 }
 
 @layer base {
@@ -47,7 +44,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-[#2c3e50] via-[#34495e] to-[#1a252f] text-foreground;
   }
 }
 
