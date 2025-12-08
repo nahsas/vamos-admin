@@ -4,38 +4,38 @@
 
 @layer base {
   :root {
-    --background: 210 29% 19%; /* #2c3e50 */
-    --foreground: 0 0% 100%; /* #FFFFFF - White */
-    --card: 210 22% 28%; /* #34495e */
-    --card-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --popover: 210 29% 15%; /* #1a252f */
-    --popover-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --primary: 147 83% 34%; /* #0F9D58 - Green Accent */
+    --background: 210 29% 97%; /* #f7f9fa - Very Light Gray */
+    --foreground: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
+    --card: 0 0% 100%; /* #FFFFFF - White */
+    --card-foreground: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
+    --popover: 0 0% 100%; /* #FFFFFF - White */
+    --popover-foreground: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
+    --primary: 34 83% 50%; /* #F5A623 - Orange Accent */
     --primary-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --secondary: 0 0% 18%; /* #2E2E2E - Medium Gray */
-    --secondary-foreground: 0 0% 74%; /* #BDBDBD - Light Gray */
-    --muted: 0 0% 18%; /* #2E2E2E - Medium Gray */
-    --muted-foreground: 0 0% 74%; /* #BDBDBD - Light Gray */
-    --accent: 0 0% 18%; /* #2E2E2E - Medium Gray */
-    --accent-foreground: 0 0% 100%; /* #FFFFFF - White */
+    --secondary: 0 0% 95%; /* #F2F2F2 - Light Gray */
+    --secondary-foreground: 210 29% 25%; /* #34495e - Slate Blue */
+    --muted: 0 0% 95%; /* #F2F2F2 - Light Gray */
+    --muted-foreground: 0 0% 40%; /* #666666 - Medium Gray */
+    --accent: 0 0% 97%; /* #F7F7F7 - Off-White */
+    --accent-foreground: 34 83% 50%; /* #F5A623 - Orange Accent */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 25%; /* Slightly lighter gray for borders */
-    --input: 0 0% 18%; /* #2E2E2E - Medium Gray */
-    --ring: 147 83% 34%; /* #0F9D58 - Green Accent */
-    --chart-1: 147 83% 34%;
-    --chart-2: 147 83% 44%;
-    --chart-3: 147 83% 54%;
-    --chart-4: 147 83% 64%;
-    --chart-5: 147 83% 74%;
-    --sidebar-background: 0 0% 10%; /* #1A1A1A - Dark Gray */
+    --border: 0 0% 90%; /* #E5E5E5 - Light Gray Border */
+    --input: 0 0% 93%; /* #EDEDED - Lighter Gray for input */
+    --ring: 34 83% 50%; /* #F5A623 - Orange Accent */
+    --chart-1: 34 83% 50%;
+    --chart-2: 34 83% 60%;
+    --chart-3: 34 83% 70%;
+    --chart-4: 34 83% 80%;
+    --chart-5: 34 83% 90%;
+    --sidebar-background: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
     --sidebar-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --sidebar-primary: 147 83% 34%; /* #0F9D58 - Green Accent */
+    --sidebar-primary: 34 83% 50%; /* #F5A623 - Orange Accent */
     --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --sidebar-accent: 0 0% 18%; /* #2E2E2E - Medium Gray */
+    --sidebar-accent: 210 29% 15%; /* #223344 - Slightly lighter dark blue */
     --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --sidebar-border: 0 0% 18%; /* #2E2E2E - Medium Gray */
-    --sidebar-ring: 147 83% 34%; /* #0F9D58 - Green Accent */
+    --sidebar-border: 210 29% 15%; /* #223344 */
+    --sidebar-ring: 34 83% 50%; /* #F5A623 - Orange Accent */
   }
 }
 
