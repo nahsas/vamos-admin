@@ -10,8 +10,8 @@
     --card-foreground: 0 0% 98%; /* #fafafa */
     --popover: 210 29% 15%; /* #223344 */
     --popover-foreground: 0 0% 98%; /* #fafafa */
-    --primary: 34 83% 50%; /* #F5A623 - Orange Accent */
-    --primary-foreground: 210 29% 10%; /* #1a252f */
+    --primary: 210 100% 50%; /* #007BFF - Vibrant Blue */
+    --primary-foreground: 0 0% 100%; /* #ffffff - White */
     --secondary: 210 29% 25%; /* #34495e - Slate Blue */
     --secondary-foreground: 0 0% 98%; /* #fafafa */
     --muted: 210 29% 25%; /* #34495e */
@@ -22,20 +22,20 @@
     --destructive-foreground: 0 0% 98%;
     --border: 210 29% 20%; /* #2c3e50 */
     --input: 210 29% 20%; /* #2c3e50 */
-    --ring: 34 83% 50%; /* #F5A623 - Orange Accent */
-    --chart-1: 34 83% 50%;
-    --chart-2: 34 83% 60%;
-    --chart-3: 34 83% 70%;
-    --chart-4: 34 83% 80%;
-    --chart-5: 34 83% 90%;
+    --ring: 210 100% 50%; /* #007BFF - Vibrant Blue */
+    --chart-1: 210 100% 50%;
+    --chart-2: 210 100% 60%;
+    --chart-3: 210 100% 70%;
+    --chart-4: 210 100% 80%;
+    --chart-5: 210 100% 90%;
     --sidebar-background: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
     --sidebar-foreground: 0 0% 100%; /* #FFFFFF - White */
-    --sidebar-primary: 34 83% 50%; /* #F5A623 - Orange Accent */
+    --sidebar-primary: 210 100% 50%; /* #007BFF - Vibrant Blue */
     --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF - White */
     --sidebar-accent: 210 29% 15%; /* #223344 - Slightly lighter dark blue */
     --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF - White */
     --sidebar-border: 210 29% 15%; /* #223344 */
-    --sidebar-ring: 34 83% 50%; /* #F5A623 - Orange Accent */
+    --sidebar-ring: 210 100% 50%; /* #007BFF - Vibrant Blue */
   }
 }
 
