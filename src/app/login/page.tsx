@@ -40,8 +40,8 @@ export default function LoginPage() {
             <div className="flex justify-center items-center mb-2">
                 <Image src="https://api.sejadikopi.com/storage/Logo/sejadi_logo.jpg" alt="Sejadi Kopi Logo" width={80} height={80} className="rounded-full shadow-lg" unoptimized />
             </div>
-          <CardTitle className="text-3xl font-bold font-headline">SejadiKopi</CardTitle>
-          <CardDescription>Masukkan kredensial Anda untuk mengakses dasbor</CardDescription>
+          <CardTitle className="text-3xl font-bold font-headline">Vamos</CardTitle>
+          <CardDescription>Masukkan kredensial Anda untuk mengakses dashboard</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -50,7 +50,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@sejadikopi.com"
+                placeholder="enter your email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -79,7 +79,7 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter>
-           <p className="text-xs text-muted-foreground text-center w-full">© 2024 SejadiKopi. Hak cipta dilindungi.</p>
+           <p className="text-xs text-muted-foreground text-center w-full">© 2025 Vamos. Hak cipta dilindungi.</p>
         </CardFooter>
       </Card>
     </div>

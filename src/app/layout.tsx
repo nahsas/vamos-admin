@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
-  title: 'SejadiKopi',
-  description: 'SejadiKopi - Coffee Shop Management',
+  title: 'Vamos',
+  description: 'Vamos - Coffee Shop Management',
   manifest: '/manifest.webmanifest',
 };
 
