@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -298,10 +297,10 @@ export function OrderDetailModal({
                     : currentOrder.no_meja}
                 </DialogTitle>
               </div>
-              <DialogClose className="absolute right-4 top-4 rounded-full p-1 bg-white/20 text-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <Button variant="ghost" size="icon" className="absolute right-4 top-4 rounded-full p-1 bg-white/20 text-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" onClick={() => onOpenChange(false)}>
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
-              </DialogClose>
+              </Button>
               <div className="flex items-center gap-2 text-sm pt-2">
                 <Badge variant="secondary" className="bg-black/20 text-white">
                   {format(new Date(currentOrder.created_at), 'HH:mm - dd MMM yyyy', {
@@ -340,7 +339,16 @@ export function OrderDetailModal({
                                     )}
                                 </div>
                                 <div className="flex items-center gap-1 flex-wrap">
-                                    {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
+                                    {item.varian && (
+                                    <Badge
+                                        className={cn(
+                                        "text-xs text-white",
+                                        item.varian.toLowerCase() === 'hot' ? 'bg-red-500' : 'bg-blue-500'
+                                        )}
+                                    >
+                                        {item.varian}
+                                    </Badge>
+                                    )}
                                     {addonNames.map((add, index) => (
                                         <Badge key={index} variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
                                             <PlusCircle className="mr-1 h-3 w-3" />
@@ -468,5 +476,3 @@ export function OrderDetailModal({
     </>
   );
 }
-
-    
