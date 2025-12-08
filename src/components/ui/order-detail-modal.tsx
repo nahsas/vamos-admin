@@ -331,7 +331,7 @@ export function OrderDetailModal({
                     <div key={item.id} className="bg-slate-50 rounded-lg p-3">
                         <div className="flex justify-between items-start gap-4">
                            <div className="flex-1 space-y-1">
-                                <p className="font-bold flex items-center gap-2">
+                                <div className="font-bold flex items-center gap-2">
                                     {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
                                      {item.printed === 0 && !isCompleted && (
                                       <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
@@ -339,7 +339,7 @@ export function OrderDetailModal({
                                           BARU
                                       </Badge>
                                     )}
-                                </p>
+                                </div>
                                 <div className="flex items-center gap-1 flex-wrap">
                                     {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
                                     {addonNames.map((add, index) => (
