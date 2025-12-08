@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -389,7 +388,7 @@ export function PaymentModal({
             )}
         </div>
 
-        <DialogFooter className="p-4 bg-slate-50 border-t grid grid-cols-2 gap-2">
+        <DialogFooter className="p-4 bg-background border-t grid grid-cols-2 gap-2">
             <Button onClick={handleFinishPayment} className="bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
                 {isLoading ? "Memproses..." : (
                     <>
@@ -398,16 +397,12 @@ export function PaymentModal({
                     </>
                 )}
             </Button>
-             <DialogClose asChild>
-                <Button variant="secondary" className="bg-gray-300 text-gray-800 hover:bg-gray-400" disabled={isLoading}>
+            <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={isLoading}>
                     <X className="mr-2 h-4 w-4" />
                     Batal
-                </Button>
-             </DialogClose>
+            </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-    
