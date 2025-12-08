@@ -39,7 +39,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 
 const mainNavItems = [
-  { href: "/", label: "Dasbor", icon: LayoutDashboard, roles: ['admin', 'kasir'] },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, roles: ['admin', 'kasir'] },
   { href: "/orders", label: "Pesanan", icon: ShoppingCart, roles: ['admin', 'kasir'] },
   { href: "/history", label: "Riwayat", icon: History, roles: ['admin', 'kasir'] },
 ];
