@@ -304,7 +304,7 @@ export function OrderDetailModal({
                 <span className="sr-only">Close</span>
               </DialogClose>
               <div className="flex items-center gap-2 text-sm pt-2">
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="bg-black/20 text-white">
                   {format(new Date(currentOrder.created_at), 'HH:mm - dd MMM yyyy', {
                     locale: id,
                   })}
@@ -315,7 +315,7 @@ export function OrderDetailModal({
                   {statusConfig[currentOrder.status.toLowerCase()]?.label}
                 </Badge>
                 {currentOrder.location_area && (
-                  <Badge variant="outline" className="bg-white/20 border-white/50 text-white">
+                  <Badge variant="outline" className="bg-black/20 text-white border-white/50">
                     <MapPin className="mr-1 h-3 w-3" />
                     {currentOrder.location_area}
                   </Badge>
