@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -341,7 +340,7 @@ export function OrderDetailModal({
                                     )}
                                 </div>
                                 <div className="flex items-center gap-1 flex-wrap">
-                                    {item.varian && <Badge variant="secondary" className="text-xs">{item.varian}</Badge>}
+                                    {item.varian && <Badge variant="outline" className="text-xs bg-gray-200 text-gray-800">{item.varian}</Badge>}
                                     {addonNames.map((add, index) => (
                                         <Badge key={index} variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
                                             <PlusCircle className="mr-1 h-3 w-3" />
@@ -469,3 +468,5 @@ export function OrderDetailModal({
     </>
   );
 }
+
+    
