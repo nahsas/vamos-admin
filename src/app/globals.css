@@ -4,40 +4,6 @@
 
 @layer base {
   :root {
-    --background: 36 100% 97%; /* #FFFAF0 - Creamy white */
-    --foreground: 25 30% 20%; /* Darker brown */
-    --card: 36 60% 95%; /* Slightly off-white */
-    --card-foreground: 25 30% 20%;
-    --popover: 36 100% 97%;
-    --popover-foreground: 25 30% 20%;
-    --primary: 25 30% 37%; /* #6F4E37 - Coffee brown */
-    --primary-foreground: 40 100% 97%; /* Creamy white */
-    --secondary: 36 33% 94%; /* Lighter cream */
-    --secondary-foreground: 25 30% 25%;
-    --muted: 36 33% 94%;
-    --muted-foreground: 25 30% 40%;
-    --accent: 36 33% 92%; /* Slightly darker cream */
-    --accent-foreground: 25 30% 15%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 36 33% 88%;
-    --input: 36 33% 88%;
-    --ring: 25 30% 37%;
-    --chart-1: 25 30% 37%;
-    --chart-2: 25 40% 50%;
-    --chart-3: 25 50% 60%;
-    --chart-4: 25 60% 70%;
-    --chart-5: 25 70% 80%;
-    --sidebar-background: 28 55% 96%; /* Even creamier */
-    --sidebar-foreground: 25 30% 20%;
-    --sidebar-primary: 25 30% 37%;
-    --sidebar-primary-foreground: 40 100% 97%;
-    --sidebar-accent: 36 33% 90%;
-    --sidebar-accent-foreground: 25 30% 15%;
-    --sidebar-border: 36 33% 88%;
-    --sidebar-ring: 25 30% 37%;
-  }
-  .dark {
     --background: 0 0% 0%; /* #000000 - Black */
     --foreground: 0 0% 100%; /* #FFFFFF - White */
     --card: 0 0% 18%; /* #2E2E2E - Medium Gray */
@@ -54,7 +20,7 @@
     --accent-foreground: 0 0% 100%; /* #FFFFFF - White */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%; /* #2E2E2E - Medium Gray */
+    --border: 0 0% 25%; /* Slightly lighter gray for borders */
     --input: 0 0% 18%; /* #2E2E2E - Medium Gray */
     --ring: 147 83% 34%; /* #0F9D58 - Green Accent */
     --chart-1: 147 83% 34%;
@@ -71,6 +37,9 @@
     --sidebar-border: 0 0% 18%; /* #2E2E2E - Medium Gray */
     --sidebar-ring: 147 83% 34%; /* #0F9D58 - Green Accent */
   }
+  .dark {
+    /* Kept empty as the dark theme is now the default */
+  }
 }
 
 @layer base {
@@ -85,6 +54,6 @@
 @layer utilities {
   .login-bg {
     @apply bg-cover bg-center bg-no-repeat;
-    background-image: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1558226023-1c34a5692695?q=80&w=2070&auto=format&fit=crop');
+    background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1614704094191-236f3a35ce30?q=80&w=2070&auto=format&fit=crop');
   }
 }
