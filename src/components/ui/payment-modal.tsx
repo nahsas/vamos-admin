@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Order, MenuItem, Additional } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { X, Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2 } from 'lucide-react';
+import { Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { printPaymentStruk } from '@/lib/print-utils';
@@ -216,25 +216,25 @@ export function PaymentModal({
         </DialogHeader>
 
         <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 space-y-2">
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 space-y-2">
              <div className="flex justify-between items-center text-sm">
-                <span className="font-medium text-yellow-800">Subtotal:</span>
-                <span className="text-yellow-900">
+                <span className="font-medium text-foreground/80">Subtotal:</span>
+                <span className="text-foreground">
                 Rp {orderTotal.toLocaleString('id-ID')}
                 </span>
             </div>
             {appliedDiscount && (
-                 <div className="flex justify-between items-center text-sm text-red-600">
+                 <div className="flex justify-between items-center text-sm text-red-400">
                     <span className="font-medium">Diskon ({appliedDiscount.code}):</span>
                     <span>
                     - Rp {appliedDiscount.amount.toLocaleString('id-ID')}
                     </span>
                 </div>
             )}
-            <div className="border-t border-yellow-200 border-dashed my-1"></div>
+            <div className="border-t border-primary/20 border-dashed my-1"></div>
             <div className="flex justify-between items-center">
-                <span className="font-medium text-yellow-800">Total Pembayaran:</span>
-                <span className="font-bold text-xl text-yellow-900">
+                <span className="font-medium text-foreground/80">Total Pembayaran:</span>
+                <span className="font-bold text-xl text-primary-foreground">
                 Rp {displayTotal.toLocaleString('id-ID')}
                 </span>
             </div>
@@ -316,7 +316,7 @@ export function PaymentModal({
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-sm">
                         {quickAddAmounts.map(amount => (
-                            <Button key={amount} variant="outline" size="sm" onClick={() => handleQuickAdd(amount)} className="bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100">
+                            <Button key={amount} variant="outline" size="sm" onClick={() => handleQuickAdd(amount)} className="bg-secondary hover:bg-secondary/80">
                                 +Rp {amount.toLocaleString('id-ID')}
                             </Button>
                         ))}
@@ -353,7 +353,7 @@ export function PaymentModal({
                                     )}
                                 >
                                     <Image src={bank.logo} alt={bank.name} width={60} height={24} className="object-contain" unoptimized />
-                                    <span className="text-sm font-medium">{bank.name}</span>
+                                    <span className="text-sm font-medium text-gray-800">{bank.name}</span>
                                 </button>
                             ))}
                         </div>
@@ -389,7 +389,7 @@ export function PaymentModal({
         </div>
 
         <DialogFooter className="p-4 bg-background border-t grid grid-cols-2 gap-2">
-            <Button onClick={handleFinishPayment} className="bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
+            <Button onClick={handleFinishPayment} variant="default" disabled={isLoading}>
                 {isLoading ? "Memproses..." : (
                     <>
                         <Check className="mr-2 h-4 w-4" />
@@ -398,7 +398,6 @@ export function PaymentModal({
                 )}
             </Button>
             <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                    <X className="mr-2 h-4 w-4" />
                     Batal
             </Button>
         </DialogFooter>
