@@ -36,22 +36,28 @@ const updatePrintedStatus = (items: OrderItem[]) => {
   if (unprintedItems.length === 0) return;
 
   // Fire-and-forget: Don't await the promises here to avoid blocking the UI
-  for (const item of unprintedItems) {
-      fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+  const updatePromises = unprintedItems.map(item =>
+    fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ printed: 1 }),
-      }).then(response => {
+    }).then(response => {
         if (!response.ok) {
-           console.error(`Gagal update status print untuk item ${item.id}`);
-        } else {
-            // After all updates, emit an event to refresh data
-            appEventEmitter.emit('new-order');
+            console.error(`Gagal update status print untuk item ${item.id}`);
         }
-      }).catch(error => {
-         console.error(`Gagal update status print untuk item ${item.id}:`, error);
-      });
-  }
+        return response.ok;
+    }).catch(error => {
+        console.error(`Gagal update status print untuk item ${item.id}:`, error);
+        return false;
+    })
+  );
+
+  Promise.all(updatePromises).then(results => {
+    // If at least one update was successful, emit an event to refresh data
+    if (results.some(success => success)) {
+        appEventEmitter.emit('new-order');
+    }
+  });
 };
 
 
@@ -124,23 +130,11 @@ const generateReceiptText = (
   }
 
   // --- Items ---
-  const makananItems = itemsToPrint.filter(item => {
-    const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-    return menuItem?.kategori_struk === 'makanan';
-  });
-
-  const minumanItems = itemsToPrint.filter(item => {
-    const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-    return menuItem?.kategori_struk === 'minuman';
-  });
-  
   if (title === 'MAIN CHECKER') {
-    const itemsForMinumanSection = minumanItems;
-
     // For MINUMAN section, only show new drinks if any exist.
-    if (itemsForMinumanSection.length > 0) {
-      receipt += "--- MINUMAN ---\n";
-      itemsForMinumanSection.forEach(item => {
+    if (itemsToPrint.length > 0) {
+      receipt += "--- MINUMAN BARU ---\n";
+      itemsToPrint.forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem) return;
         let itemName = `${item.jumlah}x ${menuItem.nama}`;
@@ -251,94 +245,62 @@ const printJob = (receiptContent: string) => {
     window.location.href = url;
 };
 
-export const printOperationalStruk = (
-  order: Order, 
+export const printKitchenStruk = (
+  order: Order,
   menuItems: MenuItem[],
-  additionals: Additional[], // Pass additionals here
-  onNextPrint: (nextPrintFn: (() => void), title: string) => void
+  additionals: Additional[]
 ) => {
   try {
-    const unprintedItems = order.detail_pesanans.filter(item => item.printed === 0);
-    let itemsToProcess: OrderItem[];
-
-    // If there are unprinted items, process only them. Otherwise, process all items (for re-printing).
-    itemsToProcess = unprintedItems.length > 0 ? unprintedItems : order.detail_pesanans;
-    
-    if (itemsToProcess.length === 0) {
-      return;
-    }
-
-    const makananItems = itemsToProcess.filter(item => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        return menuItem?.kategori_struk === 'makanan';
-    });
-
-    const minumanItems = itemsToProcess.filter(item => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        return menuItem?.kategori_struk === 'minuman';
+    const unprintedFood = order.detail_pesanans.filter(item => {
+      const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+      return item.printed === 0 && menuItem?.kategori_struk === 'makanan';
     });
     
-    const hasMakanan = makananItems.length > 0;
-    const hasMinuman = minumanItems.length > 0;
-
-    const kitchenPrintFn = () => {
-        const receiptText = generateReceiptText(order, menuItems, {
-            title: "CHECKER DAPUR",
-            showPrices: false,
-            itemsToPrint: makananItems,
-            additionals
-        });
-        printJob(receiptText);
-        updatePrintedStatus(makananItems);
+    if (unprintedFood.length > 0) {
+      const receiptText = generateReceiptText(order, menuItems, {
+        title: "CHECKER DAPUR",
+        showPrices: false,
+        itemsToPrint: unprintedFood,
+        additionals,
+      });
+      printJob(receiptText);
+      updatePrintedStatus(unprintedFood);
+    } else {
+        alert("Tidak ada item makanan baru untuk dicetak.");
     }
-    
-    const barPrintFn = () => {
-        const unprintedMinuman = minumanItems.filter(item => item.printed === 0);
-        const itemsToPrintForBar = unprintedMinuman.length > 0 ? unprintedMinuman : minumanItems;
+  } catch(e) {
+      console.error("Error printing kitchen receipt:", e);
+      alert("Gagal mencetak struk dapur.");
+  }
+};
 
-        const receiptText = generateReceiptText(order, menuItems, {
-            title: "MAIN CHECKER",
-            showPrices: true,
-            itemsToPrint: itemsToPrintForBar,
-            allItemsForMainChecker: order.detail_pesanans, // Always pass all items for the "SEMUA ITEM" list
-            additionals
-        });
-        printJob(receiptText);
-        updatePrintedStatus(minumanItems); 
+export const printMainCheckerStruk = (
+  order: Order,
+  menuItems: MenuItem[],
+  additionals: Additional[]
+) => {
+  try {
+    const unprintedDrinks = order.detail_pesanans.filter(item => {
+      const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+      return item.printed === 0 && menuItem?.kategori_struk === 'minuman';
+    });
+
+    if (unprintedDrinks.length > 0) {
+      const receiptText = generateReceiptText(order, menuItems, {
+        title: "MAIN CHECKER",
+        showPrices: true,
+        itemsToPrint: unprintedDrinks,
+        allItemsForMainChecker: order.detail_pesanans, // Always pass all items
+        additionals,
+      });
+      printJob(receiptText);
+      updatePrintedStatus(unprintedDrinks);
+    } else {
+        alert("Tidak ada item minuman baru untuk dicetak.");
     }
-    
-    const printQueue: { fn: () => void, title: string }[] = [];
-    if(hasMakanan) printQueue.push({ fn: kitchenPrintFn, title: "Cetak Struk Dapur?" });
-    if(hasMinuman) printQueue.push({ fn: barPrintFn, title: "Cetak Struk Bar/Checker?" });
-
-    const runNextPrint = (index: number) => {
-        if (index >= printQueue.length) return; // Stop when queue is empty
-
-        const currentPrint = printQueue[index];
-        const nextPrint = printQueue[index + 1];
-
-        // This is the last job in the queue, just confirm and print.
-        onNextPrint(() => {
-            currentPrint.fn(); // Print the current job
-            // If there's a next job, trigger it automatically after a short delay
-            if (nextPrint) {
-                setTimeout(() => runNextPrint(index + 1), 500); 
-            }
-        }, currentPrint.title);
-    }
-    
-    if (printQueue.length > 1) {
-        // If there are multiple jobs, we start the chain with confirmation
-        runNextPrint(0);
-    } else if (printQueue.length === 1) {
-        // If there's only one job, just print it directly without confirmation chaining
-        const job = printQueue[0];
-        job.fn();
-    }
-
-  } catch (error) {
-    console.error("Error printing receipt:", error);
-    alert("Gagal mencetak struk. Pastikan aplikasi RawBT terinstall.");
+  } catch(e) {
+      console.error("Error printing main checker receipt:", e);
+      alert("Gagal mencetak main checker.");
   }
 };
 

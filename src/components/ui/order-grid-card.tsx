@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { MapPin, FileText, Info, ArrowRight, Wallet, Bell, Printer } from 'lucide-react';
-import { printOperationalStruk, printBillStruk } from '@/lib/print-utils';
+import { printKitchenStruk, printMainCheckerStruk, printBillStruk } from '@/lib/print-utils';
 import React from 'react';
 import {
   AlertDialog,
@@ -21,7 +21,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 const statusConfig: {
   [key: string]: {
@@ -39,8 +49,9 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'diproses';
   
-  const [showSequentialPrintDialog, setShowSequentialPrintDialog] = React.useState(false);
-  const [sequentialPrintJob, setSequentialPrintJob] = React.useState<{ fn: (() => void) | null, title: string }>({ fn: null, title: '' });
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
+  const [printType, setPrintType] = React.useState<'main' | 'kitchen' | ''>('');
+  
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
 
   React.useEffect(() => {
@@ -70,20 +81,14 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     printBillStruk(order, menuItems, additionals);
   }
 
-  const handlePrintChecker = () => {
-    printOperationalStruk(order, menuItems, additionals, (nextPrintFn, title) => {
-        setSequentialPrintJob({ fn: nextPrintFn, title });
-        setShowSequentialPrintDialog(true);
-    });
-  };
-  
-  const executeSequentialPrint = () => {
-    if (sequentialPrintJob.fn) {
-        sequentialPrintJob.fn();
+  const handleConfirmPrint = () => {
+    if (printType === 'main') {
+      printMainCheckerStruk(order, menuItems, additionals);
+    } else if (printType === 'kitchen') {
+      printKitchenStruk(order, menuItems, additionals);
     }
-    // This will close the current dialog, and the next call to onNextPrint inside printOperationalStruk will open a new one if needed.
-    setShowSequentialPrintDialog(false); 
-    setSequentialPrintJob({ fn: null, title: '' });
+    setIsPrintDialogOpen(false);
+    setPrintType('');
   };
 
 
@@ -166,7 +171,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
             </span>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            <Button onClick={handlePrintChecker} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" disabled={!hasNewItems}>
+            <Button onClick={() => setIsPrintDialogOpen(true)} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" disabled={!hasNewItems}>
               <FileText className="h-3 w-3" />
               Checker
             </Button>
@@ -184,8 +189,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                     "w-full text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1",
                     isProcessing ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"
                 )} 
-                onClick={handleActionClick} 
-                disabled={order.status.toLowerCase() === 'pending' && false}
+                onClick={handleActionClick}
             >
               {isProcessing ? (
                 <>
@@ -203,22 +207,29 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
         </div>
       </CardContent>
     </Card>
-    <AlertDialog open={showSequentialPrintDialog} onOpenChange={setShowSequentialPrintDialog}>
-        <AlertDialogContent>
-        <AlertDialogHeader>
-            <AlertDialogTitle>{sequentialPrintJob.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-            Struk sebelumnya telah dikirim. Apakah Anda ingin melanjutkan untuk mencetak struk berikutnya?
-            </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowSequentialPrintDialog(false)}>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={executeSequentialPrint}>
-            Ya, Lanjutkan Mencetak
-            </AlertDialogAction>
-        </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
+    <Dialog open={isPrintDialogOpen} onOpenChange={setIsPrintDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Which checker do you want to print?</DialogTitle>
+                <DialogDescription>
+                    Select the type of checker you want to print. This will mark the items as printed.
+                </DialogDescription>
+            </DialogHeader>
+            <Select onValueChange={(value) => setPrintType(value as 'main' | 'kitchen')}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select checker type" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="main">Main Checker</SelectItem>
+                    <SelectItem value="kitchen">Kitchen Checker</SelectItem>
+                </SelectContent>
+            </Select>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsPrintDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleConfirmPrint} disabled={!printType}>Print</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
     </>
   );
 }
