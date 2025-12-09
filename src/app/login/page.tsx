@@ -35,10 +35,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen login-bg px-4">
-      <Card className="w-full max-w-sm shadow-xl bg-card/80 backdrop-blur-sm border-white/20">
+      <Card className="w-full max-w-sm shadow-xl bg-card/80 backdrop-blur-sm border-white/20 rounded-2xl">
         <CardHeader className="text-center space-y-2">
             <div className="flex justify-center items-center mb-2">
-                <Image src="https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png" alt="Vamos Logo" width={80} height={80} className="rounded-lg shadow-lg" unoptimized />
+                <Image src="https://api.sejadikopi.com/storage/Logo/vamos.png" alt="Vamos Logo" width={80} height={80} className="rounded-lg shadow-lg" unoptimized />
             </div>
           <CardTitle className="text-3xl font-bold font-headline">Vamos</CardTitle>
           <CardDescription>Masukkan kredensial Anda untuk mengakses dashboard</CardDescription>

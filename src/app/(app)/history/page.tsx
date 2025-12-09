@@ -48,7 +48,7 @@ function StatCard({
   iconColor: string;
 }) {
   return (
-    <Card className="shadow-md">
+    <Card className="shadow-md rounded-xl">
       <CardContent className="p-4 flex items-center gap-4">
         <div className={`p-3 rounded-md ${bgColor}`}>
           <Icon className={`w-8 h-8 ${iconColor}`} />
@@ -88,7 +88,7 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
   }
 
   return (
-    <Card className={cn("shadow-md border-l-4 flex flex-col", statusBorder[order.status.toLowerCase()])}>
+    <Card className={cn("shadow-md border-l-4 flex flex-col rounded-xl", statusBorder[order.status.toLowerCase()])}>
       <CardContent className="p-4 space-y-4 flex-grow">
         <div className="flex justify-between items-start">
           <div>
@@ -282,7 +282,7 @@ export default function HistoryPage() {
         </Button>
       </div>
 
-      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm font-medium px-4 py-2 rounded-md flex items-center gap-2">
+      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm font-medium px-4 py-2 rounded-xl flex items-center gap-2">
         <Calendar className="h-4 w-4" />
         <span>Hari ini: {format(new Date(), "dd MMMM yyyy", { locale: id })}</span>
       </div>
@@ -325,7 +325,7 @@ export default function HistoryPage() {
 
        {loading && <div className="text-center p-8">Memuat data riwayat...</div>}
        {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md flex items-center gap-3">
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-xl flex items-center gap-3">
                 <AlertTriangle className="h-6 w-6"/>
                 <div>
                     <p className="font-bold">Gagal memuat data</p>

@@ -89,7 +89,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
 
   return (
     <>
-    <Card className={cn("shadow-lg border-2", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
+    <Card className={cn("shadow-lg border-2 rounded-xl", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
       <CardContent className="p-4 flex flex-col h-full">
         <div className="flex-grow space-y-3">
           <div className="flex justify-between items-start">

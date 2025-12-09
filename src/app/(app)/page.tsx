@@ -145,7 +145,7 @@ export default function DashboardPage() {
           return (
              <div className="grid gap-4 md:grid-cols-2">
                 {[...Array(2)].map((_, i) => (
-                    <Card key={i} className="h-64 animate-pulse bg-gray-200"></Card>
+                    <Card key={i} className="h-64 animate-pulse bg-gray-200 rounded-xl"></Card>
                 ))}
              </div>
           )

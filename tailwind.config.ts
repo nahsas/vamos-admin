@@ -9,6 +9,11 @@ export default {
   ],
   theme: {
     extend: {
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
       fontFamily: {
         body: ['Roboto', 'sans-serif'],
         headline: ['Montserrat', 'sans-serif'],
@@ -68,11 +73,6 @@ export default {
       },
       backgroundImage: {
         'main-gradient': 'linear-gradient(to bottom right, #2c3e50, #34495e, #1a252f)',
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
       },
       keyframes: {
         'accordion-down': {

@@ -95,7 +95,7 @@ const PaymentBreakdownCard = ({
     transactions: number | string;
     icon: React.ReactNode;
 }) => (
-    <Card className="bg-background/50">
+    <Card className="bg-background/50 rounded-xl">
         <CardContent className="p-4 flex flex-col gap-2">
             <div className="flex items-center gap-2">
                 <div className="p-2 bg-primary/20 rounded-md text-primary-foreground">

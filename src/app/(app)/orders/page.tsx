@@ -49,7 +49,7 @@ function StatCard({
   icon: React.ElementType;
 }) {
   return (
-    <Card className="shadow-md">
+    <Card className="shadow-md rounded-xl">
       <CardContent className="p-4 flex items-center gap-4">
         <div className="p-3 bg-amber-400/20 rounded-md">
           <Icon className="w-8 h-8 text-amber-600" />
