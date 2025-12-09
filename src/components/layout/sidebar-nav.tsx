@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store, Fingerprint, UserCog } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import React, { useState, useEffect } from "react";
 
@@ -48,6 +48,12 @@ const managementNavItems = [
     { href: "/reports", label: "Pembukuan", icon: BarChart3, roles: ['admin', 'kasir'] },
     { href: "/menu", label: "Manajer Menu", icon: BookOpen, roles: ['admin'] },
 ];
+
+const externalNavItems = [
+    { href: "https://vamos.sejadikopi.com/admin", label: "Admin Menu", icon: UserCog, roles: ['admin'], target: "_blank" },
+    { href: "https://vamos.sejadikopi.com", label: "Absensi Karyawan", icon: Fingerprint, roles: ['admin', 'kasir'], target: "_blank" },
+];
+
 
 function ShopStatusModal({ isOpen, onOpenChange, shopStatus, onConfirm, loading }: { isOpen: boolean, onOpenChange: (open: boolean) => void, shopStatus: boolean | null, onConfirm: () => void, loading: boolean }) {
     const nextStatusText = shopStatus ? 'menutup' : 'membuka';
@@ -98,6 +104,8 @@ export function SidebarNav() {
 
   const availableMainNavItems = mainNavItems.filter(item => item.roles.includes(userRole));
   const availableManagementNavItems = managementNavItems.filter(item => item.roles.includes(userRole));
+  const availableExternalNavItems = externalNavItems.filter(item => item.roles.includes(userRole));
+
 
   const fetchShopStatus = async () => {
     try {
@@ -154,11 +162,11 @@ export function SidebarNav() {
     }
   };
 
-  const NavItem = ({ item }: { item: typeof mainNavItems[0] }) => (
+  const NavItem = ({ item }: { item: (typeof mainNavItems[0] & { target?: string }) }) => (
     <SidebarMenuItem key={item.label}>
-      <Link href={item.href}>
+      <Link href={item.href} target={item.target || '_self'} rel={item.target ? "noopener noreferrer" : ""}>
         <SidebarMenuButton
-          isActive={pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))}
+          isActive={!item.target && (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))}
           className="group flex items-center gap-4 rounded-lg px-4 py-3"
         >
           <div className={cn(
@@ -198,6 +206,14 @@ export function SidebarNav() {
                     <SidebarGroupLabel className="px-0">MANAJEMEN</SidebarGroupLabel>
                     <SidebarMenu>
                          {availableManagementNavItems.map((item) => <NavItem key={item.href} item={item} />)}
+                    </SidebarMenu>
+                </SidebarGroup>
+            )}
+             {availableExternalNavItems.length > 0 && (
+                <SidebarGroup>
+                    <SidebarGroupLabel className="px-0">LAINNYA</SidebarGroupLabel>
+                    <SidebarMenu>
+                         {availableExternalNavItems.map((item) => <NavItem key={item.href} item={item} />)}
                     </SidebarMenu>
                 </SidebarGroup>
             )}

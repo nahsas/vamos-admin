@@ -112,7 +112,7 @@ const generateReceiptText = (
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
   
-  const renderItemDetails = (item: OrderItem, menuItem: MenuItem) => {
+  const renderItemDetails = (item: OrderItem) => {
       let details = '';
       const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
       for (const id in itemAdditionals) {
@@ -142,7 +142,7 @@ const generateReceiptText = (
         
         const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
         receipt += createLine(itemName, subtotal) + "\n";
-        receipt += renderItemDetails(item, menuItem);
+        receipt += renderItemDetails(item);
       });
       receipt += "\n";
     }
@@ -157,7 +157,7 @@ const generateReceiptText = (
         const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
         
         receipt += createLine(itemName, subtotal) + "\n";
-        receipt += renderItemDetails(item, menuItem);
+        receipt += renderItemDetails(item);
     });
 
   } else {
@@ -181,7 +181,7 @@ const generateReceiptText = (
           receipt += itemLine + "\n";
       }
       
-      receipt += renderItemDetails(item, menuItem);
+      receipt += renderItemDetails(item);
     });
   }
 

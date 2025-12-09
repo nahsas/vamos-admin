@@ -13,16 +13,6 @@ import { MapPin, FileText, Info, ArrowRight, Wallet, Bell, Printer } from 'lucid
 import { printKitchenStruk, printMainCheckerStruk, printBillStruk } from '@/lib/print-utils';
 import React from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
