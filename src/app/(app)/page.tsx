@@ -185,14 +185,14 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2">
-        {user?.role === 'admin' && (
+        {user?.role === 'admin' ? (
           <>
             <StatCard 
               title="Total Menu" 
               value={totalMenu !== null ? totalMenu.toString() : "..."} 
               icon={Utensils} 
               description="Semua kategori" 
-              bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+              bgColor="bg-blue-500" 
               textColor="text-white" 
             />
             <StatCard 
@@ -200,7 +200,7 @@ export default function DashboardPage() {
                 value={totalCategories !== null ? totalCategories.toString() : "..."} 
                 icon={Layers} 
                 description="Kategori aktif" 
-                bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+                bgColor="bg-blue-500" 
                 textColor="text-white" 
             />
             <StatCard 
@@ -208,15 +208,19 @@ export default function DashboardPage() {
                 value={todaysOrdersCount !== null ? todaysOrdersCount.toString() : "..."} 
                 icon={ClipboardList} 
                 description="Total pesanan" 
-                bgColor="bg-gradient-to-br from-yellow-400 to-amber-600" 
+                bgColor="bg-blue-500" 
                 textColor="text-white" 
             />
           </>
+        ) : (
+          <>
+            <StatCard title="Tertunda" value={pendingOrders !== null ? pendingOrders.toString() : "..."} icon={Clock} description="Menunggu" bgColor="bg-yellow-400" textColor="text-white" />
+            <StatCard title="Diproses" value={processingOrders !== null ? processingOrders.toString() : "..."} icon={Loader} description="Sedang diproses" bgColor="bg-blue-500" textColor="text-white" />
+            <StatCard title="Selesai" value={completedOrders !== null ? completedOrders.toString() : "..."} icon={CheckCircle2} description="Selesai hari ini" bgColor="bg-green-500" textColor="text-white" />
+          </>
         )}
-        <StatCard title="Tertunda" value={pendingOrders !== null ? pendingOrders.toString() : "..."} icon={Clock} description="Menunggu" bgColor="bg-yellow-400" textColor="text-white" />
-        <StatCard title="Diproses" value={processingOrders !== null ? processingOrders.toString() : "..."} icon={Loader} description="Sedang diproses" bgColor="bg-blue-500" textColor="text-white" />
-        <StatCard title="Selesai" value={completedOrders !== null ? completedOrders.toString() : "..."} icon={CheckCircle2} description="Selesai hari ini" bgColor="bg-green-500" textColor="text-white" />
       </div>
+
 
       <Card>
         <CardHeader className="space-y-4">
@@ -256,5 +260,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
