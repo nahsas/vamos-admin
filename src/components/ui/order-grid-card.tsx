@@ -91,7 +91,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-bold">
-                  {order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}` : order.no_meja}
+                  {order.location_type.toLowerCase() === 'dine-in' ? `Meja ${order.no_meja}` : order.no_meja}
                 </h3>
                 {hasNewItems && (
                   <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
