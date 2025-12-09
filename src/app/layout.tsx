@@ -31,8 +31,8 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#FFFAF0" />
 
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="https://api.sejadikopi.com/storage/Logo/vamos.png" />
+        <link rel="shortcut icon" href="https://api.sejadikopi.com/storage/Logo/vamos.png" />
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
