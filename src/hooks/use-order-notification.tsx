@@ -25,7 +25,7 @@ export function useOrderNotification() {
 
   const fetchActiveOrders = useCallback(async () => {
     try {
-      const response = await fetch('https://api.sejadikopi.com/api/pesanans?status=pending,diproses');
+      const response = await fetch('https://vamos-api.sejadikopi.com/api/pesanans?status=pending,diproses');
       if (!response.ok) {
         console.error('Failed to fetch active orders');
         return;

@@ -180,8 +180,8 @@ export default function HistoryPage() {
     try {
       const today = format(startOfToday(), 'yyyy-MM-dd');
       const [orderRes, menuRes] = await Promise.all([
-        fetch(`https://api.sejadikopi.com/api/pesanans?status=selesai,cancelled&payment_date=${today}`),
-        fetch('https://api.sejadikopi.com/api/menu')
+        fetch(`https://vamos-api.sejadikopi.com/api/pesanans?status=selesai,cancelled&payment_date=${today}`),
+        fetch('https://vamos-api.sejadikopi.com/api/menu')
       ]);
 
       if (!orderRes.ok) throw new Error("Gagal mengambil riwayat pesanan.");

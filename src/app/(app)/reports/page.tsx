@@ -151,7 +151,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                 image: null,
             });
             if(expense.bukti_url) {
-                setImagePreview(`https://api.sejadikopi.com/storage/${expense.bukti_url}`);
+                setImagePreview(`https://vamos-api.sejadikopi.com/storage/${expense.bukti_url}`);
             } else {
                 setImagePreview(null);
             }
@@ -190,7 +190,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
         imageFormData.append('image', imageFile);
         imageFormData.append('folder', 'expenses');
 
-        const imageUploadRes = await fetch('https://api.sejadikopi.com/api/images/upload', {
+        const imageUploadRes = await fetch('https://vamos-api.sejadikopi.com/api/images/upload', {
           method: 'POST',
           body: imageFormData,
         });
@@ -205,8 +205,8 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
 
       const method = expense ? 'PUT' : 'POST';
       const url = expense
-        ? `https://api.sejadikopi.com/api/pengeluarans/${expense.id}`
-        : 'https://api.sejadikopi.com/api/pengeluarans';
+        ? `https://vamos-api.sejadikopi.com/api/pengeluarans/${expense.id}`
+        : 'https://vamos-api.sejadikopi.com/api/pengeluarans';
       
       const payload = {
         id: values.id || `EXP-${Date.now()}`,
@@ -386,7 +386,7 @@ export default function ReportsPage() {
         const sDateOnly = startDate ? format(startDate, 'yyyy-MM-dd') : '';
         const eDateOnly = endDate ? format(endDate, 'yyyy-MM-dd') : '';
 
-        const transactionUrl = new URL('https://api.sejadikopi.com/api/pesanans');
+        const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
         if(sDate) transactionUrl.searchParams.set('created_from', sDate);
         if(eDate) transactionUrl.searchParams.set('created_to', eDate);
@@ -396,7 +396,7 @@ export default function ReportsPage() {
             transactionUrl.searchParams.set('metode_pembayaran', fetchMethod);
         }
 
-        const expenseUrl = new URL('https://api.sejadikopi.com/api/pengeluarans');
+        const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
         if(sDateOnly) expenseUrl.searchParams.set('tanggal_from', sDateOnly);
         if(eDateOnly) expenseUrl.searchParams.set('tanggal_to', eDateOnly);
         expenseUrl.searchParams.set('order', 'tanggal.desc');
@@ -404,7 +404,7 @@ export default function ReportsPage() {
         const [transactionRes, expenseRes, menuRes] = await Promise.all([
             fetch(transactionUrl.toString()),
             fetch(expenseUrl.toString()),
-            fetch('https://api.sejadikopi.com/api/menu'),
+            fetch('https://vamos-api.sejadikopi.com/api/menu'),
         ]);
 
         if (transactionRes.ok) {
@@ -490,7 +490,7 @@ export default function ReportsPage() {
   const handleDeleteExpense = async (id: string) => {
     if (!confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?')) return;
     try {
-        const response = await fetch(`https://api.sejadikopi.com/api/pengeluarans/${id}`, {
+        const response = await fetch(`https://vamos-api.sejadikopi.com/api/pengeluarans/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Gagal menghapus pengeluaran.');

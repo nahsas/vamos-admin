@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, loading, pathname, router]);
 
   const login = async (email: string, pass: string) => {
-    const response = await fetch('https://api.sejadikopi.com/api/auth/login', {
+    const response = await fetch('https://vamos-api.sejadikopi.com/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

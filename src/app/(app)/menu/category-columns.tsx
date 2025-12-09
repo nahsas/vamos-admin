@@ -38,7 +38,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
     // NOTE: DELETE /categories/{id} is not defined in api.json.
     // Assuming it's missing and will implement optimistically.
     try {
-      const response = await fetch(`https://api.sejadikopi.com/api/categories/${id}`, {
+      const response = await fetch(`https://vamos-api.sejadikopi.com/api/categories/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus kategori. Endpoint tidak ada.");

@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.sejadikopi.com',
+        hostname: 'vamos-api.sejadikopi.com',
         port: '',
         pathname: '/**',
       },

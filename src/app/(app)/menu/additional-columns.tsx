@@ -39,7 +39,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: AdditionalColumnsProps): Co
     // NOTE: DELETE /additionals/{id} is not in api.json.
     // Assuming it's missing and implementing optimistically
     try {
-      const response = await fetch(`https://api.sejadikopi.com/api/additionals/${id}`, {
+      const response = await fetch(`https://vamos-api.sejadikopi.com/api/additionals/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus item tambahan. Endpoint tidak ada.");

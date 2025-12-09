@@ -115,7 +115,7 @@ export function MenuForm({
         available_variants: variants,
       });
       if(menuItem.foto) {
-        setImagePreview(`https://api.sejadikopi.com/storage/${menuItem.foto}`);
+        setImagePreview(`https://vamos-api.sejadikopi.com/storage/${menuItem.foto}`);
       } else {
         setImagePreview(null);
       }
@@ -152,7 +152,7 @@ export function MenuForm({
         const imageFormData = new FormData();
         imageFormData.append('image', values.image);
         imageFormData.append('folder', 'menu');
-        const res = await fetch('https://api.sejadikopi.com/api/images/upload', {
+        const res = await fetch('https://vamos-api.sejadikopi.com/api/images/upload', {
             method: 'POST',
             body: imageFormData,
         });
@@ -177,8 +177,8 @@ export function MenuForm({
       const method = menuItem ? 'PUT' : 'POST'; 
       // NOTE: PUT /menu/{id} and POST /menu are not in api.json, but necessary for functionality
       const url = menuItem
-        ? `https://api.sejadikopi.com/api/menu/${menuItem.id}`
-        : 'https://api.sejadikopi.com/api/menu';
+        ? `https://vamos-api.sejadikopi.com/api/menu/${menuItem.id}`
+        : 'https://vamos-api.sejadikopi.com/api/menu';
       
       const response = await fetch(url, {
         method,

@@ -37,7 +37,7 @@ const updatePrintedStatus = (items: OrderItem[]) => {
 
   // Fire-and-forget: Don't await the promises here to avoid blocking the UI
   for (const item of unprintedItems) {
-      fetch(`https://api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+      fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ printed: 1 }),

@@ -52,12 +52,12 @@ export default function DashboardPage() {
     // This can be refactored into a single stats endpoint later
     try {
         const [menuRes, catRes, todayRes, pendingRes, processingRes, completedRes] = await Promise.all([
-            fetch("https://api.sejadikopi.com/api/menu"),
-            fetch("https://api.sejadikopi.com/api/categories?select=nama"),
-            fetch("https://api.sejadikopi.com/api/pesanans?select=id,created_at"),
-            fetch("https://api.sejadikopi.com/api/pesanans?select=id&status=pending"),
-            fetch("https://api.sejadikopi.com/api/pesanans?select=id&status=diproses"),
-            fetch("https://api.sejadikopi.com/api/pesanans?select=id,created_at&status=selesai")
+            fetch("https://vamos-api.sejadikopi.com/api/menu"),
+            fetch("https://vamos-api.sejadikopi.com/api/categories?select=nama"),
+            fetch("https://vamos-api.sejadikopi.com/api/pesanans?select=id,created_at"),
+            fetch("https://vamos-api.sejadikopi.com/api/pesanans?select=id&status=pending"),
+            fetch("https://vamos-api.sejadikopi.com/api/pesanans?select=id&status=diproses"),
+            fetch("https://vamos-api.sejadikopi.com/api/pesanans?select=id,created_at&status=selesai")
         ]);
 
         if (menuRes.ok) {
@@ -106,8 +106,8 @@ export default function DashboardPage() {
       setOrdersLoading(true);
       setOrdersError(null);
       try {
-          const dineInRes = await fetch("https://api.sejadikopi.com/api/pesanans?location_type=dine_in&status=pending,diproses");
-          const takeawayRes = await fetch("https://api.sejadikopi.com/api/pesanans?location_type=takeaway&status=pending,diproses");
+          const dineInRes = await fetch("https://vamos-api.sejadikopi.com/api/pesanans?location_type=dine_in&status=pending,diproses");
+          const takeawayRes = await fetch("https://vamos-api.sejadikopi.com/api/pesanans?location_type=takeaway&status=pending,diproses");
 
           if (dineInRes.ok) {
               const data = await dineInRes.json();

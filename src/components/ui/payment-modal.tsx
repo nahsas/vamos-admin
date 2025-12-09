@@ -50,10 +50,10 @@ export function PaymentModal({
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
   React.useEffect(() => {
-    fetch('https://api.sejadikopi.com/api/menu')
+    fetch('https://vamos-api.sejadikopi.com/api/menu')
         .then(res => res.json())
         .then(data => setMenuItems(data.data || []));
-    fetch('https://api.sejadikopi.com/api/additionals')
+    fetch('https://vamos-api.sejadikopi.com/api/additionals')
         .then(res => res.json())
         .then(data => setAdditionals(data.data || []));
   }, []);
@@ -80,7 +80,7 @@ export function PaymentModal({
 
     try {
         // NOTE: This endpoint is not in api.json, but implementing as requested
-        const response = await fetch('https://api.sejadikopi.com/api/discount-codes/apply', {
+        const response = await fetch('https://vamos-api.sejadikopi.com/api/discount-codes/apply', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export function PaymentModal({
     };
     
     try {
-        const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${order.id}`, {
+        const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${order.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

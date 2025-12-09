@@ -77,7 +77,7 @@ export function OrderDetailModal({
   React.useEffect(() => {
     setCurrentOrder(order);
     if(open) {
-      fetch('https://api.sejadikopi.com/api/additionals')
+      fetch('https://vamos-api.sejadikopi.com/api/additionals')
         .then(res => res.json())
         .then(data => setAdditionals(data.data || []))
         .catch(console.error);
@@ -89,7 +89,7 @@ export function OrderDetailModal({
     if (!currentOrder) return;
 
     try {
-      const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${currentOrder.id}`, {
+      const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${currentOrder.id}`, {
         method: 'DELETE',
       });
 
@@ -116,7 +116,7 @@ export function OrderDetailModal({
   
   const updateOrderTotalOnBackend = async (orderId: number, newTotal: number) => {
     try {
-        const response = await fetch(`https://api.sejadikopi.com/api/pesanans/${orderId}`, {
+        const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${orderId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ total: newTotal, total_after_discount: newTotal }),
@@ -141,7 +141,7 @@ export function OrderDetailModal({
     const newSubtotal = (item.base_price + (parseInt(item.additional_price, 10) || 0)) * newQuantity;
 
     try {
-      const response = await fetch(`https://api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+      const response = await fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ export function OrderDetailModal({
   const handleDeleteItem = async (itemId: number) => {
     if (!currentOrder) return;
     try {
-        const response = await fetch(`https://api.sejadikopi.com/api/detail_pesanan/${itemId}`, {
+        const response = await fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${itemId}`, {
             method: 'DELETE',
         });
         if (!response.ok) {

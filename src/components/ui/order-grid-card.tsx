@@ -44,7 +44,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
 
   React.useEffect(() => {
-    fetch('https://api.sejadikopi.com/api/additionals')
+    fetch('https://vamos-api.sejadikopi.com/api/additionals')
       .then(res => res.json())
       .then(data => setAdditionals(data.data || []));
   }, []);

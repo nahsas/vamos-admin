@@ -5,16 +5,10 @@ import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
+import { Order } from "@/lib/data"
 
-type Transaction = {
-    id: number;
-    completed_at: string;
-    created_at: string;
-    no_meja: string;
-    metode_pembayaran: 'cash' | 'qris';
-    total_after_discount: number;
-    bank_qris?: string;
-}
+// Align Transaction type with the full Order type
+type Transaction = Order;
 
 type TransactionColumnsProps = {
     onViewDetails: (transaction: Transaction) => void;
@@ -59,8 +53,8 @@ export const transactionColumns = ({ onViewDetails }: TransactionColumnsProps): 
         accessorKey: "total_after_discount",
         header: "Total",
         cell: ({ row }) => {
-            const total = row.getValue("total_after_discount") as number;
-            return <div className="text-right font-medium">{toRupiah(total || 0)}</div>
+            const total = row.getValue("total_after_discount") as number | null;
+            return <div className="text-right font-medium">{toRupiah(total || parseInt(row.original.total, 10) || 0)}</div>
         }
     },
     {
