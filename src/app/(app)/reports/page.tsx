@@ -714,14 +714,14 @@ export default function ReportsPage() {
                     </SelectContent>
                 </Select>
             </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-4">
             <Button onClick={handleApplyFilter} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
                 <Check className="mr-2 h-4 w-4" /> Terapkan
             </Button>
             <Button variant="secondary" onClick={handleResetFilter} className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
             </Button>
-            <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white font-bold" onClick={handleExport} disabled={exporting}>
+            <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white font-bold sm:col-span-2 md:col-span-1" onClick={handleExport} disabled={exporting}>
                 {exporting ? (
                     <>
                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -738,7 +738,7 @@ export default function ReportsPage() {
       </Card>
       
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <ReportStatCard
             title="Total Pendapatan"
             value={toRupiah(totalRevenue)}
@@ -784,7 +784,7 @@ export default function ReportsPage() {
                 </div>
                 <h2 className="text-xl font-bold">Rincian Pembayaran</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <PaymentBreakdownCard title="Pitty Cash" amount={toRupiah(pittyCash)} transactions="Kas tetap" icon={<Wallet className="h-6 w-6"/>} />
                 <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6"/>} />
                 <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6"/>} />

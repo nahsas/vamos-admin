@@ -242,7 +242,7 @@ export default function OrdersPage() {
                         <Hourglass className="h-5 w-5 text-yellow-600" />
                         <h3 className="text-lg font-semibold text-yellow-700">Pending ({pendingOrders.length})</h3>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {pendingOrders.map(order => (
                             <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
@@ -256,7 +256,7 @@ export default function OrdersPage() {
                         <CookingPot className="h-5 w-5 text-blue-600" />
                         <h3 className="text-lg font-semibold text-blue-700">Processing ({processingOrders.length})</h3>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {processingOrders.map(order => (
                             <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
@@ -308,10 +308,10 @@ export default function OrdersPage() {
         </Select>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
         <StatCard title="MEJA TERISI" value={occupiedTablesCount !== null ? occupiedTablesCount.toString() : '...'} icon={Users} />
         <StatCard title="TOTAL ITEM" value={totalItems.toString()} icon={ShoppingCart} />
-        <div className="md:col-span-2">
+        <div className="sm:col-span-1 md:col-span-2">
           <StatCard title="TOTAL TRANSAKSI" value={totalTransactions} icon={Wallet} />
         </div>
       </div>

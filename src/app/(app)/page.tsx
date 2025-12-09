@@ -161,7 +161,7 @@ export default function DashboardPage() {
       }
        if (orders.length > 0) {
           return (
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                 {orders.map((order) => (
                     <OrderCard key={order.id} order={order} menuItems={menuItems} />
                 ))}
@@ -184,7 +184,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {user?.role === 'admin' ? (
           <>
             <StatCard 

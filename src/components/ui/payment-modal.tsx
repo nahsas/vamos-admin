@@ -201,7 +201,7 @@ export function PaymentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[90vh]">
+      <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[90vh] rounded-xl">
         <DialogHeader className="p-4 text-center items-center sticky top-0 bg-background z-10 border-b">
             <div className="p-3 bg-green-100 rounded-full mb-2">
                 <Receipt className="w-6 h-6 text-green-600" />
