@@ -335,13 +335,13 @@ export default function HistoryPage() {
         )}
 
       {!loading && !error && (
-        <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
               <OrderCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
             ))
           ) : (
-            <div className="text-center py-16 text-muted-foreground">
+            <div className="text-center py-16 text-muted-foreground md:col-span-2 xl:col-span-3">
               <p>Tidak ada riwayat transaksi untuk filter yang dipilih.</p>
             </div>
           )}

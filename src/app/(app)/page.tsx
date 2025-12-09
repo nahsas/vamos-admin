@@ -143,7 +143,7 @@ export default function DashboardPage() {
   const renderOrderList = (orders: Order[], type: 'dine-in' | 'take-away') => {
       if (ordersLoading) {
           return (
-             <div className="grid gap-4 md:grid-cols-2">
+             <div className="grid gap-6 md:grid-cols-2">
                 {[...Array(2)].map((_, i) => (
                     <Card key={i} className="h-64 animate-pulse bg-gray-200 rounded-xl"></Card>
                 ))}
@@ -161,7 +161,7 @@ export default function DashboardPage() {
       }
        if (orders.length > 0) {
           return (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
                 {orders.map((order) => (
                     <OrderCard key={order.id} order={order} menuItems={menuItems} />
                 ))}
@@ -184,7 +184,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {user?.role === 'admin' ? (
           <>
             <StatCard 
@@ -222,7 +222,7 @@ export default function DashboardPage() {
       </div>
 
 
-      <Card>
+      <Card className="rounded-xl">
         <CardHeader className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <CardTitle className="text-xl font-bold">Status Pesanan</CardTitle>

@@ -24,7 +24,7 @@ import { DiscountForm } from './discount-form';
 
 function StatCard({ title, value, icon: Icon, description, color }: { title: string, value: string, icon: React.ElementType, description: string, color: string }) {
   return (
-    <Card className={cn("relative overflow-hidden", color)}>
+    <Card className={cn("relative overflow-hidden rounded-xl", color)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-white/80" />
@@ -39,7 +39,7 @@ function StatCard({ title, value, icon: Icon, description, color }: { title: str
 
 function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, buttonDisabled = false, children }: { icon: React.ElementType, title: string, description: string, buttonText: string, onButtonClick: () => void, buttonDisabled?: boolean, children?: React.ReactNode }) {
   return (
-    <Card className="mb-6 bg-card">
+    <Card className="mb-6 bg-card rounded-xl">
       <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
         <div className="flex items-center gap-4 flex-grow">
           <div className="p-3 bg-primary/10 rounded-lg">
@@ -213,7 +213,7 @@ export default function MenuPage() {
         <p className="text-muted-foreground">Tambah, ubah, dan kelola menu kedai kopi Anda.</p>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-blue-500 text-white" />
         <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-amber-600 text-white" />
         <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-green-500 text-white" />
@@ -228,8 +228,8 @@ export default function MenuPage() {
           <TabsTrigger value="category">Kategori</TabsTrigger>
         </TabsList>
         <TabsContent value="menu" className="mt-6">
-          <div className="space-y-4">
-            <Card>
+          <div className="space-y-6">
+            <Card className='rounded-xl'>
               <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
                   <div className="flex items-center gap-4 flex-grow">
                       <div className="p-3 bg-primary/10 rounded-lg">
@@ -246,7 +246,7 @@ export default function MenuPage() {
                   </Button>
               </CardContent>
             </Card>
-            <Card>
+            <Card className='rounded-xl'>
                 <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -274,7 +274,7 @@ export default function MenuPage() {
                 </CardContent>
               </Card>
           </div>
-          <div className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto mt-6">
             <DataTable 
                 columns={menuColumnsWithCategories} 
                 data={filteredMenuItems} 
@@ -282,7 +282,7 @@ export default function MenuPage() {
           </div>
         </TabsContent>
         <TabsContent value="stock" className="mt-6">
-          <Card className="mb-6">
+          <Card className="mb-6 rounded-xl">
               <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
                 <div className="relative flex-grow w-full md:w-auto">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

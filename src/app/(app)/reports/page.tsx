@@ -635,7 +635,7 @@ export default function ReportsPage() {
         <p className="text-muted-foreground">Analisis penjualan dan kinerja Anda.</p>
       </div>
 
-      <Card>
+      <Card className="rounded-xl">
         <CardHeader className="flex flex-row items-center gap-4 space-y-0">
             <div className="p-3 rounded-md bg-yellow-100">
                 <Filter className="w-5 h-5 text-yellow-600" />
@@ -738,7 +738,7 @@ export default function ReportsPage() {
       </Card>
       
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           <ReportStatCard
             title="Total Pendapatan"
             value={toRupiah(totalRevenue)}
@@ -795,7 +795,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="rounded-xl">
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
                 <CardTitle className="text-xl">Pelacakan Pengeluaran</CardTitle>
@@ -829,7 +829,7 @@ export default function ReportsPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="rounded-xl">
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
                 <CardTitle className="text-xl">Riwayat Transaksi</CardTitle>
@@ -857,8 +857,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-
-    
-
-    
-

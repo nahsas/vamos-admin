@@ -235,14 +235,14 @@ export default function OrdersPage() {
     }
     
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {pendingOrders.length > 0 && (
                 <div>
                     <div className="flex items-center gap-2 mb-4">
                         <Hourglass className="h-5 w-5 text-yellow-600" />
                         <h3 className="text-lg font-semibold text-yellow-700">Pending ({pendingOrders.length})</h3>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                         {pendingOrders.map(order => (
                             <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
@@ -256,7 +256,7 @@ export default function OrdersPage() {
                         <CookingPot className="h-5 w-5 text-blue-600" />
                         <h3 className="text-lg font-semibold text-blue-700">Processing ({processingOrders.length})</h3>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                         {processingOrders.map(order => (
                             <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
@@ -308,7 +308,7 @@ export default function OrdersPage() {
         </Select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <StatCard title="MEJA TERISI" value={occupiedTablesCount !== null ? occupiedTablesCount.toString() : '...'} icon={Users} />
         <StatCard title="TOTAL ITEM" value={totalItems.toString()} icon={ShoppingCart} />
         <div className="md:col-span-2">
@@ -329,7 +329,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="rounded-xl">
         <CardHeader className="flex items-center justify-center p-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
             <TabsList className="grid grid-cols-2 rounded-lg bg-gray-200 p-1 h-auto">
