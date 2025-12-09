@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'Vamos - Pool Cafe',
   description: 'Vamos - Coffee Shop Management',
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: 'https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png',
+    shortcut: 'https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png',
+    apple: 'https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png',
+  },
 };
 
 export default function RootLayout({
@@ -30,9 +35,6 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#6F4E37" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#FFFAF0" />
-
-        <link rel="apple-touch-icon" href="https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png" />
-        <link rel="shortcut icon" href="https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png" />
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
