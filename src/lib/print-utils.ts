@@ -4,6 +4,13 @@ import { appEventEmitter } from './event-emitter';
 
 const paperWidth = 32;
 
+// In-memory state to track printing status for each checker type for the current session.
+// This is a workaround because the database only has one 'printed' flag.
+const printSessionState = {
+    main: new Set<number>(),
+    kitchen: new Set<number>(),
+};
+
 const createLine = (left: string, right: string): string => {
     const spaces = paperWidth - left.length - right.length;
     if (spaces < 1) {
@@ -22,7 +29,6 @@ interface ReceiptOptions {
     title: string;
     showPrices: boolean;
     itemsToPrint: OrderItem[];
-    allItemsForMainChecker?: OrderItem[];
     paymentAmount?: number;
     additionals: Additional[];
 }
@@ -49,6 +55,7 @@ const updatePrintedStatus = (items: OrderItem[]) => {
 
   Promise.all(updatePromises).then(results => {
     if (results.some(success => success)) {
+        // After backend update, refresh the parent component's data
         appEventEmitter.emit('new-order');
     }
   });
@@ -61,7 +68,7 @@ const generateReceiptText = (
     options: ReceiptOptions
 ): string => {
   
-  const { title, showPrices, itemsToPrint, allItemsForMainChecker, paymentAmount, additionals } = options;
+  const { title, showPrices, itemsToPrint, paymentAmount, additionals } = options;
 
   const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
@@ -105,63 +112,28 @@ const generateReceiptText = (
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
   
-  const renderItemDetails = (item: OrderItem) => {
-      let details = '';
-      const itemAdditionals: { [key: string]: boolean } = { ...(item.additionals || {}), ...(item.dimsum_additionals || {}) };
-      
-      for (const id in itemAdditionals) {
-          if (itemAdditionals[id]) {
-              const additional = additionals.find(add => add.id === parseInt(id));
-              if (additional) {
-                  details += `  + ${additional.nama}\n`;
-              }
-          }
-      }
-      if (item.note) {
-        details += `  *Note: ${item.note}\n`;
-      }
-      return details;
-  }
-
   if (title === 'MAIN CHECKER') {
     receipt += "--- SEMUA ITEM ---\n";
-    (itemsToPrint).forEach(item => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        if (!menuItem) return;
-        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
-        if (item.varian) itemName += ` (${item.varian})`;
-        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
-        
-        receipt += createLine(itemName, subtotal) + "\n";
-        if (item.note) {
-            receipt += `  Note: ${item.note}\n`;
-        }
-    });
-
-  } else {
-    itemsToPrint.forEach((item) => {
-      const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-      if (!menuItem || item.jumlah === 0) return;
-
-      const qty = `${item.jumlah}x `;
-      let itemName = menuItem.nama.replace(/\*/g, '');
-      if (item.varian) itemName += ` (${item.varian})`;
-      
-      const itemLine = qty + itemName; 
-
-      if (showPrices) {
-          const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
-          receipt += createLine(itemLine, subtotal) + "\n";
-      } else {
-          receipt += itemLine + "\n";
-      }
-      
-      if(item.note) {
-          receipt += `  Note: ${item.note}\n`;
-      }
-    });
   }
 
+  itemsToPrint.forEach((item) => {
+    const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+    if (!menuItem || item.jumlah === 0) return;
+
+    let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
+    if (item.varian) itemName += ` (${item.varian})`;
+    
+    if (showPrices) {
+        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+        receipt += createLine(itemName, subtotal) + "\n";
+    } else {
+        receipt += itemName + "\n";
+    }
+    
+    if (item.note) {
+        receipt += `  Note: ${item.note}\n`;
+    }
+  });
 
   receipt += "-".repeat(paperWidth) + "\n";
   
@@ -189,15 +161,9 @@ const generateReceiptText = (
       if (metodeLabel) {
         receipt += createLine("Metode", metodeLabel) + "\n";
       }
-    } else if (showPrices && !order.metode_pembayaran && title !== 'BILL') {
-        receipt += "--------------------------------\n";
-        receipt += "\x1B\x61\x01"; 
-        receipt += "Sampai Jumpa" + "\n";
-        receipt += "Terima Kasih" + "\n";
-        receipt += "\x1B\x61\x00"; 
     }
-
-    if (showPrices && title !== 'BILL') {
+    
+    if (title === 'BILL' || title === 'STRUK PEMBELIAN') {
          receipt += "--------------------------------\n";
         receipt += "\x1B\x61\x01"; 
         receipt += "Sampai Jumpa" + "\n";
@@ -208,7 +174,7 @@ const generateReceiptText = (
 
   receipt += "\n\n\n";
   receipt += "\x1D\x56\x41"; 
-  if (showPrices && title !== 'BILL' && title !== 'MAIN CHECKER') {
+  if (title === 'STRUK PEMBELIAN') {
     receipt += "\x1B\x70\x00\x19\xFA"; 
   }
 
@@ -229,7 +195,7 @@ export const printKitchenStruk = (
   try {
     const unprintedFood = order.detail_pesanans.filter(item => {
       const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-      return item.printed === 0 && menuItem?.kategori_struk === 'makanan';
+      return menuItem?.kategori_struk === 'makanan' && !printSessionState.kitchen.has(item.id);
     });
     
     if (unprintedFood.length > 0) {
@@ -240,9 +206,12 @@ export const printKitchenStruk = (
         additionals,
       });
       printJob(receiptText);
+      
+      // Update session state and backend
+      unprintedFood.forEach(item => printSessionState.kitchen.add(item.id));
       updatePrintedStatus(unprintedFood);
     } else {
-        alert("Tidak ada item makanan baru untuk dicetak.");
+        alert("Tidak ada item makanan baru untuk dicetak di Dapur.");
     }
   } catch(e) {
       console.error("Error printing kitchen receipt:", e);
@@ -256,19 +225,23 @@ export const printMainCheckerStruk = (
   additionals: Additional[]
 ) => {
   try {
-    const unprintedItems = order.detail_pesanans.filter(item => item.printed === 0);
+    // Items that have never been printed on the main checker
+    const newItemsForMain = order.detail_pesanans.filter(item => !printSessionState.main.has(item.id));
 
-    if (unprintedItems.length > 0) {
+    if (newItemsForMain.length > 0) {
       const receiptText = generateReceiptText(order, menuItems, {
         title: "MAIN CHECKER",
         showPrices: true,
-        itemsToPrint: unprintedItems, // Only pass unprinted items
+        itemsToPrint: newItemsForMain, // Only print the new items
         additionals,
       });
       printJob(receiptText);
-      updatePrintedStatus(unprintedItems);
+      
+      // Update session state and backend
+      newItemsForMain.forEach(item => printSessionState.main.add(item.id));
+      updatePrintedStatus(newItemsForMain);
     } else {
-        alert("Tidak ada item baru untuk dicetak.");
+        alert("Tidak ada item baru untuk dicetak di Main Checker.");
     }
   } catch(e) {
       console.error("Error printing main checker receipt:", e);
