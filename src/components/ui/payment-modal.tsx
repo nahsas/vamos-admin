@@ -389,7 +389,7 @@ export function PaymentModal({
         </div>
 
         <DialogFooter className="p-4 bg-background border-t grid grid-cols-2 gap-2">
-            <Button onClick={handleFinishPayment} variant="default" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button onClick={handleFinishPayment} variant="default" disabled={isLoading} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700">
                 {isLoading ? "Memproses..." : (
                     <>
                         <Check className="mr-2 h-4 w-4" />
