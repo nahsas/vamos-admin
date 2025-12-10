@@ -200,7 +200,7 @@ export default function DashboardPage() {
                 value={totalCategories !== null ? totalCategories.toString() : "..."} 
                 icon={Layers} 
                 description="Kategori aktif" 
-                bgColor="bg-blue-500" 
+                bgColor="bg-gradient-to-tr from-purple-700 to-blue-700" 
                 textColor="text-white" 
             />
             <StatCard 
