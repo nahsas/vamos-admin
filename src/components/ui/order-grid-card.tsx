@@ -30,7 +30,7 @@ const statusConfig: {
   };
 } = {
   pending: { label: 'PENDING', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' },
-  diproses: { label: 'PROSES', color: 'bg-blue-500 text-white' },
+  diproses: { label: 'PROSES', color: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' },
   selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
@@ -72,11 +72,15 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     printMainCheckerStruk(order, menuItems, additionals);
   }
 
+  const borderGradientClass = isProcessing
+    ? 'bg-gradient-to-br from-purple-600 to-blue-600'
+    : 'border-yellow-400 border-2';
+
 
   return (
     <>
-    <Card className={cn("shadow-lg border-2 rounded-xl", order.status.toLowerCase() === 'pending' ? 'border-yellow-400' : 'border-blue-500')}>
-      <CardContent className="p-4 flex flex-col h-full">
+    <Card className={cn("shadow-lg rounded-xl p-0.5", borderGradientClass)}>
+      <CardContent className="p-4 flex flex-col h-full bg-card rounded-lg">
         <div className="flex-grow space-y-3">
           <div className="flex justify-between items-start">
             <div>
@@ -187,7 +191,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                 size="sm" 
                 className={cn(
                     "w-full text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1",
-                    isProcessing ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"
+                    isProcessing ? "bg-gradient-to-r from-purple-600 to-blue-600" : "bg-blue-600 hover:bg-blue-700"
                 )} 
                 onClick={handleActionClick}
             >
