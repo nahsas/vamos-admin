@@ -29,7 +29,7 @@ const statusConfig: {
     color: string;
   };
 } = {
-  pending: { label: 'PENDING', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' },
+  pending: { label: 'PENDING', color: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' },
   diproses: { label: 'PROSES', color: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' },
   selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
@@ -74,7 +74,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
 
   const borderGradientClass = isProcessing
     ? 'bg-gradient-to-br from-purple-600 to-blue-600'
-    : 'border-yellow-400 border-2';
+    : 'bg-gradient-to-br from-yellow-400 to-yellow-600';
 
 
   return (
