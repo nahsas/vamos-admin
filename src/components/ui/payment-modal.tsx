@@ -22,7 +22,7 @@ import { printPaymentStruk } from '@/lib/print-utils';
 import { appEventEmitter } from '@/lib/event-emitter';
 
 const banks = [
-    { id: 'BCA', name: 'BCA', logo: 'https://placehold.co/100x40/003087/FFFFFF?text=BCA' },
+    { id: 'BCA', name: 'BCA', logo: 'https://vamos-api.sejadikopi.com/storage/images/BCA.png' },
     { id: 'BRI', name: 'BRI', logo: 'https://placehold.co/100x40/00529C/FFFFFF?text=BRI' },
     { id: 'BSI', name: 'BSI', logo: 'https://placehold.co/100x40/00A59C/FFFFFF?text=BSI' },
 ]

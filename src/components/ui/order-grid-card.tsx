@@ -40,19 +40,12 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   const isProcessing = order.status.toLowerCase() === 'diproses';
   
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
-  const [printInitiated, setPrintInitiated] = React.useState(false);
 
   React.useEffect(() => {
     fetch('https://vamos-api.sejadikopi.com/api/additionals')
       .then(res => res.json())
       .then(data => setAdditionals(data.data || []));
   }, []);
-  
-  React.useEffect(() => {
-    // Reset print status when order data changes (e.g., new item added)
-    setPrintInitiated(false);
-  }, [order.detail_pesanans]);
-
 
   const hasNewItems = order.detail_pesanans.some(item => item.printed === 0);
 
@@ -73,12 +66,10 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
 
   const handleKitchenPrint = () => {
     printKitchenStruk(order, menuItems, additionals);
-    setPrintInitiated(true);
   };
 
   const handleMainCheckerPrint = () => {
     printMainCheckerStruk(order, menuItems, additionals);
-    setPrintInitiated(true);
   }
 
 
@@ -177,10 +168,10 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex-col gap-2 mt-4 md:flex-row md:justify-between">
                     <div className="grid grid-cols-2 gap-2 w-full">
-                        <AlertDialogAction onClick={handleKitchenPrint} className="w-full" disabled={printInitiated}>
+                        <AlertDialogAction onClick={handleKitchenPrint} className="w-full">
                             Checker Dapur
                         </AlertDialogAction>
-                        <AlertDialogAction onClick={handleMainCheckerPrint} className="w-full" disabled={printInitiated}>
+                        <AlertDialogAction onClick={handleMainCheckerPrint} className="w-full">
                             Main Checker
                         </AlertDialogAction>
                     </div>
