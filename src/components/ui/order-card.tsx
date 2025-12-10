@@ -38,8 +38,10 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
     router.push('/orders');
   }
   
-  const borderGradientClass = order.status.toLowerCase() === 'pending' 
-    ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' 
+  const isPending = order.status.toLowerCase() === 'pending';
+
+  const borderGradientClass = isPending
+    ? 'bg-gradient-to-br from-yellow-400 to-yellow-600'
     : 'bg-gradient-to-br from-purple-600 to-blue-600';
 
 
@@ -104,7 +106,13 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
               </div>
           </div>
           <div className="mt-4">
-              <Button onClick={handleRedirect} className="w-full">
+              <Button 
+                onClick={handleRedirect} 
+                className={cn(
+                  "w-full",
+                  isPending && "bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 hover:from-yellow-500 hover:to-amber-600"
+                )}
+              >
                   <Eye className="mr-2 h-4 w-4" />
                   Lihat Detail
               </Button>
