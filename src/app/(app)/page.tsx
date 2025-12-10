@@ -208,7 +208,7 @@ export default function DashboardPage() {
                 value={todaysOrdersCount !== null ? todaysOrdersCount.toString() : "..."} 
                 icon={ClipboardList} 
                 description="Total pesanan" 
-                bgColor="bg-blue-500" 
+                bgColor="bg-blue-700" 
                 textColor="text-white" 
             />
           </>
