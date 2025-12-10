@@ -19,7 +19,7 @@ const statusConfig: {
     color: string;
   };
 } = {
-  pending: { variant: 'secondary', label: 'Tertunda', color: 'bg-yellow-400 hover:bg-yellow-500 text-white' },
+  pending: { variant: 'secondary', label: 'Tertunda', color: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' },
   diproses: { variant: 'default', label: 'Diproses', color: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' },
   selesai: { variant: 'outline', label: 'Selesai', color: 'bg-green-500 text-white' },
   dibatalkan: { variant: 'destructive', label: 'Dibatalkan', color: 'bg-red-500 text-white' },
