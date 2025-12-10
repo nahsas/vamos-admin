@@ -120,8 +120,13 @@ const generateReceiptText = (
 
     let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
     if (item.varian) itemName += ` (${item.varian})`;
-    
-    receipt += itemName + "\n";
+
+    if (showPrices) {
+        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+        receipt += createLine(itemName, subtotal) + "\n";
+    } else {
+        receipt += itemName + "\n";
+    }
     
     if (item.note) {
         receipt += `  Note: ${item.note}\n`;
@@ -131,8 +136,11 @@ const generateReceiptText = (
   // This section prints all items for the summary
   if (allItemsForSummary && allItemsForSummary.length > 0) {
     if (itemsToPrint.length > 0) { // Add separator only if there were new items
-        receipt += "-".repeat(paperWidth) + "\n";
+        receipt += "\n";
     }
+    receipt += `\x1B\x61\x00`; // Align left
+    receipt += "--- SEMUA ITEM ---" + "\n";
+    
     allItemsForSummary.forEach((item) => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem || item.jumlah === 0) return;
@@ -210,7 +218,7 @@ export const printKitchenStruk = (
     const unprintedFood = order.detail_pesanans.filter(item => {
       const menuItem = menuItems.find(mi => mi.id === item.menu_id);
       // Item is food and has not been printed by kitchen checker yet
-      return menuItem?.kategori_struk === 'makanan' && !printSessionState.kitchen.has(item.id);
+      return menuItem?.kategori_struk === 'makanan' && item.printed === 0;
     });
     
     if (unprintedFood.length > 0) {
@@ -223,7 +231,6 @@ export const printKitchenStruk = (
       printJob(receiptText);
       
       // Update session state for kitchen and update backend
-      unprintedFood.forEach(item => printSessionState.kitchen.add(item.id));
       updatePrintedStatus(unprintedFood);
     } else {
         alert("Tidak ada item makanan baru untuk dicetak di Dapur.");
@@ -240,15 +247,18 @@ export const printMainCheckerStruk = (
   additionals: Additional[]
 ) => {
   try {
-    // For Main Checker, we are interested in any new item (food or drink)
-    const newItems = order.detail_pesanans.filter(item => !printSessionState.main.has(item.id));
+    // For Main Checker, we are interested in any new DRINK item
+    const newDrinks = order.detail_pesanans.filter(item => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+        return menuItem?.kategori_struk === 'minuman' && item.printed === 0
+    });
 
-    if (newItems.length > 0) {
+    if (newDrinks.length > 0) {
       const receiptText = generateReceiptText(order, menuItems, {
         title: "MAIN CHECKER",
         showPrices: true,
-        // We pass an empty array to `itemsToPrint` to avoid the first block of items
-        itemsToPrint: [],
+        // We pass only new drinks to `itemsToPrint` to print in the first block
+        itemsToPrint: newDrinks,
         // We pass ALL items to `allItemsForSummary` to print them in a single block
         allItemsForSummary: order.detail_pesanans,
         additionals,
@@ -256,10 +266,9 @@ export const printMainCheckerStruk = (
       printJob(receiptText);
       
       // Mark all new items as printed for the 'main' session
-      newItems.forEach(item => printSessionState.main.add(item.id));
-      updatePrintedStatus(newItems);
+      updatePrintedStatus(newDrinks);
     } else {
-        alert("Tidak ada item baru untuk dicetak di Main Checker.");
+        alert("Tidak ada item minuman baru untuk dicetak di Main Checker.");
     }
   } catch(e) {
       console.error("Error printing main checker receipt:", e);
