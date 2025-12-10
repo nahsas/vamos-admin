@@ -52,8 +52,8 @@ function StatCard({
   return (
     <Card className="shadow-md rounded-xl">
       <CardContent className="p-4 flex items-center gap-4">
-        <div className="p-3 bg-amber-400/20 rounded-md">
-          <Icon className="w-8 h-8 text-amber-500" />
+        <div className="p-3 bg-primary/10 rounded-md">
+          <Icon className="w-8 h-8 text-primary" />
         </div>
         <div>
           <p className="text-sm text-muted-foreground font-semibold">{title}</p>
@@ -252,7 +252,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {pendingOrders.map(order => (
-                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={onUpdateStatus} onPaymentClick={handlePaymentClick} />
+                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
                     </div>
                 </div>
@@ -266,7 +266,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {processingOrders.map(order => (
-                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={onUpdateStatus} onPaymentClick={handlePaymentClick} />
+                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={handleUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
                     </div>
                 </div>
@@ -368,6 +368,8 @@ export default function OrdersPage() {
 }
 
     
+    
+
     
 
     
