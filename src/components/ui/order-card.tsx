@@ -56,7 +56,10 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
                   {order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}` : order.no_meja}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
-                  <Badge className={statusInfo.color}>
+                  <Badge className={cn(
+                      statusInfo.color,
+                      !isPending && 'bg-gradient-to-r from-purple-600 to-blue-600'
+                    )}>
                       {statusInfo.label}
                   </Badge>
                   {order.location_area && (
@@ -110,7 +113,9 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
                 onClick={handleRedirect} 
                 className={cn(
                   "w-full",
-                  isPending && "bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 hover:from-yellow-500 hover:to-amber-600"
+                  isPending 
+                    ? "bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 hover:from-yellow-500 hover:to-amber-600"
+                    : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                 )}
               >
                   <Eye className="mr-2 h-4 w-4" />
