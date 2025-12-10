@@ -29,7 +29,7 @@ import {
   Hourglass,
   CookingPot
 } from "lucide-react";
-import { Order, MenuItem } from "@/lib/data";
+import { Order, MenuItem, Additional } from "@/lib/data";
 import { OrderGridCard } from "@/components/ui/order-grid-card";
 import { OrderDetailModal } from "@/components/ui/order-detail-modal";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { PaymentModal } from "@/components/ui/payment-modal";
 import { appEventEmitter } from "@/lib/event-emitter";
+import { printMainCheckerStruk } from "@/lib/print-utils";
 
 
 function StatCard({
@@ -68,6 +69,7 @@ export default function OrdersPage() {
   const [dineInOrders, setDineInOrders] = React.useState<Order[]>([]);
   const [takeawayOrders, setTakeawayOrders] = React.useState<Order[]>([]);
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
+  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [occupiedTablesCount, setOccupiedTablesCount] = React.useState<number | null>(null);
   
@@ -85,9 +87,10 @@ export default function OrdersPage() {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [ordersRes, menuRes] = await Promise.all([
+      const [ordersRes, menuRes, additionalsRes] = await Promise.all([
         fetch("https://vamos-api.sejadikopi.com/api/pesanans?order=updated_at.desc&status=pending,diproses"),
-        fetch("https://vamos-api.sejadikopi.com/api/menu")
+        fetch("https://vamos-api.sejadikopi.com/api/menu"),
+        fetch("https://vamos-api.sejadikopi.com/api/additionals")
       ]);
       
       const allActiveOrders = ordersRes.ok ? (await ordersRes.json()).data : [];
@@ -99,6 +102,7 @@ export default function OrdersPage() {
       setTakeawayOrders(allTakeawayOrders);
 
       if (menuRes.ok) setMenuItems((await menuRes.json()).data);
+      if (additionalsRes.ok) setAdditionals((await additionalsRes.json()).data);
 
       const uniqueTables = new Set(
         allDineInOrders.map((order: Order) => order.no_meja)
@@ -111,6 +115,7 @@ export default function OrdersPage() {
       setTakeawayOrders([]);
       setOccupiedTablesCount(0);
       setMenuItems([]);
+      setAdditionals([]);
     } finally {
       setLoading(false);
     }
@@ -132,9 +137,13 @@ export default function OrdersPage() {
     setIsModalOpen(true);
   };
   
-  const handleUpdateStatus = async (orderId: number) => {
+  const handleUpdateStatus = async (order: Order) => {
     try {
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${orderId}`, {
+      // First, print the main checker
+      printMainCheckerStruk(order, menuItems, additionals);
+      
+      // Then, update the status
+      const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +157,7 @@ export default function OrdersPage() {
 
       toast({
         title: 'Success',
-        description: `Order #${orderId} has been moved to "Processing".`,
+        description: `Order #${order.id} has been moved to "Processing".`,
       });
 
       // Refetch data to update the UI
@@ -358,3 +367,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+    

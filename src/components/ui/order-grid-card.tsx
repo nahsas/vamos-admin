@@ -10,18 +10,8 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { MapPin, FileText, Info, ArrowRight, Wallet, Bell, Printer } from 'lucide-react';
-import { printKitchenStruk, printMainCheckerStruk } from '@/lib/print-utils';
+import { printKitchenStruk } from '@/lib/print-utils';
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 
 const statusConfig: {
   [key: string]: {
@@ -35,12 +25,9 @@ const statusConfig: {
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
-export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (orderId: number) => void; onPaymentClick: (order: Order) => void; }) {
+export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (order: Order) => void; onPaymentClick: (order: Order) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'diproses';
-  
-  const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
-  const [printType, setPrintType] = React.useState<'main' | 'kitchen' | ''>('');
   
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
 
@@ -63,18 +50,12 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     if (isProcessing) {
       onPaymentClick(order);
     } else {
-      onUpdateStatus(order.id);
+      onUpdateStatus(order);
     }
   }
 
-  const handleConfirmPrint = () => {
-    if (printType === 'main') {
-      printMainCheckerStruk(order, menuItems, additionals);
-    } else if (printType === 'kitchen') {
-      printKitchenStruk(order, menuItems, additionals);
-    }
-    setIsPrintDialogOpen(false);
-    setPrintType('');
+  const handleKitchenPrint = () => {
+    printKitchenStruk(order, menuItems, additionals);
   };
 
 
@@ -157,7 +138,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button onClick={() => setIsPrintDialogOpen(true)} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
+            <Button onClick={handleKitchenPrint} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
               <FileText className="h-3 w-3" />
               Checker
             </Button>
@@ -189,29 +170,6 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
         </div>
       </CardContent>
     </Card>
-    <Dialog open={isPrintDialogOpen} onOpenChange={setIsPrintDialogOpen}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Checker mana yang ingin Anda cetak?</DialogTitle>
-                <DialogDescription>
-                    Pilih jenis checker yang ingin Anda cetak. Ini akan menandai item sebagai telah dicetak.
-                </DialogDescription>
-            </DialogHeader>
-            <Select onValueChange={(value) => setPrintType(value as 'main' | 'kitchen')}>
-                <SelectTrigger>
-                    <SelectValue placeholder="Pilih tipe checker" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="main">Main Checker</SelectItem>
-                    <SelectItem value="kitchen">Kitchen Checker</SelectItem>
-                </SelectContent>
-            </Select>
-            <DialogFooter>
-                <Button variant="outline" onClick={() => setIsPrintDialogOpen(false)}>Batal</Button>
-                <Button onClick={handleConfirmPrint} disabled={!printType}>Cetak</Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
     </>
   );
 }
