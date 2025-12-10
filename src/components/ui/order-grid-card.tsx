@@ -166,10 +166,10 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                     Pilih checker yang ingin Anda cetak untuk item baru.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col gap-2">
+                <AlertDialogFooter className="!flex-col !items-stretch gap-2">
                     <div className="grid grid-cols-2 gap-2">
-                        <AlertDialogAction onClick={handleKitchenPrint} className="flex-1">Checker Dapur</AlertDialogAction>
-                        <AlertDialogAction onClick={handleMainCheckerPrint} className="flex-1">Main Checker</AlertDialogAction>
+                        <AlertDialogAction onClick={handleKitchenPrint} className="w-full">Checker Dapur</AlertDialogAction>
+                        <AlertDialogAction onClick={handleMainCheckerPrint} className="w-full">Main Checker</AlertDialogAction>
                     </div>
                     <AlertDialogCancel className="w-full mt-0">Batal</AlertDialogCancel>
                 </AlertDialogFooter>
