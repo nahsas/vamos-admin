@@ -113,6 +113,7 @@ const generateReceiptText = (
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
   
+  // This section prints the new items (for kitchen checker) or nothing (for main checker clean up)
   itemsToPrint.forEach((item) => {
     const menuItem = menuItems.find(mi => mi.id === item.menu_id);
     if (!menuItem || item.jumlah === 0) return;
@@ -127,9 +128,11 @@ const generateReceiptText = (
     }
   });
 
+  // This section prints all items for the summary
   if (allItemsForSummary && allItemsForSummary.length > 0) {
-    receipt += "-".repeat(paperWidth) + "\n";
-    receipt += "--- SEMUA ITEM ---\n";
+    if (itemsToPrint.length > 0) { // Add separator only if there were new items
+        receipt += "-".repeat(paperWidth) + "\n";
+    }
     allItemsForSummary.forEach((item) => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem || item.jumlah === 0) return;
@@ -237,27 +240,26 @@ export const printMainCheckerStruk = (
   additionals: Additional[]
 ) => {
   try {
-    // Items are drinks and have not been printed by main checker yet
-    const newDrinks = order.detail_pesanans.filter(item => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        return menuItem?.kategori_struk === 'minuman' && !printSessionState.main.has(item.id);
-    });
+    // For Main Checker, we are interested in any new item (food or drink)
+    const newItems = order.detail_pesanans.filter(item => !printSessionState.main.has(item.id));
 
-    if (newDrinks.length > 0) {
+    if (newItems.length > 0) {
       const receiptText = generateReceiptText(order, menuItems, {
         title: "MAIN CHECKER",
         showPrices: true,
-        itemsToPrint: newDrinks,
-        allItemsForSummary: order.detail_pesanans, // Always include all items for summary
+        // We pass an empty array to `itemsToPrint` to avoid the first block of items
+        itemsToPrint: [],
+        // We pass ALL items to `allItemsForSummary` to print them in a single block
+        allItemsForSummary: order.detail_pesanans,
         additionals,
       });
       printJob(receiptText);
       
-      // Update session state for main and update backend for the new drinks
-      newDrinks.forEach(item => printSessionState.main.add(item.id));
-      updatePrintedStatus(newDrinks);
+      // Mark all new items as printed for the 'main' session
+      newItems.forEach(item => printSessionState.main.add(item.id));
+      updatePrintedStatus(newItems);
     } else {
-        alert("Tidak ada item minuman baru untuk dicetak di Main Checker.");
+        alert("Tidak ada item baru untuk dicetak di Main Checker.");
     }
   } catch(e) {
       console.error("Error printing main checker receipt:", e);
