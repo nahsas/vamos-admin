@@ -192,7 +192,7 @@ export default function DashboardPage() {
               value={totalMenu !== null ? totalMenu.toString() : "..."} 
               icon={Utensils} 
               description="Semua kategori" 
-              bgColor="bg-blue-500" 
+              bgColor="bg-purple-600" 
               textColor="text-white" 
             />
             <StatCard 
