@@ -50,7 +50,7 @@ const statusConfig: {
     color: string;
   };
 } = {
-  pending: { label: 'PENDING', color: 'bg-yellow-400 text-yellow-900' },
+  pending: { label: 'PENDING', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' },
   diproses: { label: 'PROSES', color: 'bg-blue-500 text-white' },
   selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
@@ -484,5 +484,3 @@ export function OrderDetailModal({
     </>
   );
 }
-
-    
