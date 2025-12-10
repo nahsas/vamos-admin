@@ -1,5 +1,4 @@
 
-
 import { Order, OrderItem, MenuItem, Additional } from './data';
 import { appEventEmitter } from './event-emitter';
 
@@ -125,31 +124,18 @@ const generateReceiptText = (
   }
 
   if (title === 'MAIN CHECKER') {
-    if (itemsToPrint.length > 0) {
-      receipt += "--- MINUMAN BARU ---\n";
-      itemsToPrint.forEach(item => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        if (!menuItem) return;
-        let itemName = `${item.jumlah}x ${menuItem.nama}`;
-        if (item.varian) itemName += ` (${item.varian})`;
-        
-        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
-        receipt += createLine(itemName, subtotal) + "\n";
-        receipt += renderItemDetails(item);
-      });
-      receipt += "\n";
-    }
-    
     receipt += "--- SEMUA ITEM ---\n";
-    (allItemsForMainChecker || order.detail_pesanans).forEach(item => {
+    (itemsToPrint).forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem) return;
-        let itemName = `${item.jumlah}x ${menuItem.nama}`;
+        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
         if (item.varian) itemName += ` (${item.varian})`;
         const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
         
         receipt += createLine(itemName, subtotal) + "\n";
-        receipt += renderItemDetails(item);
+        if (item.note) {
+            receipt += `  Note: ${item.note}\n`;
+        }
     });
 
   } else {
@@ -158,10 +144,10 @@ const generateReceiptText = (
       if (!menuItem || item.jumlah === 0) return;
 
       const qty = `${item.jumlah}x `;
-      let itemName = menuItem.nama;
+      let itemName = menuItem.nama.replace(/\*/g, '');
       if (item.varian) itemName += ` (${item.varian})`;
       
-      const itemLine = qty + itemName.replace(/\*/g, ''); // Remove asterisks
+      const itemLine = qty + itemName; 
 
       if (showPrices) {
           const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
@@ -170,7 +156,9 @@ const generateReceiptText = (
           receipt += itemLine + "\n";
       }
       
-      receipt += renderItemDetails(item);
+      if(item.note) {
+          receipt += `  Note: ${item.note}\n`;
+      }
     });
   }
 
@@ -268,23 +256,19 @@ export const printMainCheckerStruk = (
   additionals: Additional[]
 ) => {
   try {
-    const unprintedDrinks = order.detail_pesanans.filter(item => {
-      const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-      return item.printed === 0 && menuItem?.kategori_struk === 'minuman';
-    });
+    const unprintedItems = order.detail_pesanans.filter(item => item.printed === 0);
 
-    if (unprintedDrinks.length > 0) {
+    if (unprintedItems.length > 0) {
       const receiptText = generateReceiptText(order, menuItems, {
         title: "MAIN CHECKER",
         showPrices: true,
-        itemsToPrint: unprintedDrinks,
-        allItemsForMainChecker: order.detail_pesanans,
+        itemsToPrint: unprintedItems, // Only pass unprinted items
         additionals,
       });
       printJob(receiptText);
-      updatePrintedStatus(unprintedDrinks);
+      updatePrintedStatus(unprintedItems);
     } else {
-        alert("Tidak ada item minuman baru untuk dicetak.");
+        alert("Tidak ada item baru untuk dicetak.");
     }
   } catch(e) {
       console.error("Error printing main checker receipt:", e);
