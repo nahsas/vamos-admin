@@ -23,8 +23,8 @@ import { appEventEmitter } from '@/lib/event-emitter';
 
 const banks = [
     { id: 'BCA', name: 'BCA', logo: 'https://vamos-api.sejadikopi.com/storage/images/BCA.png' },
-    { id: 'BRI', name: 'BRI', logo: 'https://placehold.co/100x40/00529C/FFFFFF?text=BRI' },
-    { id: 'BSI', name: 'BSI', logo: 'https://placehold.co/100x40/00A59C/FFFFFF?text=BSI' },
+    { id: 'BRI', name: 'BRI', logo: 'https://vamos-api.sejadikopi.com/storage/images/BRI.png' },
+    { id: 'BSI', name: 'BSI', logo: 'https://vamos-api.sejadikopi.com/storage/images/BSI.png' },
 ]
 
 export function PaymentModal({
