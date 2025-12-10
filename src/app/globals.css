@@ -4,6 +4,42 @@
 
 @layer base {
   :root {
+    --background: 210 17% 97%; /* #f8f9fa */
+    --foreground: 210 29% 24%; /* #2c3e50 */
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 210 29% 24%; /* #2c3e50 */
+    --popover: 0 0% 100%; /* #ffffff */
+    --popover-foreground: 210 29% 24%; /* #2c3e50 */
+    --primary: 207 70% 51%; /* #3498db */
+    --primary-foreground: 0 0% 100%; /* #ffffff */
+    --secondary: 213 27% 84%; /* #e8ecf1 */
+    --secondary-foreground: 210 29% 24%; /* #2c3e50 */
+    --muted: 213 27% 84%; /* #e8ecf1 */
+    --muted-foreground: 204 9% 51%; /* #7f8c8d */
+    --accent: 213 27% 91%; /* #e8ecf1 */
+    --accent-foreground: 210 29% 24%; /* #2c3e50 */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 213 27% 84%; /* #d8dfe7 */
+    --input: 213 27% 84%; /* #d8dfe7 */
+    --ring: 207 70% 51%; /* #3498db */
+    --radius: 0.75rem;
+    --chart-1: 207 70% 51%;
+    --chart-2: 207 70% 61%;
+    --chart-3: 207 70% 71%;
+    --chart-4: 207 70% 81%;
+    --chart-5: 207 70% 91%;
+    --sidebar-background: 210 29% 24%; /* #2c3e50 */
+    --sidebar-foreground: 0 0% 100%; /* #ffffff */
+    --sidebar-primary: 207 70% 51%; /* #3498db */
+    --sidebar-primary-foreground: 0 0% 100%; /* #ffffff */
+    --sidebar-accent: 210 29% 30%; /* #3a444e */
+    --sidebar-accent-foreground: 0 0% 100%; /* #ffffff */
+    --sidebar-border: 210 29% 30%; /* #3a444e */
+    --sidebar-ring: 207 70% 51%; /* #3498db */
+  }
+
+  .dark {
     --background: 210 29% 10%; /* #1a252f - Dark Blue-Gray */
     --foreground: 0 0% 98%; /* #fafafa - Almost White */
     --card: 210 29% 15%; /* #223344 - Lighter Dark Blue-Gray */
@@ -45,6 +81,9 @@
     @apply border-border;
   }
   body {
+    @apply bg-gradient-to-br from-background via-[#F5F7FA] to-[#E8ECF1] text-foreground;
+  }
+  .dark body {
     @apply bg-gradient-to-br from-[#2c3e50] via-[#34495e] to-[#1a252f] text-foreground;
   }
 }
@@ -62,15 +101,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--sidebar-background));
+    background: hsl(var(--sidebar-background) / 0.5);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--secondary));
+    background: hsl(var(--sidebar-accent));
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted)); 
+    background: hsl(var(--sidebar-primary));
   }
 }
