@@ -19,8 +19,8 @@ const statusConfig: {
     color: string;
   };
 } = {
-  pending: { variant: 'secondary', label: 'Tertunda', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' },
-  diproses: { variant: 'default', label: 'Diproses', color: 'bg-blue-500 text-white' },
+  pending: { variant: 'secondary', label: 'Tertunda', color: 'bg-yellow-400 hover:bg-yellow-500 text-white' },
+  diproses: { variant: 'default', label: 'Diproses', color: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' },
   selesai: { variant: 'outline', label: 'Selesai', color: 'bg-green-500 text-white' },
   dibatalkan: { variant: 'destructive', label: 'Dibatalkan', color: 'bg-red-500 text-white' },
 };
@@ -57,8 +57,7 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                   <Badge className={cn(
-                      statusInfo.color,
-                      !isPending && 'bg-gradient-to-r from-purple-600 to-blue-600'
+                      statusInfo.color
                     )}>
                       {statusInfo.label}
                   </Badge>
@@ -114,7 +113,7 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
                 className={cn(
                   "w-full",
                   isPending 
-                    ? "bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 hover:from-yellow-500 hover:to-amber-600"
+                    ? "bg-gradient-to-r from-yellow-400 to-amber-500 text-white hover:from-yellow-500 hover:to-amber-600"
                     : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                 )}
               >
