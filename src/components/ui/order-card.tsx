@@ -98,7 +98,7 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
             </div>
         </div>
         <div className="mt-4">
-             <Button onClick={handleRedirect} className="w-full font-bold">
+             <Button onClick={handleRedirect} className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold">
                 <Eye className="mr-2 h-4 w-4" />
                 Lihat Detail
              </Button>
@@ -107,3 +107,5 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
     </Card>
   );
 }
+
+    
