@@ -8,7 +8,6 @@ const paperWidth = 32;
 const createLine = (left: string, right: string): string => {
     const spaces = paperWidth - left.length - right.length;
     if (spaces < 1) {
-        // If the combined length is too long, truncate the left string to make space
         const leftTruncated = left.substring(0, left.length + spaces - 1);
         return `${leftTruncated} ${right}`;
     }
@@ -20,22 +19,19 @@ const formatCurrency = (num: number): string => {
     return num.toLocaleString('id-ID');
 }
 
-type ReceiptType = 'kitchen' | 'bar' | 'waiter' | 'payment';
-
 interface ReceiptOptions {
     title: string;
     showPrices: boolean;
     itemsToPrint: OrderItem[];
-    allItemsForMainChecker?: OrderItem[]; // Specifically for the "SEMUA ITEM" list
+    allItemsForMainChecker?: OrderItem[];
     paymentAmount?: number;
-    additionals: Additional[]; // Add this to pass additional names
+    additionals: Additional[];
 }
 
 const updatePrintedStatus = (items: OrderItem[]) => {
   const unprintedItems = items.filter(item => item.printed === 0);
   if (unprintedItems.length === 0) return;
 
-  // Fire-and-forget: Don't await the promises here to avoid blocking the UI
   const updatePromises = unprintedItems.map(item =>
     fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
         method: 'PUT',
@@ -53,7 +49,6 @@ const updatePrintedStatus = (items: OrderItem[]) => {
   );
 
   Promise.all(updatePromises).then(results => {
-    // If at least one update was successful, emit an event to refresh data
     if (results.some(success => success)) {
         appEventEmitter.emit('new-order');
     }
@@ -86,23 +81,22 @@ const generateReceiptText = (
   const tipeText = order.location_area ? `${baseType}|${order.location_area}` : baseType;
 
   let receipt = "\n\n";
-  receipt += "\x1B\x40"; // Initialize printer
+  receipt += "\x1B\x40"; 
   
-  // --- Header ---
-  receipt += `\x1B\x61\x01`; // Align Center
-  receipt += `\x1B\x21\x10`; // Double width/height
+  receipt += `\x1B\x61\x01`; 
+  receipt += `\x1B\x21\x10`; 
   receipt += "SEJADI KOPI" + "\n";
   
   if (showPrices) {
-    receipt += `\x1B\x21\x00`; // Normal size
+    receipt += `\x1B\x21\x00`; 
     receipt += "Jl. Pattimura, Air Saga" + "\n";
   }
   
-  receipt += `\x1B\x21\x10`; // Double width/height
+  receipt += `\x1B\x21\x10`; 
   receipt += title + "\n\n";
 
-  receipt += `\x1B\x21\x00`; // Normal size
-  receipt += `\x1B\x61\x00`; // Align Left
+  receipt += `\x1B\x21\x00`; 
+  receipt += `\x1B\x61\x00`; 
   
   if (showPrices || title === 'MAIN CHECKER') {
       receipt += createLine("No", `#${order.id}`) + "\n";
@@ -114,7 +108,8 @@ const generateReceiptText = (
   
   const renderItemDetails = (item: OrderItem) => {
       let details = '';
-      const itemAdditionals = { ...item.additionals, ...item.dimsum_additionals };
+      const itemAdditionals: { [key: string]: boolean } = { ...(item.additionals || {}), ...(item.dimsum_additionals || {}) };
+      
       for (const id in itemAdditionals) {
           if (itemAdditionals[id]) {
               const additional = additionals.find(add => add.id === parseInt(id));
@@ -129,9 +124,7 @@ const generateReceiptText = (
       return details;
   }
 
-  // --- Items ---
   if (title === 'MAIN CHECKER') {
-    // For MINUMAN section, only show new drinks if any exist.
     if (itemsToPrint.length > 0) {
       receipt += "--- MINUMAN BARU ---\n";
       itemsToPrint.forEach(item => {
@@ -147,7 +140,6 @@ const generateReceiptText = (
       receipt += "\n";
     }
     
-    // For SEMUA ITEM, always show all items from the original order
     receipt += "--- SEMUA ITEM ---\n";
     (allItemsForMainChecker || order.detail_pesanans).forEach(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
@@ -165,17 +157,14 @@ const generateReceiptText = (
       const menuItem = menuItems.find(mi => mi.id === item.menu_id);
       if (!menuItem || item.jumlah === 0) return;
 
-      let qty = `${item.jumlah}x `;
-      if (item.printed === 0 && !showPrices) { // Only mark new on kitchen/bar receipts
-        qty = `**${item.jumlah}x** `; // Mark new items
-      }
+      const qty = `${item.jumlah}x `;
       let itemName = menuItem.nama;
       if (item.varian) itemName += ` (${item.varian})`;
       
-      const itemLine = qty + itemName;
-      const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+      const itemLine = qty + itemName.replace(/\*/g, ''); // Remove asterisks
 
       if (showPrices) {
+          const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
           receipt += createLine(itemLine, subtotal) + "\n";
       } else {
           receipt += itemLine + "\n";
@@ -188,7 +177,6 @@ const generateReceiptText = (
 
   receipt += "-".repeat(paperWidth) + "\n";
   
-  // --- Footer ---
   if (showPrices || title === 'MAIN CHECKER') {
     const total = order.total_after_discount ?? parseInt(order.total, 10);
     receipt += createLine("TOTAL", `Rp${formatCurrency(parseInt(order.total, 10))}`) + "\n";
@@ -215,25 +203,25 @@ const generateReceiptText = (
       }
     } else if (showPrices && !order.metode_pembayaran && title !== 'BILL') {
         receipt += "--------------------------------\n";
-        receipt += "\x1B\x61\x01"; // Align center
+        receipt += "\x1B\x61\x01"; 
         receipt += "Sampai Jumpa" + "\n";
         receipt += "Terima Kasih" + "\n";
-        receipt += "\x1B\x61\x00"; // Align left
+        receipt += "\x1B\x61\x00"; 
     }
 
     if (showPrices && title !== 'BILL') {
          receipt += "--------------------------------\n";
-        receipt += "\x1B\x61\x01"; // Align center
+        receipt += "\x1B\x61\x01"; 
         receipt += "Sampai Jumpa" + "\n";
         receipt += "Terima Kasih" + "\n";
-        receipt += "\x1B\x61\x00"; // Align left
+        receipt += "\x1B\x61\x00"; 
     }
   }
 
   receipt += "\n\n\n";
-  receipt += "\x1D\x56\x41"; // Cut paper
+  receipt += "\x1D\x56\x41"; 
   if (showPrices && title !== 'BILL' && title !== 'MAIN CHECKER') {
-    receipt += "\x1B\x70\x00\x19\xFA"; // open drawer
+    receipt += "\x1B\x70\x00\x19\xFA"; 
   }
 
   return receipt;
@@ -290,7 +278,7 @@ export const printMainCheckerStruk = (
         title: "MAIN CHECKER",
         showPrices: true,
         itemsToPrint: unprintedDrinks,
-        allItemsForMainChecker: order.detail_pesanans, // Always pass all items
+        allItemsForMainChecker: order.detail_pesanans,
         additionals,
       });
       printJob(receiptText);

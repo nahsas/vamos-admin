@@ -200,14 +200,14 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     <Dialog open={isPrintDialogOpen} onOpenChange={setIsPrintDialogOpen}>
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Which checker do you want to print?</DialogTitle>
+                <DialogTitle>Checker mana yang ingin Anda cetak?</DialogTitle>
                 <DialogDescription>
-                    Select the type of checker you want to print. This will mark the items as printed.
+                    Pilih jenis checker yang ingin Anda cetak. Ini akan menandai item sebagai telah dicetak.
                 </DialogDescription>
             </DialogHeader>
             <Select onValueChange={(value) => setPrintType(value as 'main' | 'kitchen')}>
                 <SelectTrigger>
-                    <SelectValue placeholder="Select checker type" />
+                    <SelectValue placeholder="Pilih tipe checker" />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="main">Main Checker</SelectItem>
@@ -215,8 +215,8 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                 </SelectContent>
             </Select>
             <DialogFooter>
-                <Button variant="outline" onClick={() => setIsPrintDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleConfirmPrint} disabled={!printType}>Print</Button>
+                <Button variant="outline" onClick={() => setIsPrintDialogOpen(false)}>Batal</Button>
+                <Button onClick={handleConfirmPrint} disabled={!printType}>Cetak</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
