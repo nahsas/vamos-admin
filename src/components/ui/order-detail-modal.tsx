@@ -37,10 +37,12 @@ import {
   PlusCircle,
   Bell,
   Plus,
-  Minus
+  Minus,
+  Printer,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentModal } from './payment-modal';
+import { printBillStruk } from '@/lib/print-utils';
 
 const statusConfig: {
   [key: string]: {
@@ -274,6 +276,12 @@ export function OrderDetailModal({
     setIsPaymentModalOpen(true);
   }
 
+  const handlePrintBill = () => {
+    if (currentOrder) {
+      printBillStruk(currentOrder, menuItems, additionals);
+    }
+  };
+
   const handleClose = (isOpen: boolean) => {
     if (!isOpen) {
       onOrderDeleted(); // Refresh data on parent when modal closes
@@ -415,11 +423,11 @@ export function OrderDetailModal({
                      <p className="text-sm text-muted-foreground">{totalItems} item</p>
                 </div>
                 {!isCompleted && (
-                    <DialogFooter className="grid grid-cols-2 gap-2">
+                    <DialogFooter className="grid grid-cols-3 gap-2">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" className="bg-red-600 text-white hover:bg-red-700">
-                                    <XCircle className="mr-2 h-4 w-4" /> Batalkan Pesanan
+                                    <XCircle className="mr-2 h-4 w-4" /> Batalkan
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -437,6 +445,10 @@ export function OrderDetailModal({
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
+
+                        <Button variant="outline" className="bg-gray-600 hover:bg-gray-700 text-white" onClick={handlePrintBill}>
+                            <Printer className="mr-2 h-4 w-4" /> Bill
+                        </Button>
 
                         <Button 
                             onClick={isProcessing ? handlePaymentClick : () => {}}
