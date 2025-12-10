@@ -185,8 +185,8 @@ const generateReceiptText = (
       }
     }
     
-    if (title === 'BILL' || title === 'STRUK PEMBELIAN') {
-         receipt += "--------------------------------\n";
+    if (title === 'BILL' || title === 'STRUK PEMBELIAN' || title === 'MAIN CHECKER') {
+        receipt += "--------------------------------\n";
         receipt += "\x1B\x61\x01"; 
         receipt += "Sampai Jumpa" + "\n";
         receipt += "Terima Kasih" + "\n";
