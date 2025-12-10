@@ -10,8 +10,19 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { MapPin, FileText, Info, ArrowRight, Wallet, Bell, Printer } from 'lucide-react';
-import { printKitchenStruk } from '@/lib/print-utils';
+import { printKitchenStruk, printMainCheckerStruk } from '@/lib/print-utils';
 import React from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const statusConfig: {
   [key: string]: {
@@ -57,6 +68,10 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   const handleKitchenPrint = () => {
     printKitchenStruk(order, menuItems, additionals);
   };
+
+  const handleMainCheckerPrint = () => {
+    printMainCheckerStruk(order, menuItems, additionals);
+  }
 
 
   return (
@@ -138,10 +153,27 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <Button onClick={handleKitchenPrint} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
-              <FileText className="h-3 w-3" />
-              Checker
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button disabled={!hasNewItems} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
+                    <FileText className="h-3 w-3" />
+                    Checker
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Pilih Tipe Checker</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Pilih checker yang ingin Anda cetak untuk item baru.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="grid grid-cols-2 gap-2">
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleKitchenPrint}>Checker Dapur</AlertDialogAction>
+                  <AlertDialogAction onClick={handleMainCheckerPrint}>Main Checker</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order)}>
               <Info className="h-3 w-3" />
               Detail
