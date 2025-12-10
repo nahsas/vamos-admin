@@ -139,9 +139,6 @@ export default function OrdersPage() {
   
   const handleUpdateStatus = async (order: Order) => {
     try {
-      // Print main checker first
-      printMainCheckerStruk(order, menuItems, additionals);
-      
       const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${order.id}`, {
         method: 'PUT',
         headers: {
@@ -368,6 +365,8 @@ export default function OrdersPage() {
 }
 
     
+    
+
     
 
     
