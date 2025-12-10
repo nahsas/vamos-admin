@@ -152,29 +152,33 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button disabled={!hasNewItems} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
-                    <FileText className="h-3 w-3" />
-                    Checker
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Pilih Tipe Checker</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Pilih checker yang ingin Anda cetak untuk item baru.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="!flex-col !items-stretch gap-2">
-                    <div className="grid grid-cols-2 gap-2">
-                        <AlertDialogAction onClick={handleKitchenPrint} className="w-full">Checker Dapur</AlertDialogAction>
-                        <AlertDialogAction onClick={handleMainCheckerPrint} className="w-full">Main Checker</AlertDialogAction>
-                    </div>
-                    <AlertDialogCancel className="w-full mt-0">Batal</AlertDialogCancel>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button disabled={!hasNewItems} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  Checker
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Pilih Tipe Checker</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Pilih checker yang ingin Anda cetak untuk item baru.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col sm:flex-col gap-2 mt-4">
+                <div className="grid grid-cols-2 gap-2 w-full">
+                    <AlertDialogAction onClick={handleKitchenPrint} className="w-full">
+                      Checker Dapur
+                    </AlertDialogAction>
+                    <AlertDialogAction onClick={handleMainCheckerPrint} className="w-full">
+                      Main Checker
+                    </AlertDialogAction>
+                </div>
+                <AlertDialogCancel className="w-full mt-2">Batal</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
             <Button size="sm" variant="secondary" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1" onClick={() => onDetailClick(order)}>
               <Info className="h-3 w-3" />
               Detail
@@ -206,3 +210,5 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     </>
   );
 }
+
+    

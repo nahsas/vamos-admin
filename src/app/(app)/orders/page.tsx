@@ -37,7 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { PaymentModal } from "@/components/ui/payment-modal";
 import { appEventEmitter } from "@/lib/event-emitter";
-import { printMainCheckerStruk } from "@/lib/print-utils";
+import { printMainCheckerStruk, printKitchenStruk } from "@/lib/print-utils";
 
 
 function StatCard({
@@ -52,8 +52,8 @@ function StatCard({
   return (
     <Card className="shadow-md rounded-xl">
       <CardContent className="p-4 flex items-center gap-4">
-        <div className="p-3 bg-amber-400/20 rounded-md">
-          <Icon className="w-8 h-8 text-amber-600" />
+        <div className="p-3 bg-primary/10 rounded-md">
+          <Icon className="w-8 h-8 text-primary" />
         </div>
         <div>
           <p className="text-sm text-muted-foreground font-semibold">{title}</p>
@@ -139,6 +139,9 @@ export default function OrdersPage() {
   
   const handleUpdateStatus = async (order: Order) => {
     try {
+      // Print main checker first
+      printMainCheckerStruk(order, menuItems, additionals);
+      
       const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${order.id}`, {
         method: 'PUT',
         headers: {
@@ -364,4 +367,5 @@ export default function OrdersPage() {
   );
 }
 
+    
     
