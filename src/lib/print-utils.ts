@@ -100,6 +100,7 @@ const generateReceiptText = (
   }
   
   receipt += `\x1B\x21\x10`; 
+  receipt += `\x1B\x61\x01`; // center align
   receipt += title + "\n\n";
 
   receipt += `\x1B\x21\x00`; 
@@ -113,35 +114,58 @@ const generateReceiptText = (
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
   
-  // This section prints the new items (for kitchen checker) or nothing (for main checker clean up)
-  itemsToPrint.forEach((item) => {
-    const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-    if (!menuItem || item.jumlah === 0) return;
+  // -- MINUMAN -- section for MAIN CHECKER
+  if (title === 'MAIN CHECKER' && itemsToPrint.length > 0) {
+      receipt += `\x1B\x61\x00`; // Left align
+      receipt += "-- MINUMAN --" + "\n";
+      itemsToPrint.forEach((item) => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+        if (!menuItem || item.jumlah === 0) return;
 
-    let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
-    if (item.varian) itemName += ` (${item.varian})`;
-
-    if (showPrices) {
+        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
+        if (item.varian) itemName += ` (${item.varian})`;
         const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
         receipt += createLine(itemName, subtotal) + "\n";
-    } else {
-        receipt += itemName + "\n";
-    }
-    
-    if (item.note) {
-        receipt += `  Note: ${item.note}\n`;
-    }
-  });
+
+        if (item.note) {
+            receipt += `  Note: ${item.note}\n`;
+        }
+      });
+  } else if (title !== 'MAIN CHECKER') {
+    // Original logic for kitchen and other checkers
+    itemsToPrint.forEach((item) => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
+        if (!menuItem || item.jumlah === 0) return;
+
+        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
+        if (item.varian) itemName += ` (${item.varian})`;
+
+        if (showPrices) {
+            const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+            receipt += createLine(itemName, subtotal) + "\n";
+        } else {
+            receipt += itemName + "\n";
+        }
+        
+        if (item.note) {
+            receipt += `  Note: ${item.note}\n`;
+        }
+      });
+  }
+
 
   // This section prints all items for the summary
   if (allItemsForSummary && allItemsForSummary.length > 0) {
-    if (itemsToPrint.length > 0) { // Add separator only if there were new items
+    if (itemsToPrint.length > 0) { 
         receipt += "\n";
     }
     receipt += `\x1B\x61\x00`; // Align left
-    receipt += "--- SEMUA ITEM ---" + "\n";
+    receipt += "-- SEMUA ITEM --" + "\n";
     
-    allItemsForSummary.forEach((item) => {
+    // Sort allItemsForSummary to have new items (printed === 0) on top
+    const sortedItems = [...allItemsForSummary].sort((a, b) => a.printed - b.printed);
+    
+    sortedItems.forEach((item) => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem || item.jumlah === 0) return;
 
