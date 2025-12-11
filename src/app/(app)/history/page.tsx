@@ -237,7 +237,6 @@ export default function HistoryPage() {
   });
 
   const completedOrders = orders.filter(o => o.status === "selesai").length;
-  const cancelledOrders = orders.filter(o => o.status === "cancelled").length;
   const totalRevenue = orders
     .filter((o) => o.status === "selesai")
     .reduce((sum, order) => sum + (order.total_after_discount ?? parseInt(order.total, 10)), 0);
@@ -287,7 +286,7 @@ export default function HistoryPage() {
         <span>Hari ini: {format(new Date(), "dd MMMM yyyy", { locale: id })}</span>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="TOTAL TRANSAKSI"
           value={orders.length.toString()}
@@ -301,13 +300,6 @@ export default function HistoryPage() {
           icon={CheckCircle}
           bgColor="bg-green-100"
           iconColor="text-green-600"
-        />
-        <StatCard
-          title="DIBATALKAN"
-          value={cancelledOrders.toString()}
-          icon={XCircle}
-          bgColor="bg-red-100"
-          iconColor="text-red-600"
         />
         <StatCard
           title="TOTAL PENDAPATAN"
@@ -350,5 +342,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
-    
