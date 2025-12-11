@@ -75,11 +75,15 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   const borderGradientClass = isProcessing
     ? 'bg-gradient-to-br from-purple-600 to-blue-600'
     : 'bg-gradient-to-br from-yellow-400 to-yellow-600';
+    
+  const shadowClass = isProcessing
+    ? 'hover:shadow-[0_0_15px_2px_rgba(139,92,246,0.5)]'
+    : 'hover:shadow-[0_0_15px_2px_rgba(251,191,36,0.5)]';
 
 
   return (
     <>
-    <Card className={cn("shadow-lg rounded-xl p-0.5", borderGradientClass)}>
+    <Card className={cn("shadow-lg rounded-xl p-0.5 transition-all duration-300 ease-in-out hover:scale-105 hover:p-1", borderGradientClass, shadowClass)}>
       <CardContent className="p-4 flex flex-col h-full bg-card rounded-lg">
         <div className="flex-grow space-y-3">
           <div className="flex justify-between items-start">
