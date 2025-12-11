@@ -377,13 +377,13 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-        const sDate = startDate ? format(startDate, 'yyyy-MM-dd\'T\'HH:mm:ss') : '';
-        const eDate = endDate ? format(endDate, 'yyyy-MM-dd\'T\'HH:mm:ss') : '';
+        const sDate = startDate ? format(startDate, 'yyyy-MM-dd') : '';
+        const eDate = endDate ? format(endDate, 'yyyy-MM-dd') : '';
         
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
-        if (sDate) transactionUrl.searchParams.set('created_from', sDate);
-        if (eDate) transactionUrl.searchParams.set('created_to', eDate);
+        if (sDate) transactionUrl.searchParams.set('start_date', sDate);
+        if (eDate) transactionUrl.searchParams.set('end_date', eDate);
         
         const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
         if (fetchMethod !== 'all') {
@@ -391,8 +391,8 @@ export default function ReportsPage() {
         }
 
         const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-        if(sDate) expenseUrl.searchParams.set('start_date', format(startDate as Date, 'yyyy-MM-dd'));
-        if(eDate) expenseUrl.searchParams.set('end_date', format(endDate as Date, 'yyyy-MM-dd'));
+        if(sDate) expenseUrl.searchParams.set('start_date', sDate);
+        if(eDate) expenseUrl.searchParams.set('end_date', eDate);
         expenseUrl.searchParams.set('order', 'tanggal.desc');
         
         const [transactionRes, expenseRes, menuRes] = await Promise.all([
@@ -464,7 +464,6 @@ export default function ReportsPage() {
     setStartDate(startOfDay(new Date()));
     setEndDate(endOfDay(new Date()));
     setPaymentMethod("all");
-    // Use a timeout to ensure state is updated before fetching
     setTimeout(fetchData, 0);
   };
   
@@ -562,7 +561,7 @@ export default function ReportsPage() {
 
             // --- SUMMARY SHEET ---
             const summaryData = [
-                [{ v: "Laporan Pembukuan Sejadi Kopi", s: { font: { bold: true, sz: 16 } } }],
+                [{ v: "Laporan Pembukuan Vamos - Pool & Cafe", s: { font: { bold: true, sz: 16 } } }],
                 [{ v: `Periode: ${filterDateRangeStr}`, s: { font: { italic: true } } }],
                 [],
                 [{ v: "RINGKASAN UMUM", s: headerStyle }],
@@ -868,5 +867,6 @@ export default function ReportsPage() {
     </div>
   )
 }
+    
 
     
