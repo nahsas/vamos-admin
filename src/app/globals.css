@@ -82,6 +82,11 @@
   }
   body {
     @apply bg-background text-foreground;
+     scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  }
+  body::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
   }
   .dark body {
     @apply bg-background text-foreground;
@@ -96,20 +101,6 @@
 
   /* Custom Scrollbar for Webkit browsers */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--sidebar-background) / 0.5);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--sidebar-accent));
-    border-radius: 10px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--sidebar-primary));
+    display: none;
   }
 }
