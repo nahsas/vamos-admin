@@ -377,23 +377,13 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-        const sDate = startDate ? format(startDate, "yyyy-MM-dd") : '';
-        const eDate = endDate ? format(endDate, "yyyy-MM-dd") : '';
+        const sDate = startDate ? format(startOfDay(startDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
+        const eDate = endDate ? format(endOfDay(endDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
         
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
-        if(sDate) transactionUrl.searchParams.set('payment_date', sDate);
-        if(eDate && sDate === eDate) {
-            // If start and end are the same, we query for that single day
-             transactionUrl.searchParams.set('payment_date', sDate);
-        } else {
-            // If different, we create a range. API might need specific handling for range.
-            // Assuming separate from/to params for payment date range if API supports it.
-            // For now, this might fetch more than needed if API doesn't support range on `payment_date`.
-            // The user may need to clarify API capabilities if this doesn't work.
-            if(sDate) transactionUrl.searchParams.set('created_from', format(startOfDay(startDate as Date), "yyyy-MM-dd'T'HH:mm:ss"));
-            if(eDate) transactionUrl.searchParams.set('created_to', format(endOfDay(endDate as Date), "yyyy-MM-dd'T'HH:mm:ss"));
-        }
+        if(sDate) transactionUrl.searchParams.set('created_from', sDate);
+        if(eDate) transactionUrl.searchParams.set('created_to', eDate);
         
         const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
         if (fetchMethod !== 'all') {
@@ -401,8 +391,8 @@ export default function ReportsPage() {
         }
 
         const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-        if(sDate) expenseUrl.searchParams.set('tanggal_from', sDate);
-        if(eDate) expenseUrl.searchParams.set('tanggal_to', eDate);
+        if(sDate) expenseUrl.searchParams.set('start_date', format(startDate as Date, 'yyyy-MM-dd'));
+        if(eDate) expenseUrl.searchParams.set('end_date', format(endDate as Date, 'yyyy-MM-dd'));
         expenseUrl.searchParams.set('order', 'tanggal.desc');
         
         const [transactionRes, expenseRes, menuRes] = await Promise.all([
@@ -560,58 +550,74 @@ export default function ReportsPage() {
 
     const handleExport = () => {
         setExporting(true);
-        
-        const summaryData = [
-        ["Laporan Pembukuan Sejadi Kopi"],
-        [`Periode: ${filterDateRangeStr}`],
-        [],
-        ["RINGKASAN UMUM"],
-        ["Total Pendapatan", totalRevenue],
-        ["Total Pengeluaran", totalExpenses],
-        ["Laba Bersih", netProfit],
-        ["Margin Laba", `${margin.toFixed(2)}%`],
-        ["Total Transaksi", filteredTransactions.length],
-        [],
-        ["RINCIAN PEMBAYARAN"],
-        ["Metode", "Jumlah Transaksi", "Total Nominal"],
-        ["Pitty Cash", "", pittyCash],
-        ["Tunai", paymentBreakdown.cash.count, paymentBreakdown.cash.amount],
-        ["Setoran", "", setoran],
-        ["QRIS (Semua)", paymentBreakdown.qris.count, paymentBreakdown.qris.amount],
-        ["QRIS (BCA)", paymentBreakdown.qris_bca.count, paymentBreakdown.qris_bca.amount],
-        ["QRIS (BRI)", paymentBreakdown.qris_bri.count, paymentBreakdown.qris_bri.amount],
-        ["QRIS (BSI)", paymentBreakdown.qris_bsi.count, paymentBreakdown.qris_bsi.amount],
-        ];
-        const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
+        try {
+            const wb = XLSX.utils.book_new();
 
-        const transactionsData = filteredTransactions.map(t => ({
-        "ID": t.id,
-        "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
-        "Meja/Pelanggan": t.no_meja,
-        "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
-        "Total": t.total,
-        "Diskon": t.discount_amount || 0,
-        "Total Akhir": t.total_after_discount,
-        }));
-        const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
+            // --- SUMMARY SHEET ---
+            const summaryHeaderStyle = { font: { bold: true }, fill: { fgColor: { rgb: "D9EAD3" } } };
+            const subHeaderStyle = { font: { bold: true } };
 
-        const expensesData = filteredExpenses.map(e => ({
-            "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
-            "Kategori": e.kategori,
-            "Deskripsi": e.deskripsi,
-            "Jumlah": e.jumlah,
-            "Dibuat oleh": e.created_by
-        }));
-        const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
-        
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
-        XLSX.utils.book_append_sheet(wb, transactions_ws, "Riwayat Transaksi");
-        XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
+            const summaryData = [
+                [{ v: "Laporan Pembukuan Sejadi Kopi", s: { font: { bold: true, sz: 16 } } }],
+                [{ v: `Periode: ${filterDateRangeStr}`, s: { font: { italic: true } } }],
+                [],
+                [{ v: "RINGKASAN UMUM", s: summaryHeaderStyle }],
+                ["Total Pendapatan", { v: totalRevenue, t: 'n', z: '"Rp"#,##0' }],
+                ["Total Pengeluaran", { v: totalExpenses, t: 'n', z: '"Rp"#,##0' }],
+                ["Laba Bersih", { v: netProfit, t: 'n', z: '"Rp"#,##0' }],
+                ["Margin Laba", {v: margin / 100, t: 'n', z: '0.00%'}],
+                ["Total Transaksi", { v: filteredTransactions.length, t: 'n' }],
+                [],
+                [{ v: "RINCIAN PEMBAYARAN", s: summaryHeaderStyle }],
+                [{v: "Metode", s: subHeaderStyle}, {v: "Jumlah Transaksi", s: subHeaderStyle}, {v: "Total Nominal", s: subHeaderStyle}],
+                ["Pitty Cash", "", { v: pittyCash, t: 'n', z: '"Rp"#,##0' }],
+                ["Tunai", {v: paymentBreakdown.cash.count, t: 'n'}, { v: paymentBreakdown.cash.amount, t: 'n', z: '"Rp"#,##0' }],
+                ["Setoran", "", { v: setoran, t: 'n', z: '"Rp"#,##0' }],
+                ["QRIS (Semua)", {v: paymentBreakdown.qris.count, t: 'n'}, { v: paymentBreakdown.qris.amount, t: 'n', z: '"Rp"#,##0' }],
+                ["QRIS (BCA)", {v: paymentBreakdown.qris_bca.count, t: 'n'}, { v: paymentBreakdown.qris_bca.amount, t: 'n', z: '"Rp"#,##0' }],
+                ["QRIS (BRI)", {v: paymentBreakdown.qris_bri.count, t: 'n'}, { v: paymentBreakdown.qris_bri.amount, t: 'n', z: '"Rp"#,##0' }],
+                ["QRIS (BSI)", {v: paymentBreakdown.qris_bsi.count, t: 'n'}, { v: paymentBreakdown.qris_bsi.amount, t: 'n', z: '"Rp"#,##0' }],
+            ];
+            const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
+            summary_ws['!cols'] = [{wch: 20}, {wch: 15}, {wch: 20}];
+            XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
+            
 
-        XLSX.writeFile(wb, "Laporan_Pembukuan.xlsx");
+            // --- TRANSACTIONS SHEET ---
+            const transactionsData = filteredTransactions.map(t => ({
+                "ID": t.id,
+                "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
+                "Meja/Pelanggan": t.no_meja,
+                "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
+                "Total": { v: t.total, t: 'n', z: '"Rp"#,##0' },
+                "Diskon": { v: t.discount_amount || 0, t: 'n', z: '"Rp"#,##0' },
+                "Total Akhir": { v: t.total_after_discount, t: 'n', z: '"Rp"#,##0' },
+            }));
+            const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
+            transactions_ws['!cols'] = [{wch: 10}, {wch: 20}, {wch: 20}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}];
+            XLSX.utils.book_append_sheet(wb, transactions_ws, "Riwayat Transaksi");
 
-        setExporting(false);
+
+            // --- EXPENSES SHEET ---
+            const expensesData = filteredExpenses.map(e => ({
+                "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
+                "Kategori": e.kategori,
+                "Deskripsi": e.deskripsi,
+                "Jumlah": { v: e.jumlah, t: 'n', z: '"Rp"#,##0' },
+                "Dibuat oleh": e.created_by
+            }));
+            const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
+            expenses_ws['!cols'] = [{wch: 15}, {wch: 20}, {wch: 40}, {wch: 15}, {wch: 25}];
+            XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
+            
+            XLSX.writeFile(wb, "Laporan_Pembukuan_Sejadi_Kopi.xlsx");
+
+            toast({ title: 'Sukses', description: 'Data berhasil diekspor ke Excel.' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Gagal mengekspor data.' });
+        } finally {
+            setExporting(false);
+        }
     };
 
     const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [filteredExpenses]);
@@ -856,5 +862,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-
-    
