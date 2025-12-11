@@ -236,8 +236,8 @@ export function SidebarNav() {
                 className={cn(
                   "h-10 w-10 rounded-lg",
                   isShopOpen === true
-                    ? "bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700"
-                    : "bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700",
+                    ? "bg-green-600/10 text-green-600 hover:bg-green-600/20"
+                    : "bg-red-600/10 text-red-600 hover:bg-red-600/20",
                   isShopOpen === null && "bg-gray-100 text-gray-600"
                 )}
               >
