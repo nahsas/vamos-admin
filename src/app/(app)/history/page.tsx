@@ -282,7 +282,7 @@ export default function HistoryPage() {
         </Button>
       </div>
 
-      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm font-medium px-4 py-2 rounded-xl flex items-center gap-2">
+      <div className="bg-primary/10 border border-primary/20 text-primary-foreground text-sm font-medium px-4 py-2 rounded-xl flex items-center gap-2">
         <Calendar className="h-4 w-4" />
         <span>Hari ini: {format(new Date(), "dd MMMM yyyy", { locale: id })}</span>
       </div>
