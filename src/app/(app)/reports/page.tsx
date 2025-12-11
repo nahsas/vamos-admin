@@ -377,13 +377,13 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-        const sDate = startDate ? format(startDate, "yyyy-MM-dd'T'HH:mm:ss") : '';
-        const eDate = endDate ? format(endDate, "yyyy-MM-dd'T'HH:mm:ss") : '';
+        const sDate = startDate ? format(startDate, 'yyyy-MM-dd') : '';
+        const eDate = endDate ? format(endDate, 'yyyy-MM-dd') : '';
         
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
-        if (sDate) transactionUrl.searchParams.set('created_from', sDate);
-        if (eDate) transactionUrl.searchParams.set('created_to', eDate);
+        if (sDate) transactionUrl.searchParams.set('payment_date_from', sDate);
+        if (eDate) transactionUrl.searchParams.set('payment_date_to', eDate);
         
         const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
         if (fetchMethod !== 'all') {
@@ -391,8 +391,8 @@ export default function ReportsPage() {
         }
 
         const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-        if(startDate) expenseUrl.searchParams.set('start_date', format(startDate, 'yyyy-MM-dd'));
-        if(endDate) expenseUrl.searchParams.set('end_date', format(endDate, 'yyyy-MM-dd'));
+        if(sDate) expenseUrl.searchParams.set('start_date', sDate);
+        if(eDate) expenseUrl.searchParams.set('end_date', eDate);
         expenseUrl.searchParams.set('order', 'tanggal.desc');
         
         const [transactionRes, expenseRes, menuRes] = await Promise.all([
@@ -433,6 +433,7 @@ export default function ReportsPage() {
         console.error("Gagal mengambil data laporan:", error);
         toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data laporan." });
         setTransactions([]);
+        setExpenses([]);
     } finally {
         setDataLoading(false);
     }
@@ -463,7 +464,8 @@ export default function ReportsPage() {
     setStartDate(startOfDay(new Date()));
     setEndDate(endOfDay(new Date()));
     setPaymentMethod("all");
-    setTimeout(fetchData, 100);
+    // Use a timeout to ensure state is updated before fetching
+    setTimeout(fetchData, 0);
   };
   
   const handleEditExpense = (expense: any) => {
@@ -498,12 +500,12 @@ export default function ReportsPage() {
     const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
 
     const displayedExpenses = expenses.filter(e =>
-      e.kategori.toLowerCase().includes(expenseSearch.toLowerCase()) ||
-      e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase())
+      (e.kategori && e.kategori.toLowerCase().includes(expenseSearch.toLowerCase())) ||
+      (e.deskripsi && e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase()))
     );
 
     const displayedTransactions = transactions.filter(t =>
-      t.id.toString().includes(transactionSearch) ||
+      (t.id && t.id.toString().includes(transactionSearch)) ||
       (t.no_meja && t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase()))
     );
 
