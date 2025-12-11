@@ -43,10 +43,14 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
   const borderGradientClass = isPending
     ? 'bg-gradient-to-br from-yellow-400 to-yellow-600'
     : 'bg-gradient-to-br from-purple-600 to-blue-600';
+    
+  const shadowClass = isPending
+    ? 'hover:shadow-[0_0_15px_2px_rgba(251,191,36,0.5)]'
+    : 'hover:shadow-[0_0_15px_2px_rgba(139,92,246,0.5)]';
 
 
   return (
-    <div className={cn("p-0.5 rounded-xl", borderGradientClass)}>
+    <div className={cn("p-0.5 rounded-xl transition-all duration-300 ease-in-out hover:scale-105 hover:p-1", borderGradientClass, shadowClass)}>
       <Card className="shadow-md rounded-lg h-full">
         <CardContent className="p-4 flex flex-col h-full">
           <div className="flex-grow space-y-3">
