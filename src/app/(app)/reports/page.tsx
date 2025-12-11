@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import * as React from "react"
@@ -377,19 +376,24 @@ export default function ReportsPage() {
 
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
-    let allTransactions: any[] = [];
-    setExpenses([]);
     try {
-        const sDate = startDate ? format(startOfDay(startDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
-        const eDate = endDate ? format(endOfDay(endDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
+        const sDate = startDate ? format(startDate, "yyyy-MM-dd") : '';
+        const eDate = endDate ? format(endDate, "yyyy-MM-dd") : '';
         
-        const sDateOnly = startDate ? format(startDate, 'yyyy-MM-dd') : '';
-        const eDateOnly = endDate ? format(endDate, 'yyyy-MM-dd') : '';
-
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
-        if(sDate) transactionUrl.searchParams.set('created_from', sDate);
-        if(eDate) transactionUrl.searchParams.set('created_to', eDate);
+        if(sDate) transactionUrl.searchParams.set('payment_date', sDate);
+        if(eDate && sDate === eDate) {
+            // If start and end are the same, we query for that single day
+             transactionUrl.searchParams.set('payment_date', sDate);
+        } else {
+            // If different, we create a range. API might need specific handling for range.
+            // Assuming separate from/to params for payment date range if API supports it.
+            // For now, this might fetch more than needed if API doesn't support range on `payment_date`.
+            // The user may need to clarify API capabilities if this doesn't work.
+            if(sDate) transactionUrl.searchParams.set('created_from', format(startOfDay(startDate as Date), "yyyy-MM-dd'T'HH:mm:ss"));
+            if(eDate) transactionUrl.searchParams.set('created_to', format(endOfDay(endDate as Date), "yyyy-MM-dd'T'HH:mm:ss"));
+        }
         
         const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
         if (fetchMethod !== 'all') {
@@ -397,8 +401,8 @@ export default function ReportsPage() {
         }
 
         const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-        if(sDateOnly) expenseUrl.searchParams.set('tanggal_from', sDateOnly);
-        if(eDateOnly) expenseUrl.searchParams.set('tanggal_to', eDateOnly);
+        if(sDate) expenseUrl.searchParams.set('tanggal_from', sDate);
+        if(eDate) expenseUrl.searchParams.set('tanggal_to', eDate);
         expenseUrl.searchParams.set('order', 'tanggal.desc');
         
         const [transactionRes, expenseRes, menuRes] = await Promise.all([
@@ -407,6 +411,7 @@ export default function ReportsPage() {
             fetch('https://vamos-api.sejadikopi.com/api/menu'),
         ]);
 
+        let allTransactions: any[] = [];
         if (transactionRes.ok) {
             const data = await transactionRes.json();
             allTransactions = data.data || [];
@@ -425,15 +430,14 @@ export default function ReportsPage() {
         } else {
             setMenuItems([]);
         }
-
+        
+        let filteredTransactions = allTransactions;
         if (paymentMethod.startsWith('qris-')) {
             const bank = paymentMethod.split('-')[1];
-            setTransactions(
-                allTransactions.filter(t => t.bank_qris && t.bank_qris.toLowerCase().includes(bank))
-            );
-        } else {
-            setTransactions(allTransactions);
+            filteredTransactions = allTransactions.filter(t => t.bank_qris && t.bank_qris.toLowerCase().includes(bank));
         }
+
+        setTransactions(filteredTransactions);
 
     } catch (error) {
         console.error("Gagal mengambil data laporan:", error);
@@ -503,12 +507,22 @@ export default function ReportsPage() {
 
     const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
 
-    const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
-    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
+    const filteredExpenses = expenses.filter(e =>
+      e.kategori.toLowerCase().includes(expenseSearch.toLowerCase()) ||
+      e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase())
+    );
+
+    const filteredTransactions = transactions.filter(t =>
+      t.id.toString().includes(transactionSearch) ||
+      (t.no_meja && t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase()))
+    );
+
+    const totalRevenue = filteredTransactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
+    const totalExpenses = filteredExpenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
     const netProfit = totalRevenue - totalExpenses;
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
     
-    const paymentBreakdown = transactions.reduce((acc, t) => {
+    const paymentBreakdown = filteredTransactions.reduce((acc, t) => {
         const method = t.metode_pembayaran || 'unknown';
         const bank = t.bank_qris || 'other';
         
@@ -547,7 +561,6 @@ export default function ReportsPage() {
     const handleExport = () => {
         setExporting(true);
         
-        // 1. Summary Sheet
         const summaryData = [
         ["Laporan Pembukuan Sejadi Kopi"],
         [`Periode: ${filterDateRangeStr}`],
@@ -557,7 +570,7 @@ export default function ReportsPage() {
         ["Total Pengeluaran", totalExpenses],
         ["Laba Bersih", netProfit],
         ["Margin Laba", `${margin.toFixed(2)}%`],
-        ["Total Transaksi", transactions.length],
+        ["Total Transaksi", filteredTransactions.length],
         [],
         ["RINCIAN PEMBAYARAN"],
         ["Metode", "Jumlah Transaksi", "Total Nominal"],
@@ -571,8 +584,7 @@ export default function ReportsPage() {
         ];
         const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
 
-        // 2. Transactions Sheet
-        const transactionsData = transactions.map(t => ({
+        const transactionsData = filteredTransactions.map(t => ({
         "ID": t.id,
         "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
         "Meja/Pelanggan": t.no_meja,
@@ -583,8 +595,7 @@ export default function ReportsPage() {
         }));
         const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
 
-        // 3. Expenses Sheet
-        const expensesData = expenses.map(e => ({
+        const expensesData = filteredExpenses.map(e => ({
             "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
             "Kategori": e.kategori,
             "Deskripsi": e.deskripsi,
@@ -593,30 +604,18 @@ export default function ReportsPage() {
         }));
         const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
         
-        // Create workbook and append sheets
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
         XLSX.utils.book_append_sheet(wb, transactions_ws, "Riwayat Transaksi");
         XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
 
-        // Write file and trigger download
         XLSX.writeFile(wb, "Laporan_Pembukuan.xlsx");
 
         setExporting(false);
     };
 
-    const filteredExpenses = expenses.filter(e =>
-      e.kategori.toLowerCase().includes(expenseSearch.toLowerCase()) ||
-      e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase())
-    );
-
-    const filteredTransactions = transactions.filter(t =>
-      t.id.toString().includes(transactionSearch) ||
-      t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase())
-    );
-
-    const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [expenses]);
-    const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [transactions]);
+    const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [filteredExpenses]);
+    const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [filteredTransactions]);
 
 
   return (
@@ -857,3 +856,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
