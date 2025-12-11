@@ -377,13 +377,13 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-        const sDate = startDate ? format(startDate, 'yyyy-MM-dd') : '';
-        const eDate = endDate ? format(endDate, 'yyyy-MM-dd') : '';
+        const sDate = startDate ? format(startDate, "yyyy-MM-dd'T'HH:mm:ss") : '';
+        const eDate = endDate ? format(endDate, "yyyy-MM-dd'T'HH:mm:ss") : '';
         
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
-        if (sDate) transactionUrl.searchParams.set('payment_date_from', sDate);
-        if (eDate) transactionUrl.searchParams.set('payment_date_to', eDate);
+        if (sDate) transactionUrl.searchParams.set('created_from', sDate);
+        if (eDate) transactionUrl.searchParams.set('created_to', eDate);
         
         const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
         if (fetchMethod !== 'all') {
@@ -391,8 +391,8 @@ export default function ReportsPage() {
         }
 
         const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-        if(sDate) expenseUrl.searchParams.set('start_date', sDate);
-        if(eDate) expenseUrl.searchParams.set('end_date', eDate);
+        if(startDate) expenseUrl.searchParams.set('start_date', format(startDate, 'yyyy-MM-dd'));
+        if(endDate) expenseUrl.searchParams.set('end_date', format(endDate, 'yyyy-MM-dd'));
         expenseUrl.searchParams.set('order', 'tanggal.desc');
         
         const [transactionRes, expenseRes, menuRes] = await Promise.all([
@@ -866,7 +866,5 @@ export default function ReportsPage() {
     </div>
   )
 }
-
-    
 
     
