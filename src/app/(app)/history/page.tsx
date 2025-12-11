@@ -40,15 +40,17 @@ function StatCard({
   icon: Icon,
   bgColor,
   iconColor,
+  className,
 }: {
   title: string;
   value: string;
   icon: React.ElementType;
   bgColor: string;
   iconColor: string;
+  className?: string;
 }) {
   return (
-    <Card className="shadow-md rounded-xl">
+    <Card className={cn("shadow-md rounded-xl", className)}>
       <CardContent className="p-4 flex items-center gap-4">
         <div className={`p-3 rounded-md ${bgColor}`}>
           <Icon className={`w-8 h-8 ${iconColor}`} />
@@ -286,7 +288,7 @@ export default function HistoryPage() {
         <span>Hari ini: {format(new Date(), "dd MMMM yyyy", { locale: id })}</span>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="TOTAL TRANSAKSI"
           value={orders.length.toString()}
@@ -307,6 +309,7 @@ export default function HistoryPage() {
           icon={Wallet}
           bgColor="bg-yellow-400"
           iconColor="text-white"
+          className="lg:col-span-2"
         />
       </div>
 
