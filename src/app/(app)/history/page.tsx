@@ -291,9 +291,9 @@ export default function HistoryPage() {
         <StatCard
           title="TOTAL TRANSAKSI"
           value={orders.length.toString()}
-          icon={Receipt}
-          bgColor="bg-yellow-100"
-          iconColor="text-yellow-600"
+          icon={Wallet}
+          bgColor="bg-blue-100"
+          iconColor="text-blue-600"
         />
         <StatCard
           title="SELESAI"
