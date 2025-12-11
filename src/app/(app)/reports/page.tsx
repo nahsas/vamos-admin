@@ -672,7 +672,7 @@ export default function ReportsPage() {
                         <Calendar
                             mode="single"
                             selected={startDate}
-                            onSelect={setStartDate}
+                            onSelect={(date) => setStartDate(date ? startOfDay(date) : undefined)}
                             initialFocus
                         />
                         </PopoverContent>
@@ -697,7 +697,7 @@ export default function ReportsPage() {
                         <Calendar
                             mode="single"
                             selected={endDate}
-                            onSelect={setEndDate}
+                            onSelect={(date) => setEndDate(date ? endOfDay(date) : undefined)}
                             initialFocus
                         />
                         </PopoverContent>
@@ -866,5 +866,7 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
 
     
