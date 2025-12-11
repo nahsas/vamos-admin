@@ -377,8 +377,8 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-      const sDate = startDate ? format(startOfDay(startDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
-      const eDate = endDate ? format(endOfDay(endDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
+      const sDate = startDate ? format(startDate, "yyyy-MM-dd'T'00:00:00") : '';
+      const eDate = endDate ? format(endDate, "yyyy-MM-dd'T'23:59:59") : '';
 
       // --- TRANSACTIONS FETCH ---
       const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
@@ -388,8 +388,8 @@ export default function ReportsPage() {
       
       // --- EXPENSES FETCH ---
       const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-      if (sDate) expenseUrl.searchParams.set('created_from', sDate);
-      if (eDate) expenseUrl.searchParams.set('created_to', eDate);
+      if (sDate) expenseUrl.searchParams.set('start_date', format(new Date(sDate), 'yyyy-MM-dd'));
+      if (eDate) expenseUrl.searchParams.set('end_date', format(new Date(eDate), 'yyyy-MM-dd'));
       expenseUrl.searchParams.set('order', 'tanggal.desc');
       
       const [transactionRes, expenseRes, menuRes] = await Promise.all([
@@ -796,13 +796,16 @@ export default function ReportsPage() {
           />
         </div>
 
-        <div>
-            <div className="flex items-center gap-2 mb-4">
+        <Card className="rounded-xl">
+          <CardHeader>
+            <div className="flex items-center gap-2">
                 <div className="p-2 bg-primary/20 rounded-md">
                     <Wallet className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold">Rincian Pembayaran</h2>
+                <CardTitle className="text-xl">Rincian Pembayaran</CardTitle>
             </div>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <PaymentBreakdownCard title="Pitty Cash" amount={toRupiah(pittyCash)} transactions="Kas tetap" icon={<Wallet className="h-6 w-6"/>} />
                 <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6"/>} />
@@ -811,7 +814,8 @@ export default function ReportsPage() {
                 <PaymentBreakdownCard title="QRIS BRI" amount={toRupiah(paymentBreakdown.qris_bri.amount)} transactions={paymentBreakdown.qris_bri.count} icon={<Grip className="h-6 w-6"/>} />
                 <PaymentBreakdownCard title="QRIS BSI" amount={toRupiah(paymentBreakdown.qris_bsi.amount)} transactions={paymentBreakdown.qris_bsi.count} icon={<Grip className="h-6 w-6"/>} />
             </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="rounded-xl">
