@@ -1,0 +1,158 @@
+
+======================================
+ Sejadi Kopi - Entity-Relationship Diagram (ERD)
+======================================
+
+Deskripsi:
+Diagram ini menguraikan entitas-entitas utama, atribut-atributnya, dan hubungan
+antar entitas dalam sistem manajemen kafe Sejadi Kopi.
+
+Legenda:
+  - PK: Primary Key (Kunci Utama)
+  - FK: Foreign Key (Kunci Asing)
+  - * : Menandakan atribut yang wajib diisi (not null)
+  - -> : Hubungan "one-to-many" (satu-ke-banyak)
+  - -< : Hubungan "many-to-one" (banyak-ke-satu)
+
+---
+
+Entitas & Atribut:
+
+[ Users ]
+  - id (PK)*
+  - name*
+  - email*
+  - password*
+  - role ('admin', 'kasir')*
+  - created_at
+  - updated_at
+
+[ Categories ]
+  - id (PK)*
+  - nama*
+  - urutan
+  - support_additional
+  - support_dimsum_additional
+
+[ Menu ]
+  - id (PK)*
+  - nama*
+  - harga*
+  - foto
+  - is_available
+  - stok
+  - kategori_struk ('makanan', 'minuman')
+  - kategori_id (FK -> Categories.id)*
+
+[ Additionals ]
+  - id (PK)*
+  - nama*
+  - harga*
+  - tipe ('regular', 'dimsum')
+  - is_active
+
+[ DiscountCodes ]
+  - id (PK)*
+  - code*
+  - type ('percentage', 'fixed')*
+  - value*
+  - is_active
+  - valid_from
+  - valid_to
+  - usage_limit
+  - min_amount
+
+[ Orders (Pesanan) ]
+  - id (PK)*
+  - no_meja*
+  - status ('pending', 'diproses', 'selesai', 'cancelled')*
+  - total*
+  - total_after_discount
+  - metode_pembayaran ('cash', 'qris')
+  - bank_qris
+  - location_type ('DINE-IN', 'TAKEAWAY')*
+  - location_area
+  - note
+  - created_at
+  - completed_at
+  - discount_code_id (FK -> DiscountCodes.id)
+
+[ OrderDetails (Detail Pesanan) ]
+  - id (PK)*
+  - jumlah*
+  - subtotal*
+  - base_price*
+  - additional_price
+  - varian
+  - note
+  - pesanan_id (FK -> Orders.id)*
+  - menu_id (FK -> Menu.id)*
+
+[ Receipts (Struk) ]
+  - id (PK)*
+  - total*
+  - dibayar*
+  - kembalian*
+  - pesanan_id (FK -> Orders.id)*
+  - kasir_id (FK -> Users.id)*
+  - created_at
+
+[ Expenses (Pengeluaran) ]
+  - id (PK, varchar)*
+  - kategori*
+  - deskripsi
+  - jumlah*
+  - tanggal*
+  - bukti_url
+  - created_by (FK -> Users.email)*
+
+---
+
+Relasi Antar Entitas:
+
+1. Pengguna dan Pesanan/Struk:
+   - Satu User (kasir) dapat membuat banyak Receipts.
+     [Users] 1 -> * [Receipts]
+
+2. Kategori dan Menu:
+   - Satu Category dapat memiliki banyak Menu items.
+     [Categories] 1 -> * [Menu]
+
+3. Pesanan dan Detail Pesanan:
+   - Satu Order memiliki banyak OrderDetails.
+     [Orders] 1 -> * [OrderDetails]
+   - Sebaliknya, banyak OrderDetails dimiliki oleh satu Order.
+     [OrderDetails] * -< 1 [Orders]
+
+4. Menu dan Detail Pesanan:
+   - Satu Menu item dapat ada di banyak OrderDetails.
+     [Menu] 1 -> * [OrderDetails]
+
+5. Pesanan dan Struk:
+   - Satu Order dapat memiliki satu Receipt. (Hubungan 1-ke-1)
+     [Orders] 1 -> 1 [Receipts]
+
+6. Diskon dan Pesanan:
+   - Satu DiscountCode dapat digunakan pada banyak Orders.
+     [DiscountCodes] 1 -> * [Orders]
+
+7. Pengguna dan Pengeluaran:
+   - Satu User dapat mencatat banyak Expenses.
+     [Users] 1 -> * [Expenses]
+
+---
+
+Diagram Sederhana (Hubungan Many-to-One):
+
+  [Menu] * ---------< 1 [Categories]
+  
+  [OrderDetails] * --< 1 [Orders]
+  [OrderDetails] * --< 1 [Menu]
+
+  [Receipts] * ------< 1 [Orders]
+  [Receipts] * ------< 1 [Users] (sebagai kasir)
+
+  [Orders] * --------< 1 [DiscountCodes] (opsional)
+
+  [Expenses] * ------< 1 [Users] (sebagai created_by)
+
