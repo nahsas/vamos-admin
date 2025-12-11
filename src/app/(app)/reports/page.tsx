@@ -497,22 +497,22 @@ export default function ReportsPage() {
 
     const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
 
-    const filteredExpenses = expenses.filter(e =>
+    const displayedExpenses = expenses.filter(e =>
       e.kategori.toLowerCase().includes(expenseSearch.toLowerCase()) ||
       e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase())
     );
 
-    const filteredTransactions = transactions.filter(t =>
+    const displayedTransactions = transactions.filter(t =>
       t.id.toString().includes(transactionSearch) ||
       (t.no_meja && t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase()))
     );
 
-    const totalRevenue = filteredTransactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
-    const totalExpenses = filteredExpenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
+    const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
+    const totalExpenses = displayedExpenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
     const netProfit = totalRevenue - totalExpenses;
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
     
-    const paymentBreakdown = filteredTransactions.reduce((acc, t) => {
+    const paymentBreakdown = displayedTransactions.reduce((acc, t) => {
         const method = t.metode_pembayaran || 'unknown';
         const bank = t.bank_qris || 'other';
         
@@ -553,45 +553,49 @@ export default function ReportsPage() {
         try {
             const wb = XLSX.utils.book_new();
 
-            // --- SUMMARY SHEET ---
-            const summaryHeaderStyle = { font: { bold: true }, fill: { fgColor: { rgb: "D9EAD3" } } };
+            const headerStyle = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "4F81BD" } } };
             const subHeaderStyle = { font: { bold: true } };
+            const currencyFormat = '"Rp"#,##0';
+            const percentFormat = '0.00%';
 
+            // --- SUMMARY SHEET ---
             const summaryData = [
                 [{ v: "Laporan Pembukuan Sejadi Kopi", s: { font: { bold: true, sz: 16 } } }],
                 [{ v: `Periode: ${filterDateRangeStr}`, s: { font: { italic: true } } }],
                 [],
-                [{ v: "RINGKASAN UMUM", s: summaryHeaderStyle }],
-                ["Total Pendapatan", { v: totalRevenue, t: 'n', z: '"Rp"#,##0' }],
-                ["Total Pengeluaran", { v: totalExpenses, t: 'n', z: '"Rp"#,##0' }],
-                ["Laba Bersih", { v: netProfit, t: 'n', z: '"Rp"#,##0' }],
-                ["Margin Laba", {v: margin / 100, t: 'n', z: '0.00%'}],
-                ["Total Transaksi", { v: filteredTransactions.length, t: 'n' }],
+                [{ v: "RINGKASAN UMUM", s: headerStyle }],
+                ["Total Pendapatan", { v: totalRevenue, t: 'n', z: currencyFormat }],
+                ["Total Pengeluaran", { v: totalExpenses, t: 'n', z: currencyFormat }],
+                ["Laba Bersih", { v: netProfit, t: 'n', z: currencyFormat }],
+                ["Margin Laba", {v: margin / 100, t: 'n', z: percentFormat}],
+                ["Total Transaksi", { v: displayedTransactions.length, t: 'n' }],
                 [],
-                [{ v: "RINCIAN PEMBAYARAN", s: summaryHeaderStyle }],
+                [{ v: "RINCIAN PEMBAYARAN & SETORAN", s: headerStyle }],
                 [{v: "Metode", s: subHeaderStyle}, {v: "Jumlah Transaksi", s: subHeaderStyle}, {v: "Total Nominal", s: subHeaderStyle}],
-                ["Pitty Cash", "", { v: pittyCash, t: 'n', z: '"Rp"#,##0' }],
-                ["Tunai", {v: paymentBreakdown.cash.count, t: 'n'}, { v: paymentBreakdown.cash.amount, t: 'n', z: '"Rp"#,##0' }],
-                ["Setoran", "", { v: setoran, t: 'n', z: '"Rp"#,##0' }],
-                ["QRIS (Semua)", {v: paymentBreakdown.qris.count, t: 'n'}, { v: paymentBreakdown.qris.amount, t: 'n', z: '"Rp"#,##0' }],
-                ["QRIS (BCA)", {v: paymentBreakdown.qris_bca.count, t: 'n'}, { v: paymentBreakdown.qris_bca.amount, t: 'n', z: '"Rp"#,##0' }],
-                ["QRIS (BRI)", {v: paymentBreakdown.qris_bri.count, t: 'n'}, { v: paymentBreakdown.qris_bri.amount, t: 'n', z: '"Rp"#,##0' }],
-                ["QRIS (BSI)", {v: paymentBreakdown.qris_bsi.count, t: 'n'}, { v: paymentBreakdown.qris_bsi.amount, t: 'n', z: '"Rp"#,##0' }],
+                ["Pitty Cash (Kas Tetap)", "", { v: pittyCash, t: 'n', z: currencyFormat }],
+                ["Total Tunai Diterima", {v: paymentBreakdown.cash.count, t: 'n'}, { v: paymentBreakdown.cash.amount, t: 'n', z: currencyFormat }],
+                ["Total Pengeluaran", "", { v: totalExpenses, t: 'n', z: currencyFormat }],
+                [{v: "Total Setoran", s: subHeaderStyle}, "", { v: setoran, t: 'n', z: currencyFormat, s: subHeaderStyle }],
+                [],
+                ["QRIS (Semua)", {v: paymentBreakdown.qris.count, t: 'n'}, { v: paymentBreakdown.qris.amount, t: 'n', z: currencyFormat }],
+                ["- QRIS BCA", {v: paymentBreakdown.qris_bca.count, t: 'n'}, { v: paymentBreakdown.qris_bca.amount, t: 'n', z: currencyFormat }],
+                ["- QRIS BRI", {v: paymentBreakdown.qris_bri.count, t: 'n'}, { v: paymentBreakdown.qris_bri.amount, t: 'n', z: currencyFormat }],
+                ["- QRIS BSI", {v: paymentBreakdown.qris_bsi.count, t: 'n'}, { v: paymentBreakdown.qris_bsi.amount, t: 'n', z: currencyFormat }],
             ];
             const summary_ws = XLSX.utils.aoa_to_sheet(summaryData);
-            summary_ws['!cols'] = [{wch: 20}, {wch: 15}, {wch: 20}];
+            summary_ws['!cols'] = [{wch: 25}, {wch: 18}, {wch: 20}];
             XLSX.utils.book_append_sheet(wb, summary_ws, "Ringkasan");
             
 
             // --- TRANSACTIONS SHEET ---
-            const transactionsData = filteredTransactions.map(t => ({
+            const transactionsData = displayedTransactions.map(t => ({
                 "ID": t.id,
                 "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
                 "Meja/Pelanggan": t.no_meja,
                 "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
-                "Total": { v: t.total, t: 'n', z: '"Rp"#,##0' },
-                "Diskon": { v: t.discount_amount || 0, t: 'n', z: '"Rp"#,##0' },
-                "Total Akhir": { v: t.total_after_discount, t: 'n', z: '"Rp"#,##0' },
+                "Subtotal": { v: t.total, t: 'n', z: currencyFormat },
+                "Diskon": { v: t.discount_amount || 0, t: 'n', z: currencyFormat },
+                "Total Akhir": { v: t.total_after_discount, t: 'n', z: currencyFormat },
             }));
             const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
             transactions_ws['!cols'] = [{wch: 10}, {wch: 20}, {wch: 20}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}];
@@ -599,18 +603,18 @@ export default function ReportsPage() {
 
 
             // --- EXPENSES SHEET ---
-            const expensesData = filteredExpenses.map(e => ({
+            const expensesData = displayedExpenses.map(e => ({
                 "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
                 "Kategori": e.kategori,
                 "Deskripsi": e.deskripsi,
-                "Jumlah": { v: e.jumlah, t: 'n', z: '"Rp"#,##0' },
+                "Jumlah": { v: e.jumlah, t: 'n', z: currencyFormat },
                 "Dibuat oleh": e.created_by
             }));
             const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
             expenses_ws['!cols'] = [{wch: 15}, {wch: 20}, {wch: 40}, {wch: 15}, {wch: 25}];
             XLSX.utils.book_append_sheet(wb, expenses_ws, "Riwayat Pengeluaran");
             
-            XLSX.writeFile(wb, "Laporan_Pembukuan_Sejadi_Kopi.xlsx");
+            XLSX.writeFile(wb, `Laporan_SejadiKopi_${format(new Date(), 'yyyyMMdd')}.xlsx`);
 
             toast({ title: 'Sukses', description: 'Data berhasil diekspor ke Excel.' });
         } catch (error) {
@@ -620,8 +624,8 @@ export default function ReportsPage() {
         }
     };
 
-    const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [filteredExpenses]);
-    const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [filteredTransactions]);
+    const memoizedExpenseColumns = React.useMemo(() => expenseColumns({ onEdit: handleEditExpense, onDelete: handleDeleteExpense }), [expenses]);
+    const memoizedTransactionColumns = React.useMemo(() => transactionColumns({ onViewDetails: handleViewTransactionDetails }), [transactions]);
 
 
   return (
@@ -828,7 +832,7 @@ export default function ReportsPage() {
             <div className="text-center h-24 flex items-center justify-center">Memuat data...</div>
           ) : (
             <div className="w-full overflow-x-auto">
-              <DataTable columns={memoizedExpenseColumns} data={filteredExpenses} />
+              <DataTable columns={memoizedExpenseColumns} data={displayedExpenses} />
             </div>
           )}
         </CardContent>
@@ -854,7 +858,7 @@ export default function ReportsPage() {
             <div className="text-center h-48 flex items-center justify-center">Memuat data...</div>
           ) : (
             <div className="w-full overflow-x-auto">
-              <DataTable columns={memoizedTransactionColumns} data={filteredTransactions} />
+              <DataTable columns={memoizedTransactionColumns} data={displayedTransactions} />
             </div>
           )}
         </CardContent>
@@ -862,3 +866,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
