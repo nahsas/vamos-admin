@@ -92,7 +92,7 @@ const generateReceiptText = (
   
   receipt += `\x1B\x61\x01`; 
   receipt += `\x1B\x21\x10`; 
-  receipt += "SEJADI KOPI" + "\n";
+  receipt += "VAMOS" + "\n";
   
   if (showPrices) {
     receipt += `\x1B\x21\x00`; 
