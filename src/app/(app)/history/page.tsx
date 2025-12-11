@@ -293,8 +293,8 @@ export default function HistoryPage() {
           title="TOTAL TRANSAKSI"
           value={orders.length.toString()}
           icon={Wallet}
-          bgColor="bg-blue-100"
-          iconColor="text-blue-600"
+          bgColor="bg-primary/10"
+          iconColor="text-primary"
         />
         <StatCard
           title="SELESAI"
