@@ -73,10 +73,10 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
   };
   
   const paymentMethodColor: { [key: string]: string } = {
-      cash: 'bg-blue-100 text-blue-700 border-blue-300',
-      bca: 'bg-sky-100 text-sky-700 border-sky-300',
-      bri: 'bg-indigo-100 text-indigo-700 border-indigo-300',
-      bsi: 'bg-teal-100 text-teal-700 border-teal-300',
+      cash: 'bg-green-100 text-green-700 border-green-300',
+      bca: 'bg-purple-100 text-purple-700 border-purple-300',
+      bri: 'bg-purple-100 text-purple-700 border-purple-300',
+      bsi: 'bg-purple-100 text-purple-700 border-purple-300',
       qris: 'bg-purple-100 text-purple-700 border-purple-300',
   }
 
