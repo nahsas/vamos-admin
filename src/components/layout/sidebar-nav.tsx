@@ -245,7 +245,7 @@ export function SidebarNav() {
               </Button>
                <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700">
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-lg bg-red-600/10 text-red-600 hover:bg-red-600/20">
                         <LogOut className="h-5 w-5" />
                     </Button>
                 </AlertDialogTrigger>
