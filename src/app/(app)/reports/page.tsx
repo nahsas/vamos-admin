@@ -380,16 +380,16 @@ export default function ReportsPage() {
         const sDate = startDate ? format(startDate, 'yyyy-MM-dd') : '';
         const eDate = endDate ? format(endDate, 'yyyy-MM-dd') : '';
         
+        // --- TRANSACTIONS FETCH ---
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
         if (sDate) transactionUrl.searchParams.set('start_date', sDate);
         if (eDate) transactionUrl.searchParams.set('end_date', eDate);
         
-        const fetchMethod = paymentMethod.startsWith('qris') ? 'qris' : paymentMethod;
-        if (fetchMethod !== 'all') {
-            transactionUrl.searchParams.set('metode_pembayaran', fetchMethod);
-        }
+        // Note: The API does not seem to support filtering by payment method directly in the query for completed orders.
+        // We will fetch all completed orders for the date range and then filter on the client-side.
 
+        // --- EXPENSES FETCH ---
         const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
         if(sDate) expenseUrl.searchParams.set('start_date', sDate);
         if(eDate) expenseUrl.searchParams.set('end_date', eDate);
@@ -421,12 +421,19 @@ export default function ReportsPage() {
             setMenuItems([]);
         }
         
+        // --- CLIENT-SIDE FILTERING FOR PAYMENT METHOD ---
         let filteredTransactions = allTransactions;
-        if (paymentMethod.startsWith('qris-')) {
-            const bank = paymentMethod.split('-')[1];
-            filteredTransactions = allTransactions.filter(t => t.bank_qris && t.bank_qris.toLowerCase().includes(bank));
+        if (paymentMethod !== 'all') {
+            if (paymentMethod === 'cash' || paymentMethod === 'qris') {
+                filteredTransactions = allTransactions.filter(t => t.metode_pembayaran === paymentMethod);
+            } else if (paymentMethod.startsWith('qris-')) {
+                const bank = paymentMethod.split('-')[1];
+                filteredTransactions = allTransactions.filter(t => 
+                    t.metode_pembayaran === 'qris' && t.bank_qris && t.bank_qris.toLowerCase().includes(bank)
+                );
+            }
         }
-
+        
         setTransactions(filteredTransactions);
 
     } catch (error) {
@@ -867,6 +874,8 @@ export default function ReportsPage() {
     </div>
   )
 }
+    
+
     
 
     
