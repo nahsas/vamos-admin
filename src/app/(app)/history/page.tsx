@@ -300,8 +300,8 @@ export default function HistoryPage() {
           title="SELESAI"
           value={completedOrders.toString()}
           icon={CheckCircle}
-          bgColor="bg-green-100/10"
-          iconColor="text-green-500"
+          bgColor="bg-primary/10"
+          iconColor="text-primary"
         />
         <StatCard
           title="TOTAL PENDAPATAN"
