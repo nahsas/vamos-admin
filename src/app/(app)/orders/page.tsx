@@ -259,7 +259,7 @@ export default function OrdersPage() {
                 <div>
                      <div className="flex items-center gap-2 mb-4">
                         <CookingPot className="h-5 w-5 text-blue-600" />
-                        <h3 className="text-lg font-semibold text-blue-700">Processing ({processingOrders.length})</h3>
+                        <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Processing ({processingOrders.length})</h3>
                     </div>
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {processingOrders.map(order => (
