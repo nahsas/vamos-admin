@@ -99,9 +99,9 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
                     {order.location_type.toLowerCase() === "dine-in"
                         ? `Meja ${order.no_meja}`
                         : order.no_meja}
-                    <Badge className={cn("text-xs capitalize", statusColor[order.status.toLowerCase()])}>{order.status}</Badge>
                     </h3>
                     <div className="flex items-center gap-2 mt-2">
+                        <Badge className={cn("text-xs capitalize", statusColor[order.status.toLowerCase()])}>{order.status}</Badge>
                         {order.metode_pembayaran && (
                             <Badge variant="outline" className={paymentMethodColor[order.metode_pembayaran]}>
                                 {paymentMethodText[order.metode_pembayaran]}
