@@ -1,158 +1,117 @@
+//// --------------------------------------------------------------------------------
+//// Sejadi Kopi - Database Schema (DBML Format)
+//// --------------------------------------------------------------------------------
 
-======================================
- Sejadi Kopi - Entity-Relationship Diagram (ERD)
-======================================
+Table Users {
+  id integer [pk, increment]
+  name varchar(255) [not null]
+  email varchar(255) [unique, not null]
+  password varchar(255) [not null]
+  role varchar(50) [not null, note: "'admin' or 'kasir'"]
+  created_at timestamp
+  updated_at timestamp
+}
 
-Deskripsi:
-Diagram ini menguraikan entitas-entitas utama, atribut-atributnya, dan hubungan
-antar entitas dalam sistem manajemen kafe Sejadi Kopi.
+Table Categories {
+  id integer [pk, increment]
+  nama varchar(255) [not null]
+  urutan integer [default: 0]
+  support_additional boolean [default: false]
+  support_dimsum_additional boolean [default: false]
+}
 
-Legenda:
-  - PK: Primary Key (Kunci Utama)
-  - FK: Foreign Key (Kunci Asing)
-  - * : Menandakan atribut yang wajib diisi (not null)
-  - -> : Hubungan "one-to-many" (satu-ke-banyak)
-  - -< : Hubungan "many-to-one" (banyak-ke-satu)
+Table Menu {
+  id integer [pk, increment]
+  nama varchar(255) [not null]
+  harga decimal(10, 2) [not null]
+  foto varchar(255)
+  is_available boolean [default: true]
+  stok integer [default: 0]
+  kategori_struk varchar(50) [note: "'makanan' or 'minuman'"]
+  kategori_id integer [not null]
+  created_at timestamp
+  updated_at timestamp
+}
 
----
+Table Additionals {
+  id integer [pk, increment]
+  nama varchar(255) [not null]
+  harga decimal(10, 2) [not null]
+  tipe varchar(50) [note: "'regular' or 'dimsum'"]
+  is_active boolean [default: true]
+}
 
-Entitas & Atribut:
+Table DiscountCodes {
+  id integer [pk, increment]
+  code varchar(255) [unique, not null]
+  type varchar(50) [not null, note: "'percentage' or 'fixed'"]
+  value decimal(10, 2) [not null]
+  is_active boolean [default: true]
+  valid_from date
+  valid_to date
+  usage_limit integer
+  min_amount decimal(10, 2)
+}
 
-[ Users ]
-  - id (PK)*
-  - name*
-  - email*
-  - password*
-  - role ('admin', 'kasir')*
-  - created_at
-  - updated_at
+Table Orders {
+  id integer [pk, increment]
+  no_meja varchar(255) [not null]
+  status varchar(50) [not null, note: "'pending', 'diproses', 'selesai', 'cancelled'"]
+  total decimal(10, 2) [not null]
+  total_after_discount decimal(10, 2)
+  metode_pembayaran varchar(50) [note: "'cash' or 'qris'"]
+  bank_qris varchar(50)
+  location_type varchar(50) [not null, note: "'DINE-IN' or 'TAKEAWAY'"]
+  location_area varchar(255)
+  note text
+  discount_code_id integer
+  created_at timestamp
+  completed_at timestamp
+  updated_at timestamp
+}
 
-[ Categories ]
-  - id (PK)*
-  - nama*
-  - urutan
-  - support_additional
-  - support_dimsum_additional
+Table OrderDetails {
+  id integer [pk, increment]
+  pesanan_id integer [not null]
+  menu_id integer [not null]
+  jumlah integer [not null]
+  subtotal decimal(10, 2) [not null]
+  base_price decimal(10, 2) [not null]
+  additional_price decimal(10, 2)
+  varian varchar(255)
+  note text
+}
 
-[ Menu ]
-  - id (PK)*
-  - nama*
-  - harga*
-  - foto
-  - is_available
-  - stok
-  - kategori_struk ('makanan', 'minuman')
-  - kategori_id (FK -> Categories.id)*
+Table Receipts {
+  id integer [pk, increment]
+  pesanan_id integer [unique, not null]
+  kasir_id integer [not null]
+  total decimal(10, 2) [not null]
+  dibayar decimal(10, 2) [not null]
+  kembalian decimal(10, 2) [not null]
+  created_at timestamp
+}
 
-[ Additionals ]
-  - id (PK)*
-  - nama*
-  - harga*
-  - tipe ('regular', 'dimsum')
-  - is_active
+Table Expenses {
+  id varchar(255) [pk]
+  kategori varchar(255) [not null]
+  deskripsi text
+  jumlah decimal(10, 2) [not null]
+  tanggal date [not null]
+  bukti_url varchar(255)
+  created_by varchar(255) [not null]
+  created_at timestamp
+}
 
-[ DiscountCodes ]
-  - id (PK)*
-  - code*
-  - type ('percentage', 'fixed')*
-  - value*
-  - is_active
-  - valid_from
-  - valid_to
-  - usage_limit
-  - min_amount
 
-[ Orders (Pesanan) ]
-  - id (PK)*
-  - no_meja*
-  - status ('pending', 'diproses', 'selesai', 'cancelled')*
-  - total*
-  - total_after_discount
-  - metode_pembayaran ('cash', 'qris')
-  - bank_qris
-  - location_type ('DINE-IN', 'TAKEAWAY')*
-  - location_area
-  - note
-  - created_at
-  - completed_at
-  - discount_code_id (FK -> DiscountCodes.id)
+//// --------------------------------------------------------------------------------
+//// Relationships
+//// --------------------------------------------------------------------------------
 
-[ OrderDetails (Detail Pesanan) ]
-  - id (PK)*
-  - jumlah*
-  - subtotal*
-  - base_price*
-  - additional_price
-  - varian
-  - note
-  - pesanan_id (FK -> Orders.id)*
-  - menu_id (FK -> Menu.id)*
-
-[ Receipts (Struk) ]
-  - id (PK)*
-  - total*
-  - dibayar*
-  - kembalian*
-  - pesanan_id (FK -> Orders.id)*
-  - kasir_id (FK -> Users.id)*
-  - created_at
-
-[ Expenses (Pengeluaran) ]
-  - id (PK, varchar)*
-  - kategori*
-  - deskripsi
-  - jumlah*
-  - tanggal*
-  - bukti_url
-  - created_by (FK -> Users.email)*
-
----
-
-Relasi Antar Entitas:
-
-1. Pengguna dan Pesanan/Struk:
-   - Satu User (kasir) dapat membuat banyak Receipts.
-     [Users] 1 -> * [Receipts]
-
-2. Kategori dan Menu:
-   - Satu Category dapat memiliki banyak Menu items.
-     [Categories] 1 -> * [Menu]
-
-3. Pesanan dan Detail Pesanan:
-   - Satu Order memiliki banyak OrderDetails.
-     [Orders] 1 -> * [OrderDetails]
-   - Sebaliknya, banyak OrderDetails dimiliki oleh satu Order.
-     [OrderDetails] * -< 1 [Orders]
-
-4. Menu dan Detail Pesanan:
-   - Satu Menu item dapat ada di banyak OrderDetails.
-     [Menu] 1 -> * [OrderDetails]
-
-5. Pesanan dan Struk:
-   - Satu Order dapat memiliki satu Receipt. (Hubungan 1-ke-1)
-     [Orders] 1 -> 1 [Receipts]
-
-6. Diskon dan Pesanan:
-   - Satu DiscountCode dapat digunakan pada banyak Orders.
-     [DiscountCodes] 1 -> * [Orders]
-
-7. Pengguna dan Pengeluaran:
-   - Satu User dapat mencatat banyak Expenses.
-     [Users] 1 -> * [Expenses]
-
----
-
-Diagram Sederhana (Hubungan Many-to-One):
-
-  [Menu] * ---------< 1 [Categories]
-  
-  [OrderDetails] * --< 1 [Orders]
-  [OrderDetails] * --< 1 [Menu]
-
-  [Receipts] * ------< 1 [Orders]
-  [Receipts] * ------< 1 [Users] (sebagai kasir)
-
-  [Orders] * --------< 1 [DiscountCodes] (opsional)
-
-  [Expenses] * ------< 1 [Users] (sebagai created_by)
-
+Ref: Menu.kategori_id > Categories.id
+Ref: OrderDetails.pesanan_id > Orders.id
+Ref: OrderDetails.menu_id > Menu.id
+Ref: Receipts.pesanan_id > Orders.id
+Ref: Receipts.kasir_id > Users.id
+Ref: Orders.discount_code_id - DiscountCodes.id
+Ref: Expenses.created_by > Users.email
