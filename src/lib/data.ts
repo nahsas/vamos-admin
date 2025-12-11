@@ -76,6 +76,15 @@ export type Additional = {
     tipe: 'regular' | 'dimsum';
 };
 
+export type Struk = {
+  id: number;
+  pesanan_id: number;
+  total: number;
+  dibayar: number;
+  kembalian: number;
+  created_at: string;
+}
+
 
 // The following are mock data and will be replaced by API calls.
 export const menuItems: any[] = [];

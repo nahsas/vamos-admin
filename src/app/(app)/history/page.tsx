@@ -1,4 +1,5 @@
 
+
 "use client";
 import * as React from "react";
 import {
@@ -7,27 +8,19 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Search,
-  Filter,
   RefreshCw,
   Calendar,
   CheckCircle,
-  XCircle,
   Wallet,
   Receipt,
   AlertTriangle,
   Eye,
+  Info,
 } from "lucide-react";
-import { Order, MenuItem } from "@/lib/data";
+import { Order, MenuItem, Struk } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfToday } from "date-fns";
 import { id } from "date-fns/locale";
@@ -64,10 +57,11 @@ function StatCard({
   );
 }
 
-function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void }) {
+function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; menuItems: MenuItem[], struk?: Struk | null, onDetailClick: (order: Order) => void }) {
   const getMenuItemName = (id: number) => {
     return menuItems.find((item) => item.id === id)?.nama || "Item Tidak Dikenal";
   };
+  const isCancelled = order.status.toLowerCase() === 'cancelled';
 
   const statusColor: { [key: string]: string } = {
     selesai: 'bg-gradient-to-br from-green-400 to-green-600 text-white border-transparent',
@@ -122,6 +116,15 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
                 </div>
                 </div>
 
+                 {isCancelled && (
+                    <div className="bg-red-50 border-l-4 border-red-400 p-3 text-red-700 text-sm">
+                        <div className="flex items-center gap-2">
+                            <Info className="h-4 w-4" />
+                            <p className="font-semibold">This order has been deleted by the cashier.</p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="border-t border-dashed pt-4">
                 <div className="flex justify-between items-center text-sm font-medium mb-2">
                     <h4>Detail Pesanan</h4>
@@ -143,14 +146,33 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
                 </div>
                 
                 <div className="border-t pt-4 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total:</span>
-                        <span className="font-semibold">Rp {parseInt(order.total).toLocaleString('id-ID')}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total Pembayaran:</span>
-                        <span className="font-bold text-base">Rp {(order.total_after_discount ?? order.total).toLocaleString('id-ID')}</span>
-                    </div>
+                    {order.metode_pembayaran === 'cash' && struk ? (
+                        <>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Total Pembayaran:</span>
+                                <span className="font-bold text-base">Rp {struk.total.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Tunai Diterima:</span>
+                                <span className="font-semibold">Rp {struk.dibayar.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Kembalian:</span>
+                                <span className="font-semibold">Rp {struk.kembalian.toLocaleString('id-ID')}</span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                           <div className="flex justify-between">
+                                <span className="text-muted-foreground">Total:</span>
+                                <span className="font-semibold">Rp {parseInt(order.total).toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Total Pembayaran:</span>
+                                <span className="font-bold text-base">Rp {(order.total_after_discount ?? order.total).toLocaleString('id-ID')}</span>
+                            </div>
+                        </>
+                    )}
                 </div>
 
             </CardContent>
@@ -168,6 +190,7 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
 export default function HistoryPage() {
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
+  const [struks, setStruks] = React.useState<Struk[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -182,9 +205,10 @@ export default function HistoryPage() {
     setError(null);
     try {
       const today = format(startOfToday(), 'yyyy-MM-dd');
-      const [orderRes, menuRes] = await Promise.all([
+      const [orderRes, menuRes, strukRes] = await Promise.all([
         fetch(`https://vamos-api.sejadikopi.com/api/pesanans?status=selesai,cancelled&payment_date=${today}`),
-        fetch('https://vamos-api.sejadikopi.com/api/menu')
+        fetch('https://vamos-api.sejadikopi.com/api/menu'),
+        fetch(`https://vamos-api.sejadikopi.com/api/struks?created_from=${today}T00:00:00&created_to=${today}T23:59:59`)
       ]);
 
       if (!orderRes.ok) throw new Error("Gagal mengambil riwayat pesanan.");
@@ -197,11 +221,20 @@ export default function HistoryPage() {
       } else {
         setMenuItems([]);
       }
+      
+       if (strukRes.ok) {
+        const strukData = await strukRes.json();
+        setStruks(strukData.data || []);
+      } else {
+        setStruks([]);
+      }
+
 
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan tidak terduga.');
       setOrders([]);
       setMenuItems([]);
+      setStruks([]);
     } finally {
       setLoading(false);
     }
@@ -316,9 +349,18 @@ export default function HistoryPage() {
       {!loading && !error && (
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <OrderCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} />
-            ))
+            filteredOrders.map((order) => {
+              const matchingStruk = struks.find(s => s.pesanan_id === order.id);
+              return (
+                <OrderCard 
+                  key={order.id} 
+                  order={order} 
+                  menuItems={menuItems}
+                  struk={matchingStruk}
+                  onDetailClick={handleDetailClick}
+                />
+              )
+            })
           ) : (
             <div className="text-center py-16 text-muted-foreground sm:col-span-1 md:col-span-2 xl:col-span-3">
               <p>Tidak ada riwayat transaksi untuk filter yang dipilih.</p>
@@ -329,3 +371,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+
