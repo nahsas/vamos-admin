@@ -307,8 +307,8 @@ export default function HistoryPage() {
           title="TOTAL PENDAPATAN"
           value={`Rp ${totalRevenue.toLocaleString("id-ID")}`}
           icon={Wallet}
-          bgColor="bg-yellow-400"
-          iconColor="text-white"
+          bgColor="bg-card"
+          iconColor="text-primary"
           className="lg:col-span-2"
         />
       </div>
