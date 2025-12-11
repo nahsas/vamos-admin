@@ -70,8 +70,8 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
   };
 
   const statusColor: { [key: string]: string } = {
-    selesai: 'bg-green-100 text-green-700 border-green-300',
-    cancelled: 'bg-red-100 text-red-700 border-red-300'
+    selesai: 'bg-gradient-to-br from-green-400 to-green-600 text-white border-transparent',
+    cancelled: 'bg-gradient-to-br from-red-400 to-red-600 text-white border-transparent'
   };
   
   const statusBorderGradient: { [key: string]: string } = {
