@@ -258,7 +258,16 @@ export default function OrdersPage() {
              {processingOrders.length > 0 && (
                 <div>
                      <div className="flex items-center gap-2 mb-4">
-                        <CookingPot className="h-5 w-5 text-blue-600" />
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style={{stopColor: "rgb(139, 92, 246)", stopOpacity: 1}} />
+                                <stop offset="100%" style={{stopColor: "rgb(37, 99, 235)", stopOpacity: 1}} />
+                                </linearGradient>
+                            </defs>
+                            <path d="M12.75 2.25v2.25m0 0a.75.75 0 000 1.5h.008a.75.75 0 000-1.5h-.008zM12.75 2.25a.75.75 0 01-1.5 0V2.25m1.5 0c1.153 0 2.243.46 3.036 1.253l1.246 1.246c.793.793 1.253 1.883 1.253 3.036v1.214a4.5 4.5 0 01-.659 2.331l-1.581 3.953a2.25 2.25 0 01-2.134 1.53H9.25a2.25 2.25 0 01-2.134-1.53l-1.581-3.953A4.5 4.5 0 014.876 11.25v-1.214c0-1.153.46-2.243 1.253-3.036L7.375 5.75C8.168 4.957 9.257 4.5 10.41 4.5h2.34z" fill="url(#grad1)" stroke="url(#grad1)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M9.75 16.125a1.125 1.125 0 102.25 0 1.125 1.125 0 00-2.25 0z" fill="white" />
+                        </svg>
                         <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Processing ({processingOrders.length})</h3>
                     </div>
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -365,6 +374,8 @@ export default function OrdersPage() {
 }
 
     
+    
+
     
 
     
