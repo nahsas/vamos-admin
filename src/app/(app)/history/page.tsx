@@ -1,5 +1,4 @@
 
-
 "use client";
 import * as React from "react";
 import {
@@ -75,13 +74,44 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
   
   const paymentMethodColor: { [key: string]: string } = {
       cash: 'bg-blue-100 text-blue-700 border-blue-300',
+      bca: 'bg-sky-100 text-sky-700 border-sky-300',
+      bri: 'bg-indigo-100 text-indigo-700 border-indigo-300',
+      bsi: 'bg-teal-100 text-teal-700 border-teal-300',
       qris: 'bg-purple-100 text-purple-700 border-purple-300',
   }
 
-  const paymentMethodText: { [key: string]: string } = {
-      cash: 'Tunai',
-      qris: `QRIS (${order.bank_qris || 'N/A'})`,
+  const getPaymentInfo = () => {
+    if (!order.metode_pembayaran) return null;
+
+    if (order.metode_pembayaran === 'cash') {
+      return {
+        text: 'Tunai',
+        colorClass: paymentMethodColor.cash
+      }
+    }
+
+    if (order.metode_pembayaran === 'qris') {
+      const bank = order.bank_qris?.toLowerCase() || 'qris';
+      let text = 'QRIS';
+      let colorClass = paymentMethodColor.qris;
+
+      if (bank.includes('bca')) {
+        text = 'BCA';
+        colorClass = paymentMethodColor.bca;
+      } else if (bank.includes('bri')) {
+        text = 'BRI';
+        colorClass = paymentMethodColor.bri;
+      } else if (bank.includes('bsi')) {
+        text = 'BSI';
+        colorClass = paymentMethodColor.bsi;
+      }
+
+      return { text, colorClass };
+    }
+    return null;
   }
+
+  const paymentInfo = getPaymentInfo();
 
   return (
     <div className={cn("p-0.5 rounded-xl", statusBorderGradient[order.status.toLowerCase()])}>
@@ -96,9 +126,9 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                     </h3>
                     <div className="flex items-center gap-2 mt-2">
                         <Badge className={cn("text-xs capitalize", statusColor[order.status.toLowerCase()])}>{order.status}</Badge>
-                        {order.metode_pembayaran && (
-                            <Badge variant="outline" className={paymentMethodColor[order.metode_pembayaran]}>
-                                {paymentMethodText[order.metode_pembayaran]}
+                        {paymentInfo && (
+                            <Badge variant="outline" className={paymentInfo.colorClass}>
+                                {paymentInfo.text}
                             </Badge>
                         )}
                         {order.location_area && (
@@ -371,4 +401,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
