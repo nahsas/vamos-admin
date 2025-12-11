@@ -131,9 +131,12 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                      <span className="truncate">{getMenuName(item.menu_id)}</span>
                      {item.varian && (
                         <Badge
+                            variant="outline"
                             className={cn(
-                            "text-xs text-white",
-                            item.varian.toLowerCase() === 'hot' ? 'bg-red-500' : 'bg-blue-500'
+                            "text-xs",
+                            item.varian.toLowerCase() === 'hot' 
+                                ? 'border-red-300 bg-red-100 text-red-700' 
+                                : 'border-blue-300 bg-blue-100 text-blue-700'
                             )}
                         >
                             {item.varian}
