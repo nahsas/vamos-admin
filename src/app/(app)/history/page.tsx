@@ -74,9 +74,9 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
     cancelled: 'bg-red-100 text-red-700 border-red-300'
   };
   
-  const statusBorder: { [key: string]: string } = {
-    selesai: 'border-green-400',
-    cancelled: 'border-red-400'
+  const statusBorderGradient: { [key: string]: string } = {
+    selesai: 'bg-gradient-to-br from-green-400 to-green-600',
+    cancelled: 'bg-gradient-to-br from-red-400 to-red-600',
   };
   
   const paymentMethodColor: { [key: string]: string } = {
@@ -90,76 +90,78 @@ function OrderCard({ order, menuItems, onDetailClick }: { order: Order; menuItem
   }
 
   return (
-    <Card className={cn("shadow-md border-l-4 flex flex-col rounded-xl", statusBorder[order.status.toLowerCase()])}>
-      <CardContent className="p-4 space-y-4 flex-grow">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              {order.location_type.toLowerCase() === "dine-in"
-                ? `Meja ${order.no_meja}`
-                : order.no_meja}
-              <Badge className={cn("text-xs capitalize", statusColor[order.status.toLowerCase()])}>{order.status}</Badge>
-            </h3>
-            <div className="flex items-center gap-2 mt-2">
-                {order.metode_pembayaran && (
-                    <Badge variant="outline" className={paymentMethodColor[order.metode_pembayaran]}>
-                        {paymentMethodText[order.metode_pembayaran]}
-                    </Badge>
-                )}
-                {order.location_area && (
-                     <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300">{order.location_area}</Badge>
-                )}
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium">
-              {format(new Date(order.created_at), "HH:mm")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(order.created_at), "eeee, dd MMMM yyyy", { locale: id })}
-            </p>
-          </div>
-        </div>
-
-        <div className="border-t border-dashed pt-4">
-          <div className="flex justify-between items-center text-sm font-medium mb-2">
-            <h4>Detail Pesanan</h4>
-            <span className="text-muted-foreground">{order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0)} item</span>
-          </div>
-          <div className="space-y-1 text-sm text-muted-foreground">
-            {order.detail_pesanans.slice(0, 2).map((item, index) => (
-              <div key={index} className="flex justify-between">
-                <span>{getMenuItemName(item.menu_id)}</span>
-                <span>x {item.jumlah}</span>
-              </div>
-            ))}
-             {order.detail_pesanans.length > 2 && (
-                <div className="text-center text-xs text-primary pt-2">
-                    + {order.detail_pesanans.length - 2} menu lainnya...
+    <div className={cn("p-0.5 rounded-xl", statusBorderGradient[order.status.toLowerCase()])}>
+        <Card className="shadow-md flex flex-col rounded-lg h-full">
+            <CardContent className="p-4 space-y-4 flex-grow">
+                <div className="flex justify-between items-start">
+                <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                    {order.location_type.toLowerCase() === "dine-in"
+                        ? `Meja ${order.no_meja}`
+                        : order.no_meja}
+                    <Badge className={cn("text-xs capitalize", statusColor[order.status.toLowerCase()])}>{order.status}</Badge>
+                    </h3>
+                    <div className="flex items-center gap-2 mt-2">
+                        {order.metode_pembayaran && (
+                            <Badge variant="outline" className={paymentMethodColor[order.metode_pembayaran]}>
+                                {paymentMethodText[order.metode_pembayaran]}
+                            </Badge>
+                        )}
+                        {order.location_area && (
+                            <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300">{order.location_area}</Badge>
+                        )}
+                    </div>
                 </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="border-t pt-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-                <span className="text-muted-foreground">Total:</span>
-                <span className="font-semibold">Rp {parseInt(order.total).toLocaleString('id-ID')}</span>
-            </div>
-             <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Pembayaran:</span>
-                <span className="font-bold text-base">Rp {(order.total_after_discount ?? order.total).toLocaleString('id-ID')}</span>
-            </div>
-        </div>
+                <div className="text-right">
+                    <p className="text-sm font-medium">
+                    {format(new Date(order.created_at), "HH:mm")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                    {format(new Date(order.created_at), "eeee, dd MMMM yyyy", { locale: id })}
+                    </p>
+                </div>
+                </div>
 
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <Button className="w-full" variant="outline" onClick={() => onDetailClick(order)}>
-          <Eye className="mr-2 h-4 w-4" />
-          Lihat Detail
-        </Button>
-      </CardFooter>
-    </Card>
+                <div className="border-t border-dashed pt-4">
+                <div className="flex justify-between items-center text-sm font-medium mb-2">
+                    <h4>Detail Pesanan</h4>
+                    <span className="text-muted-foreground">{order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0)} item</span>
+                </div>
+                <div className="space-y-1 text-sm text-muted-foreground">
+                    {order.detail_pesanans.slice(0, 2).map((item, index) => (
+                    <div key={index} className="flex justify-between">
+                        <span>{getMenuItemName(item.menu_id)}</span>
+                        <span>x {item.jumlah}</span>
+                    </div>
+                    ))}
+                    {order.detail_pesanans.length > 2 && (
+                        <div className="text-center text-xs text-primary pt-2">
+                            + {order.detail_pesanans.length - 2} menu lainnya...
+                        </div>
+                    )}
+                </div>
+                </div>
+                
+                <div className="border-t pt-4 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Total:</span>
+                        <span className="font-semibold">Rp {parseInt(order.total).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Total Pembayaran:</span>
+                        <span className="font-bold text-base">Rp {(order.total_after_discount ?? order.total).toLocaleString('id-ID')}</span>
+                    </div>
+                </div>
+
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+                <Button className="w-full" variant="outline" onClick={() => onDetailClick(order)}>
+                <Eye className="mr-2 h-4 w-4" />
+                Lihat Detail
+                </Button>
+            </CardFooter>
+        </Card>
+    </div>
   );
 }
 
