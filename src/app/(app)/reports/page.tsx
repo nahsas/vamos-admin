@@ -377,64 +377,64 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-        const sDate = startDate ? format(startDate, 'yyyy-MM-dd') : '';
-        const eDate = endDate ? format(endDate, 'yyyy-MM-dd') : '';
-        
-        // --- TRANSACTIONS FETCH ---
-        const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
-        transactionUrl.searchParams.set('status', 'selesai');
-        if (sDate) transactionUrl.searchParams.set('start_date', sDate);
-        if (eDate) transactionUrl.searchParams.set('end_date', eDate);
-        
-        // Note: The API does not seem to support filtering by payment method directly in the query for completed orders.
-        // We will fetch all completed orders for the date range and then filter on the client-side.
+      const sDate = startDate ? format(startOfDay(startDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
+      const eDate = endDate ? format(endOfDay(endDate), "yyyy-MM-dd'T'HH:mm:ss") : '';
 
-        // --- EXPENSES FETCH ---
-        const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
-        if(sDate) expenseUrl.searchParams.set('start_date', sDate);
-        if(eDate) expenseUrl.searchParams.set('end_date', eDate);
-        expenseUrl.searchParams.set('order', 'tanggal.desc');
-        
-        const [transactionRes, expenseRes, menuRes] = await Promise.all([
-            fetch(transactionUrl.toString()),
-            fetch(expenseUrl.toString()),
-            fetch('https://vamos-api.sejadikopi.com/api/menu'),
-        ]);
+      // --- TRANSACTIONS FETCH ---
+      const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
+      transactionUrl.searchParams.set('status', 'selesai');
+      if (sDate) transactionUrl.searchParams.set('created_from', sDate);
+      if (eDate) transactionUrl.searchParams.set('created_to', eDate);
+      
+      // --- EXPENSES FETCH ---
+      const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
+      if (sDate) expenseUrl.searchParams.set('created_from', sDate);
+      if (eDate) expenseUrl.searchParams.set('created_to', eDate);
+      expenseUrl.searchParams.set('order', 'tanggal.desc');
+      
+      const [transactionRes, expenseRes, menuRes] = await Promise.all([
+          fetch(transactionUrl.toString()),
+          fetch(expenseUrl.toString()),
+          fetch('https://vamos-api.sejadikopi.com/api/menu'),
+      ]);
 
-        let allTransactions: any[] = [];
-        if (transactionRes.ok) {
-            const data = await transactionRes.json();
-            allTransactions = data.data || [];
-        }
+      let allTransactions: any[] = [];
+      if (transactionRes.ok) {
+          const data = await transactionRes.json();
+          allTransactions = data.data || [];
+      } else {
+          console.error("Failed to fetch transactions:", await transactionRes.text());
+      }
 
-        if (expenseRes.ok) {
-            const data = await expenseRes.json();
-            setExpenses(data.data || []);
-        } else {
-            setExpenses([]);
-        }
+      if (expenseRes.ok) {
+          const data = await expenseRes.json();
+          setExpenses(data.data || []);
+      } else {
+          console.error("Failed to fetch expenses:", await expenseRes.text());
+          setExpenses([]);
+      }
 
-        if (menuRes.ok) {
-            const menuData = await menuRes.json();
-            setMenuItems(menuData.data || []);
-        } else {
-            setMenuItems([]);
-        }
-        
-        // --- CLIENT-SIDE FILTERING FOR PAYMENT METHOD ---
-        let filteredTransactions = allTransactions;
-        if (paymentMethod !== 'all') {
-            if (paymentMethod === 'cash' || paymentMethod === 'qris') {
-                filteredTransactions = allTransactions.filter(t => t.metode_pembayaran === paymentMethod);
-            } else if (paymentMethod.startsWith('qris-')) {
-                const bank = paymentMethod.split('-')[1];
-                filteredTransactions = allTransactions.filter(t => 
-                    t.metode_pembayaran === 'qris' && t.bank_qris && t.bank_qris.toLowerCase().includes(bank)
-                );
-            }
-        }
-        
-        setTransactions(filteredTransactions);
+      if (menuRes.ok) {
+          const menuData = await menuRes.json();
+          setMenuItems(menuData.data || []);
+      } else {
+          setMenuItems([]);
+      }
+      
+      // --- CLIENT-SIDE FILTERING FOR PAYMENT METHOD ---
+      let filteredTransactions = allTransactions;
+      if (paymentMethod !== 'all') {
+          if (paymentMethod === 'cash' || paymentMethod === 'qris') {
+              filteredTransactions = allTransactions.filter(t => t.metode_pembayaran === paymentMethod);
+          } else if (paymentMethod.startsWith('qris-')) {
+              const bank = paymentMethod.split('-')[1];
+              filteredTransactions = allTransactions.filter(t => 
+                  t.metode_pembayaran === 'qris' && t.bank_qris && t.bank_qris.toLowerCase().includes(bank)
+              );
+          }
+      }
+      
+      setTransactions(filteredTransactions);
 
     } catch (error) {
         console.error("Gagal mengambil data laporan:", error);
@@ -445,6 +445,7 @@ export default function ReportsPage() {
         setDataLoading(false);
     }
   }, [startDate, endDate, paymentMethod, toast]);
+
 
   React.useEffect(() => {
     if (user && ['admin', 'kasir'].includes(user.role)) {
@@ -504,7 +505,7 @@ export default function ReportsPage() {
   }
 
     const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
-
+    
     const displayedExpenses = expenses.filter(e =>
       (e.kategori && e.kategori.toLowerCase().includes(expenseSearch.toLowerCase())) ||
       (e.deskripsi && e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase()))
@@ -514,8 +515,8 @@ export default function ReportsPage() {
       (t.id && t.id.toString().includes(transactionSearch)) ||
       (t.no_meja && t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase()))
     );
-
-    const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_after_discount || 0), 0);
+    
+    const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_after_discount || parseInt(t.total) || 0), 0);
     const totalExpenses = displayedExpenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
     const netProfit = totalRevenue - totalExpenses;
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
@@ -523,22 +524,23 @@ export default function ReportsPage() {
     const paymentBreakdown = displayedTransactions.reduce((acc, t) => {
         const method = t.metode_pembayaran || 'unknown';
         const bank = t.bank_qris || 'other';
+        const amount = t.total_after_discount || parseInt(t.total) || 0;
         
         if (method === 'cash') {
-            acc.cash.amount += t.total_after_discount || 0;
+            acc.cash.amount += amount;
             acc.cash.count += 1;
         } else if (method === 'qris') {
-            acc.qris.amount += t.total_after_discount || 0;
+            acc.qris.amount += amount;
             acc.qris.count += 1;
             
             if (bank && bank.toLowerCase().includes('bca')) {
-                acc.qris_bca.amount += t.total_after_discount || 0;
+                acc.qris_bca.amount += amount;
                 acc.qris_bca.count += 1;
             } else if (bank && bank.toLowerCase().includes('bri')) {
-                acc.qris_bri.amount += t.total_after_discount || 0;
+                acc.qris_bri.amount += amount;
                 acc.qris_bri.count += 1;
             } else if (bank && bank.toLowerCase().includes('bsi')) {
-                acc.qris_bsi.amount += t.total_after_discount || 0;
+                acc.qris_bsi.amount += amount;
                 acc.qris_bsi.count += 1;
             }
         }
@@ -874,6 +876,8 @@ export default function ReportsPage() {
     </div>
   )
 }
+    
+
     
 
     
