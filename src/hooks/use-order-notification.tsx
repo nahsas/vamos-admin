@@ -14,6 +14,8 @@ export function useOrderNotification() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
   const isFirstLoad = useRef(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
 
   // This effect runs only once on the client to initialize the audio object.
   useEffect(() => {
@@ -27,8 +29,11 @@ export function useOrderNotification() {
     try {
       const response = await fetch('https://vamos-api.sejadikopi.com/api/pesanans?status=pending,diproses');
       if (!response.ok) {
-        console.error('Failed to fetch active orders');
-        return;
+        throw new Error('Failed to fetch active orders');
+      }
+      // If fetch is successful, clear any previous error
+      if (fetchError) {
+          setFetchError(null);
       }
       const { data: activeOrders }: { data: Order[] } = await response.json();
 
@@ -110,8 +115,19 @@ export function useOrderNotification() {
 
     } catch (error) {
       console.error('Error fetching active orders:', error);
+      // Only show the toast if it's a new error
+      if (!fetchError) {
+          const errorMessage = 'Could not connect to server to check for new orders. Please check your network connection.';
+          setFetchError(errorMessage);
+          toast({
+              variant: "destructive",
+              title: "Network Error",
+              description: errorMessage,
+              duration: 8000,
+          });
+      }
     }
-  }, [lastKnownOrdersState, toast, router]);
+  }, [lastKnownOrdersState, toast, router, fetchError]);
 
   useEffect(() => {
     const interval = setInterval(() => {
