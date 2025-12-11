@@ -48,13 +48,13 @@ const statusConfig: {
   [key: string]: {
     label: string;
     color: string;
+    headerColor: string;
   };
 } = {
-  pending: { label: 'PENDING', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' },
-  diproses: { label: 'PROSES', color: 'bg-blue-500 text-white' },
-  selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
-  dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
-  cancelled: { label: 'BATAL', color: 'bg-red-500 text-white' },
+  pending: { label: 'PENDING', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900', headerColor: 'bg-primary' },
+  diproses: { label: 'PROSES', color: 'bg-blue-500 text-white', headerColor: 'bg-primary' },
+  selesai: { label: 'SELESAI', color: 'bg-green-500 text-white', headerColor: 'bg-green-600' },
+  cancelled: { label: 'BATAL', color: 'bg-red-500 text-white', headerColor: 'bg-red-600' },
 };
 
 export function OrderDetailModal({
@@ -289,6 +289,8 @@ export function OrderDetailModal({
     onOpenChange(isOpen);
   };
 
+  const headerColor = currentOrder ? (statusConfig[currentOrder.status.toLowerCase()]?.headerColor || 'bg-primary') : 'bg-primary';
+
   return (
     <>
     <Dialog open={open} onOpenChange={handleClose}>
@@ -296,7 +298,7 @@ export function OrderDetailModal({
         {!currentOrder && <div className="p-8 text-center">No order selected.</div>}
         {currentOrder && (
           <>
-            <DialogHeader className="p-4 bg-primary text-primary-foreground rounded-t-lg relative">
+            <DialogHeader className={cn("p-4 text-primary-foreground rounded-t-lg relative", headerColor)}>
               <div className="flex justify-between items-center">
                 <DialogTitle>
                   Detail Pesanan{' '}
