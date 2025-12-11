@@ -377,8 +377,8 @@ export default function ReportsPage() {
   const fetchData = React.useCallback(async () => {
     setDataLoading(true);
     try {
-        const sDate = startDate ? format(startDate, 'yyyy-MM-dd HH:mm:ss') : '';
-        const eDate = endDate ? format(endDate, 'yyyy-MM-dd HH:mm:ss') : '';
+        const sDate = startDate ? format(startDate, 'yyyy-MM-dd\'T\'HH:mm:ss') : '';
+        const eDate = endDate ? format(endDate, 'yyyy-MM-dd\'T\'HH:mm:ss') : '';
         
         const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
         transactionUrl.searchParams.set('status', 'selesai');
@@ -868,3 +868,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
