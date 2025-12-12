@@ -290,6 +290,27 @@ export default function OrdersPage() {
         open={isPaymentModalOpen}
         onOpenChange={setIsPaymentModalOpen}
       />
+
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+        <StatCard title="MEJA TERISI" value={occupiedTablesCount !== null ? occupiedTablesCount.toString() : '...'} icon={Users} />
+        <StatCard title="TOTAL ITEM" value={totalItems.toString()} icon={ShoppingCart} />
+        <div className="sm:col-span-1 md:col-span-2">
+          <StatCard title="TOTAL TRANSAKSI" value={totalTransactions} icon={Wallet} />
+        </div>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <h2 className="text-xl font-bold">Detail List Meja Terisi</h2>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="h-9 text-sm font-medium hidden md:flex">
+            {allActiveOrders.length} pesanan aktif
+          </Badge>
+          <Button onClick={fetchData} className="h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-primary-foreground hover:from-blue-600 hover:to-purple-700">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
+      </div>
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -313,27 +334,6 @@ export default function OrdersPage() {
             <SelectItem value="diproses">Processing</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
-        <StatCard title="MEJA TERISI" value={occupiedTablesCount !== null ? occupiedTablesCount.toString() : '...'} icon={Users} />
-        <StatCard title="TOTAL ITEM" value={totalItems.toString()} icon={ShoppingCart} />
-        <div className="sm:col-span-1 md:col-span-2">
-          <StatCard title="TOTAL TRANSAKSI" value={totalTransactions} icon={Wallet} />
-        </div>
-      </div>
-      
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <h2 className="text-xl font-bold">Detail List Meja Terisi</h2>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="h-9 text-sm font-medium hidden md:flex">
-            {allActiveOrders.length} pesanan aktif
-          </Badge>
-          <Button onClick={fetchData} className="h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-primary-foreground hover:from-blue-600 hover:to-purple-700">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
-        </div>
       </div>
 
       <Card className="rounded-xl">
