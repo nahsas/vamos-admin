@@ -9,8 +9,12 @@ import { columns as menuColumns } from "./columns";
 import { columns as categoryColumns } from "./category-columns";
 import { columns as discountColumns } from "./discount-columns";
 import { columns as stockColumns } from "./stock-columns";
+import { columns as bestSellerColumns } from "./best-seller-columns";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import Image from "next/image";
 
 import { PlusCircle, Coffee, Utensils, BookOpen, Archive, Percent, Star, Search, Filter } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,6 +65,29 @@ function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, 
   )
 }
 
+function BestSellerCard({ item, rank }: { item: any, rank: number }) {
+  const rankColor =
+    rank === 1 ? "border-yellow-400 bg-yellow-400/10"
+    : rank === 2 ? "border-gray-400 bg-gray-400/10"
+    : rank === 3 ? "border-amber-600 bg-amber-600/10"
+    : "border-border";
+
+  const fullUrl = item.menu.foto ? `https://vamos-api.sejadikopi.com/storage/${item.menu.foto}` : 'https://placehold.co/64x64/FFFAF0/6F4E37?text=Kopi';
+
+  return (
+    <Card className={cn("p-4 flex items-center gap-4 transition-all hover:bg-card/80", rankColor)}>
+        <div className="w-16 h-16 rounded-md overflow-hidden relative">
+            <Image src={fullUrl} alt={item.menu.nama} layout="fill" objectFit="cover" unoptimized/>
+        </div>
+        <div className="flex-1">
+            <p className="font-bold">{item.menu.nama}</p>
+            <p className="text-sm text-muted-foreground">Terjual: {item.total_sold}</p>
+        </div>
+        <div className="text-2xl font-bold text-muted-foreground">#{rank}</div>
+    </Card>
+  )
+}
+
 export default function MenuPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -68,11 +95,15 @@ export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [bestSellers, setBestSellers] = useState<any[]>([]);
 
   const [menuSearchTerm, setMenuSearchTerm] = useState('');
   const [menuFilterCategory, setMenuFilterCategory] = useState('all');
   const [stockSearchTerm, setStockSearchTerm] = useState('');
   const [stockFilterAvailability, setStockFilterAvailability] = useState('all');
+  const [bestSellerSearchTerm, setBestSellerSearchTerm] = useState('');
+
+  const [isAutomaticBestSeller, setIsAutomaticBestSeller] = useState(true);
 
   const [stats, setStats] = useState({
     totalMenu: 0,
@@ -92,10 +123,11 @@ export default function MenuPage() {
   
   const fetchData = useCallback(async () => {
     try {
-      const [menuRes, categoryRes, discountRes] = await Promise.all([
+      const [menuRes, categoryRes, discountRes, bestSellerRes] = await Promise.all([
         fetch('https://vamos-api.sejadikopi.com/api/menu'),
         fetch('https://vamos-api.sejadikopi.com/api/categories'),
         fetch('https://vamos-api.sejadikopi.com/api/discount-codes'),
+        fetch('https://vamos-api.sejadikopi.com/api/best-sellers?limit=10&days=30'),
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };
@@ -106,6 +138,9 @@ export default function MenuPage() {
 
       const discountData = discountRes.ok ? await discountRes.json() : { data: [] };
       setDiscounts(discountData.data || []);
+
+      const bestSellerData = bestSellerRes.ok ? await bestSellerRes.json() : { data: [] };
+      setBestSellers(bestSellerData.data || []);
       
        if (menuData.data) {
         const foodAndSnackCategoryIds = [3, 4, 5, 6, 7];
@@ -162,6 +197,7 @@ export default function MenuPage() {
 
   const menuColumnsWithCategories = menuColumns({ onEdit: handleMenuFormOpen, onDeleteSuccess: fetchData, categories });
   const stockColumnsWithHandlers = stockColumns({ onUpdateSuccess: fetchData, categories });
+  const bestSellerColumnsWithHandlers = bestSellerColumns({ onUpdateSuccess: fetchData });
 
   const filteredMenuItems = menuItems.filter(item => {
     const nameMatch = item.nama.toLowerCase().includes(menuSearchTerm.toLowerCase());
@@ -178,6 +214,10 @@ export default function MenuPage() {
 
     return nameMatch && availabilityMatch;
   });
+
+  const filteredBestSellerMenuItems = menuItems.filter(item =>
+    item.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
+  );
 
 
   return (
@@ -221,11 +261,12 @@ export default function MenuPage() {
       </div>
       
       <Tabs defaultValue="menu">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
           <TabsTrigger value="menu">Menu</TabsTrigger>
           <TabsTrigger value="stock">Stok</TabsTrigger>
           <TabsTrigger value="discount">Diskon</TabsTrigger>
           <TabsTrigger value="category">Kategori</TabsTrigger>
+          <TabsTrigger value="bestseller">Menu Terlaris</TabsTrigger>
         </TabsList>
         <TabsContent value="menu" className="mt-6">
           <div className="space-y-6">
@@ -324,11 +365,51 @@ export default function MenuPage() {
             />
           </div>
         </TabsContent>
+        <TabsContent value="bestseller" className="mt-6">
+          <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}}>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "text-primary font-bold")}>Manual</Label>
+              <Switch
+                id="bestseller-mode"
+                checked={isAutomaticBestSeller}
+                onCheckedChange={setIsAutomaticBestSeller}
+              />
+              <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "text-primary font-bold")}>Otomatis</Label>
+            </div>
+          </TabHeader>
+          <Card className="rounded-xl">
+             <CardHeader>
+                <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-all duration-300 focus-within:text-primary" />
+                  <Input
+                    placeholder="Cari nama menu..."
+                    className="pl-10 transition-all duration-300 focus:shadow-md focus:shadow-primary/20"
+                    value={bestSellerSearchTerm}
+                    onChange={(e) => setBestSellerSearchTerm(e.target.value)}
+                  />
+                </div>
+            </CardHeader>
+            <CardContent>
+              {isAutomaticBestSeller ? (
+                <div className="space-y-4">
+                  {bestSellers
+                    .filter(item => item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase()))
+                    .map((item, index) => (
+                      <BestSellerCard key={item.menu_id} item={item} rank={index + 1} />
+                  ))}
+                </div>
+              ) : (
+                 <div className="w-full overflow-x-auto">
+                    <DataTable
+                      columns={bestSellerColumnsWithHandlers}
+                      data={filteredBestSellerMenuItems}
+                    />
+                 </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-
-    
-
-    
