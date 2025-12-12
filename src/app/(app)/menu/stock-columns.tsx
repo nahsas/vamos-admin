@@ -1,4 +1,3 @@
-
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -114,7 +113,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
             </AlertDialogHeader>
             <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmChange}>
+            <AlertDialogAction onClick={confirmChange} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                 Ya, Lanjutkan
             </AlertDialogAction>
             </AlertDialogFooter>
