@@ -763,7 +763,7 @@ export default function ReportsPage() {
             value={toRupiah(totalRevenue)}
             date={filterDateRangeStr}
             icon={<DollarSign className="h-5 w-5" />}
-            bgColor="bg-blue-500"
+            bgColor="bg-gradient-to-tr from-blue-500 to-blue-700"
             textColor="text-white"
             rightIcon={<Landmark className="h-6 w-6" />}
           />
@@ -771,7 +771,7 @@ export default function ReportsPage() {
             title="Setoran"
             value={toRupiah(setoran)}
             icon={<Landmark className="h-5 w-5" />}
-            bgColor="bg-green-500"
+            bgColor="bg-gradient-to-tr from-green-500 to-green-700"
             date={"Uang yang harus di setor"}
             textColor="text-white"
             rightIcon={<Wallet className="h-6 w-6" />}
@@ -781,7 +781,7 @@ export default function ReportsPage() {
             value={toRupiah(totalExpenses)}
             date={filterDateRangeStr}
             icon={<Receipt className="h-5 w-5" />}
-            bgColor="bg-purple-500"
+            bgColor="bg-gradient-to-tr from-purple-500 to-purple-700"
             textColor="text-white"
             rightIcon={<Receipt className="h-6 w-6" />}
           />
@@ -790,7 +790,7 @@ export default function ReportsPage() {
             value={toRupiah(netProfit)}
             date={`Margin: ${margin.toFixed(1)}%`}
             icon={<LineChart className="h-5 w-5" />}
-            bgColor="bg-orange-500"
+            bgColor="bg-gradient-to-tr from-orange-500 to-orange-700"
             textColor="text-white"
             rightIcon={<LineChart className="h-6 w-6" />}
           />
