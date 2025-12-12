@@ -283,6 +283,10 @@ export default function MenuPage() {
         </TabsContent>
         <TabsContent value="stock" className="mt-6">
           <Card className="mb-6 rounded-xl">
+              <CardHeader>
+                <CardTitle>Manajemen Stok</CardTitle>
+                <CardDescription>Atur ketersediaan item menu secara cepat.</CardDescription>
+              </CardHeader>
               <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
                 <div className="relative flex-grow w-full md:w-auto">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -293,19 +297,6 @@ export default function MenuPage() {
                     onChange={(e) => setStockSearchTerm(e.target.value)}
                   />
                 </div>
-                <Select value={stockFilterAvailability} onValueChange={setStockFilterAvailability}>
-                  <SelectTrigger className="w-full md:w-[240px]">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <SelectValue placeholder="Filter Ketersediaan" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua</SelectItem>
-                    <SelectItem value="available">Tersedia</SelectItem>
-                    <SelectItem value="unavailable">Habis</SelectItem>
-                  </SelectContent>
-                </Select>
               </CardContent>
             </Card>
           <div className="w-full overflow-x-auto">

@@ -2,7 +2,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, XCircle, CheckCircle } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MenuItem } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
@@ -15,10 +15,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Category } from "@/lib/types"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import React from "react"
 
 type StockColumnsProps = {
   onUpdateSuccess: () => void;
@@ -68,6 +70,58 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
       });
     }
   }
+
+  const AvailabilityToggle: React.FC<{ menuItem: MenuItem }> = ({ menuItem }) => {
+    const [isAvailable, setIsAvailable] = React.useState(menuItem.stok > 0);
+    const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+    const [pendingState, setPendingState] = React.useState(isAvailable);
+  
+    React.useEffect(() => {
+      setIsAvailable(menuItem.stok > 0);
+    }, [menuItem.stok]);
+
+    const handleCheckedChange = (checked: boolean) => {
+      setPendingState(checked);
+      setIsAlertOpen(true);
+    };
+
+    const confirmChange = () => {
+      const newStock = pendingState ? 1000 : 0;
+      handleUpdateStock(menuItem, newStock);
+      setIsAvailable(pendingState);
+      setIsAlertOpen(false);
+    };
+
+    return (
+       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <div className="flex items-center space-x-2 justify-end">
+            <Label htmlFor={`stock-switch-${menuItem.id}`} className={isAvailable ? "text-green-600" : "text-red-600"}>
+                {isAvailable ? 'Tersedia' : 'Habis'}
+            </Label>
+            <Switch
+                id={`stock-switch-${menuItem.id}`}
+                checked={isAvailable}
+                onCheckedChange={handleCheckedChange}
+                aria-readonly
+            />
+        </div>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Perubahan Status</AlertDialogTitle>
+            <AlertDialogDescription>
+                Apakah Anda yakin ingin mengubah status "{menuItem.nama}" menjadi {pendingState ? 'Tersedia' : 'Habis'}?
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmChange}>
+                Ya, Lanjutkan
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
   
   return [
     {
@@ -94,76 +148,11 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
       }
     },
     {
-        accessorKey: "stok",
-        header: "Status",
-        cell: ({ row }) => {
-            const stock = row.getValue("stok") as number;
-            const isAvailable = stock > 0;
-            return (
-                <Badge variant={isAvailable ? "outline" : "destructive"} className={isAvailable ? "bg-green-100 text-green-800 border-green-300" : ""}>
-                    {isAvailable ? 'Tersedia' : 'Habis'}
-                </Badge>
-            );
-        }
-    },
-    {
       id: "actions",
+      header: () => <div className="text-right">Ketersediaan</div>,
       cell: ({ row }) => {
-        const menuItem = row.original
-        return (
-            <div className="text-right space-x-2">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm">
-                      <XCircle className="mr-2 h-4 w-4" />
-                      Tandai Habis
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Ini akan menandai "{menuItem.nama}" sebagai Habis dengan mengatur stok menjadi 0.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Batal</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleUpdateStock(menuItem, 0)}
-                        className="bg-destructive hover:bg-destructive/90"
-                      >
-                        Ya, Tandai Habis
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                     <Button variant="outline" size="sm" className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Tandai Tersedia
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                           Ini akan menandai "{menuItem.nama}" sebagai Tersedia dengan mengatur ulang stok.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Batal</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleUpdateStock(menuItem, 1000)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Ya, Tandai Tersedia
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-            </div>
-        )
+        const menuItem = row.original;
+        return <AvailabilityToggle menuItem={menuItem} />;
       },
     },
   ]
