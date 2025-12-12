@@ -252,25 +252,24 @@ export default function MenuPage() {
         </TabsList>
         <TabsContent value="menu" className="mt-6">
           <div className="space-y-6">
-            <Card className='rounded-xl'>
-              <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
-                  <div className="flex items-center gap-4 flex-grow">
-                      <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg">
-                          <BookOpen className="w-8 h-8 text-primary" />
-                      </div>
-                      <div>
-                          <h3 className="text-lg font-bold">Kelola Menu</h3>
-                          <p className="text-sm text-muted-foreground">Tambah dan kelola menu kopi & makanan</p>
-                      </div>
-                  </div>
-                  <Button onClick={() => handleMenuFormOpen()} className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Buat Menu Baru
-                  </Button>
-              </CardContent>
-            </Card>
-            <Card className='rounded-xl'>
-                <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
+            <Card className="rounded-xl">
+              <CardHeader>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
+                    <div className="flex items-center gap-4 flex-grow">
+                        <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg">
+                            <BookOpen className="w-8 h-8 text-primary" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Kelola Menu</h3>
+                            <p className="text-sm text-muted-foreground">Tambah dan kelola menu kopi & makanan</p>
+                        </div>
+                    </div>
+                    <Button onClick={() => handleMenuFormOpen()} className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Buat Menu Baru
+                    </Button>
+                </div>
+                <CardContent className="pt-0 p-4 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -295,13 +294,14 @@ export default function MenuPage() {
                     </SelectContent>
                   </Select>
                 </CardContent>
-              </Card>
-          </div>
-          <div className="w-full overflow-x-auto mt-6">
-            <DataTable 
-                columns={menuColumnsWithCategories} 
-                data={filteredMenuItems} 
-              />
+              </CardHeader>
+              <CardContent className="p-0">
+                <DataTable 
+                    columns={menuColumnsWithCategories} 
+                    data={filteredMenuItems} 
+                  />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
         <TabsContent value="stock" className="mt-6">
@@ -310,7 +310,7 @@ export default function MenuPage() {
                 <CardTitle>Manajemen Stok</CardTitle>
                 <CardDescription>Atur ketersediaan item menu secara cepat.</CardDescription>
               </CardHeader>
-              <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
+              <CardContent className="pt-0 p-4 flex flex-col md:flex-row items-center gap-4">
                 <div className="relative flex-grow w-full md:w-auto">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
@@ -321,31 +321,35 @@ export default function MenuPage() {
                   />
                 </div>
               </CardContent>
+               <CardContent className="p-0">
+                <DataTable 
+                    columns={stockColumnsWithHandlers}
+                    data={filteredStockItems} 
+                  />
+              </CardContent>
             </Card>
-          <div className="w-full overflow-x-auto">
-            <DataTable 
-                columns={stockColumnsWithHandlers}
-                data={filteredStockItems} 
-              />
-          </div>
         </TabsContent>
         <TabsContent value="discount" className="mt-6">
           <TabHeader icon={Percent} title="Kelola Diskon" description="Buat dan kelola promosi untuk item menu" buttonText="Buat Diskon Baru" onButtonClick={() => handleDiscountFormOpen()} />
-          <div className="w-full overflow-x-auto">
-            <DataTable 
-              columns={discountColumns({ onEdit: handleDiscountFormOpen, onDeleteSuccess: fetchData })}
-              data={discounts}
-            />
-          </div>
+          <Card className="rounded-xl">
+             <CardContent className="p-0">
+                <DataTable 
+                columns={discountColumns({ onEdit: handleDiscountFormOpen, onDeleteSuccess: fetchData })}
+                data={discounts}
+                />
+            </CardContent>
+          </Card>
         </TabsContent>
         <TabsContent value="category" className="mt-6">
           <TabHeader icon={Utensils} title="Kelola Kategori" description="Kelompokkan item menu ke dalam kategori" buttonText="Buat Kategori Baru" onButtonClick={() => handleCategoryFormOpen()} />
-          <div className="w-full overflow-x-auto">
-            <DataTable
-              columns={categoryColumns({ onEdit: handleCategoryFormOpen, onDeleteSuccess: fetchData })}
-              data={categories}
-            />
-          </div>
+          <Card className="rounded-xl">
+             <CardContent className="p-0">
+                <DataTable
+                columns={categoryColumns({ onEdit: handleCategoryFormOpen, onDeleteSuccess: fetchData })}
+                data={categories}
+                />
+            </CardContent>
+          </Card>
         </TabsContent>
         <TabsContent value="bestseller" className="mt-6">
           <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}}>
@@ -371,19 +375,17 @@ export default function MenuPage() {
                   />
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {isAutomaticBestSeller ? (
                 <DataTable
                   columns={autoBestSellerColumns}
                   data={filteredAutomaticBestSellers}
                 />
               ) : (
-                 <div className="w-full overflow-x-auto">
-                    <DataTable
-                      columns={bestSellerColumnsWithHandlers}
-                      data={filteredBestSellerMenuItems}
-                    />
-                 </div>
+                <DataTable
+                    columns={bestSellerColumnsWithHandlers}
+                    data={filteredBestSellerMenuItems}
+                />
               )}
             </CardContent>
           </Card>
