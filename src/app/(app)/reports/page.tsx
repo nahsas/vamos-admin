@@ -740,7 +740,7 @@ export default function ReportsPage() {
             <Button variant="secondary" onClick={handleResetFilter} className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
             </Button>
-            <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white font-bold sm:col-span-2 md:col-span-1" onClick={handleExport} disabled={exporting}>
+            <Button variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold sm:col-span-2 md:col-span-1" onClick={handleExport} disabled={exporting}>
                 {exporting ? (
                     <>
                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
