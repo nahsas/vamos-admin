@@ -3,104 +3,104 @@
 //// --------------------------------------------------------------------------------
 
 Table Users {
-  id integer [pk, increment]
-  name varchar(255) [not null]
-  email varchar(255) [unique, not null]
-  password varchar(255) [not null]
-  role varchar(50) [not null, note: "'admin' or 'kasir'"]
-  created_at timestamp
-  updated_at timestamp
+    id integer [pk, increment]
+      name varchar(255) [not null]
+        email varchar(255) [unique, not null]
+          password varchar(255) [not null]
+            role varchar(50) [not null, note: "'admin' or 'kasir'"]
+              created_at timestamp
+                updated_at timestamp
 }
 
 Table Categories {
-  id integer [pk, increment]
-  nama varchar(255) [not null]
-  urutan integer [default: 0]
-  support_additional boolean [default: false]
-  support_dimsum_additional boolean [default: false]
+    id integer [pk, increment]
+      nama varchar(255) [not null]
+        urutan integer [default: 0]
+          support_additional boolean [default: false]
+            support_dimsum_additional boolean [default: false]
 }
 
 Table Menu {
-  id integer [pk, increment]
-  nama varchar(255) [not null]
-  harga decimal(10, 2) [not null]
-  foto varchar(255)
-  is_available boolean [default: true]
-  stok integer [default: 0]
-  kategori_struk varchar(50) [note: "'makanan' or 'minuman'"]
-  kategori_id integer [not null]
-  created_at timestamp
-  updated_at timestamp
+    id integer [pk, increment]
+      nama varchar(255) [not null]
+        harga decimal(10, 2) [not null]
+          foto varchar(255)
+            is_available boolean [default: true]
+              stok integer [default: 0]
+                kategori_struk varchar(50) [note: "'makanan' or 'minuman'"]
+                  kategori_id integer [not null]
+                    created_at timestamp
+                      updated_at timestamp
 }
 
 Table Additionals {
-  id integer [pk, increment]
-  nama varchar(255) [not null]
-  harga decimal(10, 2) [not null]
-  tipe varchar(50) [note: "'regular' or 'dimsum'"]
-  is_active boolean [default: true]
+    id integer [pk, increment]
+      nama varchar(255) [not null]
+        harga decimal(10, 2) [not null]
+          tipe varchar(50) [note: "'regular' or 'dimsum'"]
+            is_active boolean [default: true]
 }
 
 Table DiscountCodes {
-  id integer [pk, increment]
-  code varchar(255) [unique, not null]
-  type varchar(50) [not null, note: "'percentage' or 'fixed'"]
-  value decimal(10, 2) [not null]
-  is_active boolean [default: true]
-  valid_from date
-  valid_to date
-  usage_limit integer
-  min_amount decimal(10, 2)
+    id integer [pk, increment]
+      code varchar(255) [unique, not null]
+        type varchar(50) [not null, note: "'percentage' or 'fixed'"]
+          value decimal(10, 2) [not null]
+            is_active boolean [default: true]
+              valid_from date
+                valid_to date
+                  usage_limit integer
+                    min_amount decimal(10, 2)
 }
 
 Table Orders {
-  id integer [pk, increment]
-  no_meja varchar(255) [not null]
-  status varchar(50) [not null, note: "'pending', 'diproses', 'selesai', 'cancelled'"]
-  total decimal(10, 2) [not null]
-  total_after_discount decimal(10, 2)
-  metode_pembayaran varchar(50) [note: "'cash' or 'qris'"]
-  bank_qris varchar(50)
-  location_type varchar(50) [not null, note: "'DINE-IN' or 'TAKEAWAY'"]
-  location_area varchar(255)
-  note text
-  discount_code_id integer
-  created_at timestamp
-  completed_at timestamp
-  updated_at timestamp
+    id integer [pk, increment]
+      no_meja varchar(255) [not null]
+        status varchar(50) [not null, note: "'pending', 'diproses', 'selesai', 'cancelled'"]
+          total decimal(10, 2) [not null]
+            total_after_discount decimal(10, 2)
+              metode_pembayaran varchar(50) [note: "'cash' or 'qris'"]
+                bank_qris varchar(50)
+                  location_type varchar(50) [not null, note: "'DINE-IN' or 'TAKEAWAY'"]
+                    location_area varchar(255)
+                      note text
+                        discount_code_id integer
+                          created_at timestamp
+                            completed_at timestamp
+                              updated_at timestamp
 }
 
 Table OrderDetails {
-  id integer [pk, increment]
-  pesanan_id integer [not null]
-  menu_id integer [not null]
-  jumlah integer [not null]
-  subtotal decimal(10, 2) [not null]
-  base_price decimal(10, 2) [not null]
-  additional_price decimal(10, 2)
-  varian varchar(255)
-  note text
+    id integer [pk, increment]
+      pesanan_id integer [not null]
+        menu_id integer [not null]
+          jumlah integer [not null]
+            subtotal decimal(10, 2) [not null]
+              base_price decimal(10, 2) [not null]
+                additional_price decimal(10, 2)
+                  varian varchar(255)
+                    note text
 }
 
 Table Receipts {
-  id integer [pk, increment]
-  pesanan_id integer [unique, not null]
-  kasir_id integer [not null]
-  total decimal(10, 2) [not null]
-  dibayar decimal(10, 2) [not null]
-  kembalian decimal(10, 2) [not null]
-  created_at timestamp
+    id integer [pk, increment]
+      pesanan_id integer [unique, not null]
+        kasir_id integer [not null]
+          total decimal(10, 2) [not null]
+            dibayar decimal(10, 2) [not null]
+              kembalian decimal(10, 2) [not null]
+                created_at timestamp
 }
 
 Table Expenses {
-  id varchar(255) [pk]
-  kategori varchar(255) [not null]
-  deskripsi text
-  jumlah decimal(10, 2) [not null]
-  tanggal date [not null]
-  bukti_url varchar(255)
-  created_by varchar(255) [not null]
-  created_at timestamp
+    id varchar(255) [pk]
+      kategori varchar(255) [not null]
+        deskripsi text
+          jumlah decimal(10, 2) [not null]
+            tanggal date [not null]
+              bukti_url varchar(255)
+                created_by varchar(255) [not null]
+                  created_at timestamp
 }
 
 
@@ -115,3 +115,13 @@ Ref: Receipts.pesanan_id > Orders.id
 Ref: Receipts.kasir_id > Users.id
 Ref: Orders.discount_code_id - DiscountCodes.id
 Ref: Expenses.created_by > Users.email
+
+}
+}
+}
+}
+}
+}
+}
+}
+}
