@@ -95,9 +95,12 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
                   </div>
                   ))}
                   {order.detail_pesanans.length > 2 && (
-                  <div className="text-center text-xs text-primary pt-2">
-                      + {order.detail_pesanans.length - 2} menu lainnya...
-                  </div>
+                    <div className={cn(
+                        "text-center text-xs pt-2",
+                        isPending ? "text-yellow-500" : "text-blue-500"
+                    )}>
+                        + {order.detail_pesanans.length - 2} menu lainnya...
+                    </div>
                   )}
               </div>
               </div>
