@@ -184,42 +184,47 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {user?.role === 'admin' ? (
-          <>
-            <StatCard 
-              title="Total Menu" 
-              value={totalMenu !== null ? totalMenu.toString() : "..."} 
-              icon={Utensils} 
-              description="Semua kategori" 
-              bgColor="bg-purple-600" 
-              textColor="text-white" 
-            />
-            <StatCard 
-                title="Kategori Menu" 
-                value={totalCategories !== null ? totalCategories.toString() : "..."} 
-                icon={Layers} 
-                description="Kategori aktif" 
-                bgColor="bg-gradient-to-tr from-purple-700 to-blue-700" 
-                textColor="text-white" 
-            />
-            <StatCard 
-                title="Pesanan Hari Ini" 
-                value={todaysOrdersCount !== null ? todaysOrdersCount.toString() : "..."} 
-                icon={ClipboardList} 
-                description="Total pesanan" 
-                bgColor="bg-blue-700" 
-                textColor="text-white" 
-            />
-          </>
-        ) : (
-          <>
-            <StatCard title="Tertunda" value={pendingOrders !== null ? pendingOrders.toString() : "..."} icon={Clock} description="Menunggu" bgColor="bg-yellow-400" textColor="text-white" />
-            <StatCard title="Diproses" value={processingOrders !== null ? processingOrders.toString() : "..."} icon={Loader} description="Sedang diproses" bgColor="bg-blue-500" textColor="text-white" />
-            <StatCard title="Selesai" value={completedOrders !== null ? completedOrders.toString() : "..."} icon={CheckCircle2} description="Selesai hari ini" bgColor="bg-green-500" textColor="text-white" />
-          </>
-        )}
-      </div>
+      <Card className="rounded-xl">
+        <CardContent className="p-4">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {user?.role === 'admin' ? (
+              <>
+                <StatCard 
+                  title="Total Menu" 
+                  value={totalMenu !== null ? totalMenu.toString() : "..."} 
+                  icon={Utensils} 
+                  description="Semua kategori" 
+                  bgColor="bg-purple-600" 
+                  textColor="text-white" 
+                />
+                <StatCard 
+                    title="Kategori Menu" 
+                    value={totalCategories !== null ? totalCategories.toString() : "..."} 
+                    icon={Layers} 
+                    description="Kategori aktif" 
+                    bgColor="bg-gradient-to-tr from-purple-700 to-blue-700" 
+                    textColor="text-white" 
+                />
+                <StatCard 
+                    title="Pesanan Hari Ini" 
+                    value={todaysOrdersCount !== null ? todaysOrdersCount.toString() : "..."} 
+                    icon={ClipboardList} 
+                    description="Total pesanan" 
+                    bgColor="bg-blue-700" 
+                    textColor="text-white" 
+                />
+              </>
+            ) : (
+              <>
+                <StatCard title="Tertunda" value={pendingOrders !== null ? pendingOrders.toString() : "..."} icon={Clock} description="Menunggu" bgColor="bg-yellow-400" textColor="text-white" />
+                <StatCard title="Diproses" value={processingOrders !== null ? processingOrders.toString() : "..."} icon={Loader} description="Sedang diproses" bgColor="bg-blue-500" textColor="text-white" />
+                <StatCard title="Selesai" value={completedOrders !== null ? completedOrders.toString() : "..."} icon={CheckCircle2} description="Selesai hari ini" bgColor="bg-green-500" textColor="text-white" />
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <h2 className="text-xl font-bold">Status Pesanan</h2>
