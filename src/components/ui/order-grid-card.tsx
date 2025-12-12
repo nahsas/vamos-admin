@@ -135,8 +135,8 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                             className={cn(
                             "text-xs",
                             item.varian.toLowerCase() === 'hot' 
-                                ? 'border-red-300 bg-white/20 text-red-400' 
-                                : 'border-blue-300 bg-white/20 text-blue-400'
+                                ? 'border-red-300 bg-white text-red-400' 
+                                : 'border-blue-300 bg-white text-blue-400'
                             )}
                         >
                             {item.varian}
