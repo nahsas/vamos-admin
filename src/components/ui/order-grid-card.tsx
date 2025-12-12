@@ -147,7 +147,10 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                 </div>
               ))}
               {order.detail_pesanans.length > 2 && (
-                <div className="text-center text-xs text-primary pt-1">
+                <div className={cn(
+                  "text-center text-xs pt-1",
+                  isProcessing ? "text-blue-400" : "text-yellow-400"
+                )}>
                   + {order.detail_pesanans.length - 2} menu lainnya...
                 </div>
               )}
