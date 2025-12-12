@@ -251,75 +251,81 @@ export default function MenuPage() {
           <TabsTrigger value="bestseller">Menu Terlaris</TabsTrigger>
         </TabsList>
         <TabsContent value="menu" className="mt-6">
-            <div className="space-y-6">
-                <TabHeader 
-                    icon={BookOpen} 
-                    title="Kelola Menu" 
-                    description="Tambah dan kelola menu kopi & makanan" 
-                    buttonText="Buat Menu Baru" 
-                    onButtonClick={() => handleMenuFormOpen()} 
+          <div className="space-y-6">
+            <TabHeader 
+              icon={BookOpen} 
+              title="Kelola Menu" 
+              description="Tambah dan kelola menu kopi & makanan" 
+              buttonText="Buat Menu Baru" 
+              onButtonClick={() => handleMenuFormOpen()} 
+            />
+            <Card className="rounded-xl">
+              <CardHeader>
+                <CardContent className="pt-6 p-4 flex flex-col md:flex-row items-center gap-4">
+                  <div className="relative flex-grow w-full md:w-auto">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari menu..."
+                      className="pl-10"
+                      value={menuSearchTerm}
+                      onChange={(e) => setMenuSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <Select value={menuFilterCategory} onValueChange={setMenuFilterCategory}>
+                    <SelectTrigger className="w-full md:w-[240px]">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter Kategori" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Kategori</SelectItem>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </CardHeader>
+              <CardContent className="p-0">
+                <DataTable 
+                  columns={menuColumnsWithCategories} 
+                  data={filteredMenuItems} 
                 />
-                <Card className="rounded-xl">
-                    <CardHeader>
-                        <CardContent className="pt-0 p-4 flex flex-col md:flex-row items-center gap-4">
-                            <div className="relative flex-grow w-full md:w-auto">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input
-                                placeholder="Cari menu..."
-                                className="pl-10"
-                                value={menuSearchTerm}
-                                onChange={(e) => setMenuSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <Select value={menuFilterCategory} onValueChange={setMenuFilterCategory}>
-                                <SelectTrigger className="w-full md:w-[240px]">
-                                <div className="flex items-center gap-2">
-                                    <Filter className="h-4 w-4" />
-                                    <SelectValue placeholder="Filter Kategori" />
-                                </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                <SelectItem value="all">Semua Kategori</SelectItem>
-                                {categories.map(cat => (
-                                    <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama}</SelectItem>
-                                ))}
-                                </SelectContent>
-                            </Select>
-                        </CardContent>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <DataTable 
-                            columns={menuColumnsWithCategories} 
-                            data={filteredMenuItems} 
-                        />
-                    </CardContent>
-                </Card>
-            </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         <TabsContent value="stock" className="mt-6">
-          <Card className="mb-6 rounded-xl">
+          <div className="space-y-6">
+            <Card className="rounded-xl">
               <CardHeader>
                 <CardTitle>Manajemen Stok</CardTitle>
                 <CardDescription>Atur ketersediaan item menu secara cepat.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0 p-4 flex flex-col md:flex-row items-center gap-4">
-                <div className="relative flex-grow w-full md:w-auto">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari nama item..."
-                    className="pl-10"
-                    value={stockSearchTerm}
-                    onChange={(e) => setStockSearchTerm(e.target.value)}
-                  />
-                </div>
-              </CardContent>
-               <CardContent className="p-0">
+            </Card>
+            <Card className="rounded-xl">
+              <CardHeader>
+                <CardContent className="pt-6 p-4 flex flex-col md:flex-row items-center gap-4">
+                  <div className="relative flex-grow w-full md:w-auto">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari nama item..."
+                      className="pl-10"
+                      value={stockSearchTerm}
+                      onChange={(e) => setStockSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+              </CardHeader>
+              <CardContent className="p-0">
                 <DataTable 
-                    columns={stockColumnsWithHandlers}
-                    data={filteredStockItems} 
-                  />
+                  columns={stockColumnsWithHandlers}
+                  data={filteredStockItems} 
+                />
               </CardContent>
             </Card>
+          </div>
         </TabsContent>
         <TabsContent value="discount" className="mt-6">
           <TabHeader icon={Percent} title="Kelola Diskon" description="Buat dan kelola promosi untuk item menu" buttonText="Buat Diskon Baru" onButtonClick={() => handleDiscountFormOpen()} />
