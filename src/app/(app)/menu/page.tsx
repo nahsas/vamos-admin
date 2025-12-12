@@ -238,10 +238,10 @@ export default function MenuPage() {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-blue-500 text-white" />
-        <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-amber-600 text-white" />
-        <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-green-500 text-white" />
-        <StatCard title="Total Stok" value={stats.totalStock.toString()} icon={Archive} description="Item yang saat ini tersedia." color="bg-slate-700 text-white" />
+        <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-gradient-to-tr from-blue-500 to-blue-700 text-white" />
+        <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-gradient-to-tr from-amber-500 to-amber-700 text-white" />
+        <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
+        <StatCard title="Total Stok" value={stats.totalStock.toString()} icon={Archive} description="Item yang saat ini tersedia." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
       </div>
       
       <Tabs defaultValue="menu">
