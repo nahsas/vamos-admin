@@ -368,27 +368,28 @@ export default function MenuPage() {
           </Card>
         </TabsContent>
         <TabsContent value="bestseller" className="mt-6">
-          <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}}>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "text-primary font-bold")}>Manual</Label>
-              <Switch
-                id="bestseller-mode"
-                checked={isAutomaticBestSeller}
-                onCheckedChange={setIsAutomaticBestSeller}
-              />
-              <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "text-primary font-bold")}>Otomatis</Label>
-            </div>
-          </TabHeader>
+          <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}} buttonDisabled={true} />
           <Card className="rounded-xl">
              <CardHeader>
-                <div className="relative flex-grow">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-all duration-300 focus-within:text-primary" />
-                  <Input
-                    placeholder="Cari nama menu..."
-                    className="pl-10 transition-all duration-300 focus:shadow-md focus:shadow-primary/20"
-                    value={bestSellerSearchTerm}
-                    onChange={(e) => setBestSellerSearchTerm(e.target.value)}
-                  />
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="relative flex-grow w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-all duration-300 focus-within:text-primary" />
+                    <Input
+                      placeholder="Cari nama menu..."
+                      className="pl-10 transition-all duration-300 focus:shadow-md focus:shadow-primary/20"
+                      value={bestSellerSearchTerm}
+                      onChange={(e) => setBestSellerSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "text-primary font-bold")}>Manual</Label>
+                    <Switch
+                      id="bestseller-mode"
+                      checked={isAutomaticBestSeller}
+                      onCheckedChange={setIsAutomaticBestSeller}
+                    />
+                    <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "text-primary font-bold")}>Otomatis</Label>
+                  </div>
                 </div>
             </CardHeader>
             <CardContent className="p-0">
