@@ -10,6 +10,7 @@ import { columns as categoryColumns } from "./category-columns";
 import { columns as discountColumns } from "./discount-columns";
 import { columns as stockColumns } from "./stock-columns";
 import { columns as bestSellerColumns } from "./best-seller-columns";
+import { columns as autoBestSellerColumns } from "./auto-best-seller-columns";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from "@/components/ui/label";
@@ -61,29 +62,6 @@ function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, 
             </Button>
         )}
       </CardContent>
-    </Card>
-  )
-}
-
-function BestSellerCard({ item, rank }: { item: any, rank: number }) {
-  const rankColor =
-    rank === 1 ? "border-yellow-400 bg-yellow-400/10"
-    : rank === 2 ? "border-gray-400 bg-gray-400/10"
-    : rank === 3 ? "border-amber-600 bg-amber-600/10"
-    : "border-border";
-
-  const fullUrl = item.menu.foto ? `https://vamos-api.sejadikopi.com/storage/${item.menu.foto}` : 'https://placehold.co/64x64/FFFAF0/6F4E37?text=Kopi';
-
-  return (
-    <Card className={cn("p-4 flex items-center gap-4 transition-all hover:bg-card/80", rankColor)}>
-        <div className="w-16 h-16 rounded-md overflow-hidden relative">
-            <Image src={fullUrl} alt={item.menu.nama} layout="fill" objectFit="cover" unoptimized/>
-        </div>
-        <div className="flex-1">
-            <p className="font-bold">{item.menu.nama}</p>
-            <p className="text-sm text-muted-foreground">Terjual: {item.total_sold}</p>
-        </div>
-        <div className="text-2xl font-bold text-muted-foreground">#{rank}</div>
     </Card>
   )
 }
@@ -218,6 +196,10 @@ export default function MenuPage() {
   const filteredBestSellerMenuItems = menuItems.filter(item =>
     item.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
   );
+  
+  const filteredAutomaticBestSellers = bestSellers.filter(item => 
+    item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
+  ).map((item, index) => ({...item, rank: index + 1}));
 
 
   return (
@@ -288,7 +270,7 @@ export default function MenuPage() {
               </CardContent>
             </Card>
             <Card className='rounded-xl'>
-                <CardContent className="px-4 pb-4 pt-2 flex flex-col md:flex-row items-center gap-4">
+                <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -391,13 +373,10 @@ export default function MenuPage() {
             </CardHeader>
             <CardContent>
               {isAutomaticBestSeller ? (
-                <div className="space-y-4">
-                  {bestSellers
-                    .filter(item => item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase()))
-                    .map((item, index) => (
-                      <BestSellerCard key={item.menu_id} item={item} rank={index + 1} />
-                  ))}
-                </div>
+                <DataTable
+                  columns={autoBestSellerColumns}
+                  data={filteredAutomaticBestSellers}
+                />
               ) : (
                  <div className="w-full overflow-x-auto">
                     <DataTable
