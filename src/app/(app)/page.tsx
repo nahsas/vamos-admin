@@ -234,13 +234,13 @@ export default function DashboardPage() {
             <div className="flex justify-center">
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
                     <TabsList className="grid grid-cols-2 bg-gray-200 rounded-full p-1 h-auto">
-                        <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5">
+                        <TabsTrigger value="dine-in" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5">
                             Dine-in
-                            <Badge className="bg-white text-blue-600 rounded-full h-6 w-6 flex items-center justify-center">{dineInOrders.length}</Badge>
+                            <Badge className="bg-primary-foreground/90 text-primary rounded-full h-6 w-6 flex items-center justify-center">{dineInOrders.length}</Badge>
                         </TabsTrigger>
-                        <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5">
+                        <TabsTrigger value="take-away" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white flex items-center gap-2 px-3 py-1.5">
                             Take Away
-                            <Badge className="bg-white text-blue-600 rounded-full h-6 w-6 flex items-center justify-center">{takeawayOrders.length}</Badge>
+                            <Badge className="bg-primary-foreground/90 text-primary rounded-full h-6 w-6 flex items-center justify-center">{takeawayOrders.length}</Badge>
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
