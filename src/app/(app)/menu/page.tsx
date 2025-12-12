@@ -382,13 +382,13 @@ export default function MenuPage() {
                     />
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "text-primary font-bold")}>Manual</Label>
+                    <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Manual</Label>
                     <Switch
                       id="bestseller-mode"
                       checked={isAutomaticBestSeller}
                       onCheckedChange={setIsAutomaticBestSeller}
                     />
-                    <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "text-primary font-bold")}>Otomatis</Label>
+                    <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Otomatis</Label>
                   </div>
                 </div>
             </CardHeader>
