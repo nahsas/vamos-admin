@@ -261,7 +261,7 @@ export default function MenuPage() {
             />
             <Card className="rounded-xl">
               <CardHeader>
-                <CardContent className="pt-6 p-4 flex flex-col md:flex-row items-center gap-4">
+                <div className="p-4 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -285,7 +285,7 @@ export default function MenuPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                </CardContent>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <DataTable 
@@ -298,15 +298,17 @@ export default function MenuPage() {
         </TabsContent>
         <TabsContent value="stock" className="mt-6">
           <div className="space-y-6">
+            <TabHeader 
+              icon={Archive}
+              title="Manajemen Stok" 
+              description="Atur ketersediaan item menu secara cepat." 
+              buttonText=""
+              onButtonClick={() => {}}
+              buttonDisabled={true}
+            />
             <Card className="rounded-xl">
               <CardHeader>
-                <CardTitle>Manajemen Stok</CardTitle>
-                <CardDescription>Atur ketersediaan item menu secara cepat.</CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-xl">
-              <CardHeader>
-                <CardContent className="pt-6 p-4 flex flex-col md:flex-row items-center gap-4">
+                <div className="p-4 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -316,7 +318,7 @@ export default function MenuPage() {
                       onChange={(e) => setStockSearchTerm(e.target.value)}
                     />
                   </div>
-                </CardContent>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <DataTable 
