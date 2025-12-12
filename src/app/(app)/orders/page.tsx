@@ -216,7 +216,7 @@ export default function OrdersPage() {
 
   const totalItems = allActiveOrders.reduce((sum, order) => sum + order.detail_pesanans.reduce((itemSum, item) => itemSum + item.jumlah, 0), 0);
 
-  const renderOrderList = (orders: Order[], type: 'dine-in' | 'take-away') => {
+  const renderOrderList = (orders: Order[], type: 'dine-in' | 'take-away', onUpdateStatus: (order: Order) => void) => {
     const pendingOrders = orders.filter(o => o.status === 'pending');
     const processingOrders = orders.filter(o => o.status === 'diproses');
 
@@ -354,10 +354,10 @@ export default function OrdersPage() {
         <CardContent className="pt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsContent value="dine-in">
-              {renderOrderList(filteredDineInOrders, 'dine-in')}
+              {renderOrderList(filteredDineInOrders, 'dine-in', handleUpdateStatus)}
             </TabsContent>
             <TabsContent value="take-away">
-              {renderOrderList(filteredTakeawayOrders, 'take-away')}
+              {renderOrderList(filteredTakeawayOrders, 'take-away', handleUpdateStatus)}
             </TabsContent>
           </Tabs>
         </CardContent>
