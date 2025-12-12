@@ -72,7 +72,7 @@ export default function LoginPage() {
               />
             </div>
              {error && <p className="text-sm font-medium text-destructive pt-2 text-center">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSubmitting ? 'Memproses...' : 'Masuk'}
             </Button>

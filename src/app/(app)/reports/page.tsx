@@ -836,7 +836,7 @@ export default function ReportsPage() {
                 <Button variant="outline" className="w-full bg-blue-500 hover:bg-blue-600 text-white border-none" onClick={fetchData}>
                     <RefreshCw className="mr-2 h-4 w-4" /> Segarkan
                 </Button>
-                <Button className="w-full bg-primary hover:bg-primary/90 text-white" onClick={handleAddExpense}>
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white" onClick={handleAddExpense}>
                     <Plus className="mr-2 h-4 w-4" /> Tambah
                 </Button>
             </div>

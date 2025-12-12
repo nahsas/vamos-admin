@@ -51,7 +51,7 @@ function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, 
           </div>
         </div>
         {children || (
-            <Button onClick={onButtonClick} disabled={buttonDisabled} className="w-full md:w-auto">
+            <Button onClick={onButtonClick} disabled={buttonDisabled} className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 text-white">
               <PlusCircle className="mr-2 h-4 w-4" />
               {buttonText}
             </Button>
@@ -240,7 +240,7 @@ export default function MenuPage() {
                           <p className="text-sm text-muted-foreground">Tambah dan kelola menu kopi & makanan</p>
                       </div>
                   </div>
-                  <Button onClick={() => handleMenuFormOpen()} className="w-full md:w-auto">
+                  <Button onClick={() => handleMenuFormOpen()} className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Buat Menu Baru
                   </Button>
