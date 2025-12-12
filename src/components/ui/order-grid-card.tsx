@@ -202,7 +202,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                 className={cn(
                     "w-full text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1",
                     isProcessing 
-                        ? "bg-gradient-to-r from-emerald-500 to-green-600"
+                        ? "bg-green-600 hover:bg-green-700" 
                         : "bg-blue-600 hover:bg-blue-700"
                 )} 
                 onClick={handleActionClick}

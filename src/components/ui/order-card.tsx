@@ -20,7 +20,7 @@ const statusConfig: {
   };
 } = {
   pending: { variant: 'secondary', label: 'Tertunda', color: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' },
-  diproses: { variant: 'default', label: 'Diproses', color: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' },
+  diproses: { variant: 'default', label: 'Diproses', color: 'bg-blue-500 text-white' },
   selesai: { variant: 'outline', label: 'Selesai', color: 'bg-green-500 text-white' },
   dibatalkan: { variant: 'destructive', label: 'Dibatalkan', color: 'bg-red-500 text-white' },
 };
@@ -42,11 +42,11 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
 
   const borderGradientClass = isPending
     ? 'bg-gradient-to-br from-yellow-400 to-yellow-600'
-    : 'bg-gradient-to-br from-purple-600 to-blue-600';
+    : 'bg-blue-500';
     
   const shadowClass = isPending
     ? 'hover:shadow-[0_0_15px_2px_rgba(251,191,36,0.5)]'
-    : 'hover:shadow-[0_0_15px_2px_rgba(139,92,246,0.5)]';
+    : 'hover:shadow-[0_0_15px_2px_rgba(59,130,246,0.5)]';
 
 
   return (
@@ -118,7 +118,7 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
                   "w-full",
                   isPending 
                     ? "bg-gradient-to-r from-yellow-400 to-amber-500 text-white hover:from-yellow-500 hover:to-amber-600"
-                    : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
                 )}
               >
                   <Eye className="mr-2 h-4 w-4" />
