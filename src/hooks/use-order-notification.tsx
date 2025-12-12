@@ -83,7 +83,7 @@ export function useOrderNotification() {
                 title: '🔔 Pesanan Baru Diterima!',
                 description: `Pesanan baru dari ${customer} telah diterima.`,
                 action: (
-                    <Button onClick={() => router.push('/orders')} size="sm">
+                    <Button onClick={() => router.push('/orders')} size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                         Lihat Pesanan
                     </Button>
                 ),
@@ -98,7 +98,7 @@ export function useOrderNotification() {
                 title: '🔔 Item Baru Ditambahkan!',
                 description: `Item baru ditambahkan ke pesanan ${customer}.`,
                 action: (
-                    <Button onClick={() => router.push('/orders')} size="sm">
+                    <Button onClick={() => router.push('/orders')} size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                         Lihat Pesanan
                     </Button>
                 ),
