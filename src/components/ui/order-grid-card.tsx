@@ -30,7 +30,7 @@ const statusConfig: {
   };
 } = {
   pending: { label: 'PENDING', color: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' },
-  diproses: { label: 'PROSES', color: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' },
+  diproses: { label: 'PROSES', color: 'bg-blue-500 text-white' },
   selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
   dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
@@ -73,11 +73,11 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   }
 
   const borderGradientClass = isProcessing
-    ? 'bg-gradient-to-br from-purple-600 to-blue-600'
+    ? 'bg-blue-500'
     : 'bg-gradient-to-br from-yellow-400 to-yellow-600';
     
   const shadowClass = isProcessing
-    ? 'hover:shadow-[0_0_15px_2px_rgba(139,92,246,0.5)]'
+    ? 'hover:shadow-[0_0_15px_2px_rgba(59,130,246,0.5)]'
     : 'hover:shadow-[0_0_15px_2px_rgba(251,191,36,0.5)]';
 
 
@@ -135,8 +135,8 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                             className={cn(
                             "text-xs",
                             item.varian.toLowerCase() === 'hot' 
-                                ? 'border-red-300 bg-red-100 text-red-700' 
-                                : 'border-blue-300 bg-blue-100 text-blue-700'
+                                ? 'border-red-300 bg-red-100/50 text-red-700' 
+                                : 'border-blue-300 bg-blue-100/50 text-blue-700'
                             )}
                         >
                             {item.varian}
@@ -200,7 +200,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                     "w-full text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1",
                     isProcessing 
                         ? "bg-gradient-to-r from-emerald-500 to-green-600"
-                        : "bg-gradient-to-r from-purple-600 to-blue-600"
+                        : "bg-blue-600 hover:bg-blue-700"
                 )} 
                 onClick={handleActionClick}
             >
