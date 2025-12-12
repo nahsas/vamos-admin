@@ -78,6 +78,7 @@ export default function MenuPage() {
   const [menuSearchTerm, setMenuSearchTerm] = useState('');
   const [menuFilterCategory, setMenuFilterCategory] = useState('all');
   const [stockSearchTerm, setStockSearchTerm] = useState('');
+  const [stockFilterCategory, setStockFilterCategory] = useState('all');
   const [stockFilterAvailability, setStockFilterAvailability] = useState('all');
   const [bestSellerSearchTerm, setBestSellerSearchTerm] = useState('');
 
@@ -185,12 +186,13 @@ export default function MenuPage() {
   
   const filteredStockItems = menuItems.filter(item => {
     const nameMatch = item.nama.toLowerCase().includes(stockSearchTerm.toLowerCase());
+    const categoryMatch = stockFilterCategory === 'all' || (item.kategori_id !== null && item.kategori_id.toString() === stockFilterCategory);
     
     const availabilityMatch = stockFilterAvailability === 'all' 
       || (stockFilterAvailability === 'available' && item.is_available)
       || (stockFilterAvailability === 'unavailable' && !item.is_available);
 
-    return nameMatch && availabilityMatch;
+    return nameMatch && categoryMatch && availabilityMatch;
   });
 
   const filteredBestSellerMenuItems = menuItems.filter(item =>
@@ -318,6 +320,20 @@ export default function MenuPage() {
                       onChange={(e) => setStockSearchTerm(e.target.value)}
                     />
                   </div>
+                  <Select value={stockFilterCategory} onValueChange={setStockFilterCategory}>
+                    <SelectTrigger className="w-full md:w-[240px]">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="Filter Kategori" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Kategori</SelectItem>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
