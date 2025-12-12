@@ -247,7 +247,7 @@ export default function MenuPage() {
               </CardContent>
             </Card>
             <Card className='rounded-xl'>
-                <CardContent className="p-4 flex flex-col md:flex-row items-center gap-4">
+                <CardContent className="px-4 pb-4 pt-2 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative flex-grow w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -328,5 +328,7 @@ export default function MenuPage() {
     </div>
   );
 }
+
+    
 
     
