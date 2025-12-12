@@ -42,7 +42,7 @@ function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, 
     <Card className="mb-6 bg-card rounded-xl">
       <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
         <div className="flex items-center gap-4 flex-grow">
-          <div className="p-3 bg-primary/10 rounded-lg">
+          <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg">
              <Icon className="w-8 h-8 text-primary" />
           </div>
           <div>
@@ -232,7 +232,7 @@ export default function MenuPage() {
             <Card className='rounded-xl'>
               <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 gap-4">
                   <div className="flex items-center gap-4 flex-grow">
-                      <div className="p-3 bg-primary/10 rounded-lg">
+                      <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg">
                           <BookOpen className="w-8 h-8 text-primary" />
                       </div>
                       <div>
@@ -337,3 +337,5 @@ export default function MenuPage() {
     </div>
   );
 }
+
+    

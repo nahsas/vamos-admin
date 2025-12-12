@@ -44,7 +44,7 @@ function StatCard({
   return (
     <Card className={cn("shadow-md rounded-xl", className)}>
       <CardContent className="p-4 flex items-center gap-4">
-        <div className={`p-3 rounded-md ${bgColor}`}>
+        <div className={`p-3 rounded-md bg-gradient-to-br from-purple-500/20 to-blue-500/20`}>
           <Icon className={`w-8 h-8 ${iconColor}`} />
         </div>
         <div className="flex flex-col">
@@ -401,3 +401,5 @@ export default function HistoryPage() {
     </div>
   );
 }
+
+    

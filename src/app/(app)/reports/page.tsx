@@ -97,7 +97,7 @@ const PaymentBreakdownCard = ({
     <Card className="bg-background/50 rounded-xl">
         <CardContent className="p-4 flex flex-col gap-2">
             <div className="flex items-center gap-2">
-                <div className="p-2 bg-primary/20 rounded-md text-primary-foreground">
+                <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-md text-primary-foreground">
                     {icon}
                 </div>
                 <div>
@@ -656,7 +656,7 @@ export default function ReportsPage() {
 
       <Card className="rounded-xl">
         <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-            <div className="p-3 rounded-md bg-primary/10">
+            <div className="p-3 rounded-md bg-gradient-to-br from-purple-500/20 to-blue-500/20">
                 <Filter className="w-5 h-5 text-primary" />
             </div>
             <CardTitle className="text-xl">Filter Data</CardTitle>
@@ -799,7 +799,7 @@ export default function ReportsPage() {
         <Card className="rounded-xl">
           <CardHeader>
             <div className="flex items-center gap-2">
-                <div className="p-2 bg-primary/20 rounded-md">
+                <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-md">
                     <Wallet className="w-5 h-5 text-primary" />
                 </div>
                 <CardTitle className="text-xl">Rincian Pembayaran</CardTitle>
@@ -880,6 +880,8 @@ export default function ReportsPage() {
     </div>
   )
 }
+    
+
     
 
     
