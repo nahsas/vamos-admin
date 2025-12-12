@@ -221,16 +221,16 @@ export default function DashboardPage() {
         )}
       </div>
 
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <h2 className="text-xl font-bold">Status Pesanan</h2>
+        <Button onClick={handleRefresh} className="h-9 text-primary-foreground w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Segarkan
+        </Button>
+      </div>
 
       <Card className="rounded-xl">
         <CardHeader className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <CardTitle className="text-xl font-bold">Status Pesanan</CardTitle>
-                <Button onClick={handleRefresh} className="h-9 text-primary-foreground w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Segarkan
-                </Button>
-            </div>
             <div className="flex justify-center">
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
                     <TabsList className="grid grid-cols-2 bg-gray-200 rounded-full p-1 h-auto">
