@@ -312,58 +312,56 @@ export function MenuForm({
                     <FormMessage />
                 </FormItem>
 
-                {kategoriStruk === 'minuman' && (
-                    <FormField
-                    control={form.control}
-                    name="available_variants"
-                    render={() => (
-                        <FormItem>
-                        <div className="mb-4">
-                            <FormLabel className="text-base">Varian</FormLabel>
-                            <FormDescription>
-                                Pilih varian yang tersedia untuk minuman ini.
-                            </FormDescription>
-                        </div>
-                        <div className="flex gap-4">
+                <FormField
+                  control={form.control}
+                  name="available_variants"
+                  render={() => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">Varian</FormLabel>
+                        <FormDescription>
+                          Pilih varian yang tersedia untuk item ini.
+                        </FormDescription>
+                      </div>
+                      <div className="flex gap-4">
                         {['Hot', 'Ice'].map((item) => (
-                            <FormField
-                                key={item}
-                                control={form.control}
-                                name="available_variants"
-                                render={({ field }) => {
-                                return (
-                                    <FormItem
-                                    key={item}
-                                    className="flex flex-row items-start space-x-3 space-y-0"
-                                    >
-                                    <FormControl>
-                                        <Checkbox
-                                        checked={field.value?.includes(item)}
-                                        onCheckedChange={(checked) => {
-                                            return checked
-                                            ? field.onChange([...(field.value || []), item])
-                                            : field.onChange(
-                                                field.value?.filter(
+                          <FormField
+                            key={item}
+                            control={form.control}
+                            name="available_variants"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={item}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(item)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...(field.value || []), item])
+                                          : field.onChange(
+                                              field.value?.filter(
                                                 (value) => value !== item
-                                                )
+                                              )
                                             )
-                                        }}
-                                        />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                        {item}
-                                    </FormLabel>
-                                    </FormItem>
-                                )
-                                }}
-                            />
-                            ))}
-                        </div>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                )}
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {item}
+                                  </FormLabel>
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 </form>
             </Form>
         </div>

@@ -96,6 +96,35 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
       }
     },
     {
+      accessorKey: "available_variants",
+      header: "Varian",
+      cell: ({ row }) => {
+        const variants = row.original.available_variants;
+        if (!variants || (typeof variants === 'string' && variants.length <= 2)) return <span>-</span>;
+        
+        let parsedVariants: string[] = [];
+        try {
+            if (typeof variants === 'string') {
+                 parsedVariants = JSON.parse(variants.replace(/'/g, '"'));
+            } else if (Array.isArray(variants)) {
+                parsedVariants = variants;
+            }
+        } catch (e) {
+             return <span>-</span>;
+        }
+
+        if (!Array.isArray(parsedVariants) || parsedVariants.length === 0) return <span>-</span>
+
+        return (
+          <div className="flex gap-1">
+            {parsedVariants.map(v => (
+              <Badge key={v} variant="outline">{v}</Badge>
+            ))}
+          </div>
+        );
+      }
+    },
+    {
       accessorKey: "harga",
       header: () => <div className="text-right">Harga</div>,
       cell: ({ row }) => {
