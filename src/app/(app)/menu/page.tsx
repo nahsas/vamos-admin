@@ -22,10 +22,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { MenuItem } from '@/lib/data';
-import { Category, Discount } from '@/lib/types';
+import { Category, Discount, Additional } from '@/lib/types';
 import { MenuForm } from './menu-form';
 import { CategoryForm } from './category-form';
 import { DiscountForm } from './discount-form';
+import { AdditionalForm } from './additional-form';
+import { columns as additionalColumns } from './additional-columns';
+
 
 function StatCard({ title, value, icon: Icon, description, color }: { title: string, value: string, icon: React.ElementType, description: string, color: string }) {
   return (
@@ -73,6 +76,7 @@ export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [additionals, setAdditionals] = useState<Additional[]>([]);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
 
   const [menuSearchTerm, setMenuSearchTerm] = useState('');
@@ -88,7 +92,6 @@ export default function MenuPage() {
     totalMenu: 0,
     totalCoffee: 0,
     totalFoodAndSnack: 0,
-    totalStock: 0,
   });
 
   const [isMenuFormOpen, setIsMenuFormOpen] = useState(false);
@@ -100,13 +103,17 @@ export default function MenuPage() {
   const [isDiscountFormOpen, setIsDiscountFormOpen] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
   
+  const [isAdditionalFormOpen, setIsAdditionalFormOpen] = useState(false);
+  const [editingAdditional, setEditingAdditional] = useState<Additional | null>(null);
+
   const fetchData = useCallback(async () => {
     try {
-      const [menuRes, categoryRes, discountRes, bestSellerRes] = await Promise.all([
+      const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes] = await Promise.all([
         fetch('https://vamos-api.sejadikopi.com/api/menu'),
         fetch('https://vamos-api.sejadikopi.com/api/categories'),
         fetch('https://vamos-api.sejadikopi.com/api/discount-codes'),
         fetch('https://vamos-api.sejadikopi.com/api/best-sellers?limit=10&days=30'),
+        fetch('https://vamos-api.sejadikopi.com/api/additionals?order=nama.asc'),
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };
@@ -117,6 +124,9 @@ export default function MenuPage() {
 
       const discountData = discountRes.ok ? await discountRes.json() : { data: [] };
       setDiscounts(discountData.data || []);
+      
+      const additionalData = additionalRes.ok ? await additionalRes.json() : { data: [] };
+      setAdditionals(additionalData.data || []);
 
       const bestSellerData = bestSellerRes.ok ? await bestSellerRes.json() : { data: [] };
       setBestSellers(bestSellerData.data || []);
@@ -126,7 +136,6 @@ export default function MenuPage() {
         const coffeeCategoryId = 1;
 
         const totalMenu = menuData.data.length;
-        const totalStock = menuData.data.reduce((acc: number, item: { stok: number }) => acc + (item.stok || 0), 0);
         const totalCoffee = menuData.data.filter((item: { kategori_id: number }) => item.kategori_id === coffeeCategoryId).length;
         const totalFoodAndSnack = menuData.data.filter((item: { kategori_id: number }) => foodAndSnackCategoryIds.includes(item.kategori_id)).length;
         
@@ -134,7 +143,6 @@ export default function MenuPage() {
           totalMenu,
           totalCoffee,
           totalFoodAndSnack,
-          totalStock,
         });
       }
 
@@ -174,9 +182,16 @@ export default function MenuPage() {
     setIsDiscountFormOpen(true);
   };
 
+  const handleAdditionalFormOpen = (additional: Additional | null = null) => {
+    setEditingAdditional(additional);
+    setIsAdditionalFormOpen(true);
+  };
+
   const menuColumnsWithCategories = menuColumns({ onEdit: handleMenuFormOpen, onDeleteSuccess: fetchData, categories });
   const stockColumnsWithHandlers = stockColumns({ onUpdateSuccess: fetchData, categories });
   const bestSellerColumnsWithHandlers = bestSellerColumns({ onUpdateSuccess: fetchData });
+  const additionalColumnsWithHandlers = additionalColumns({ onEdit: handleAdditionalFormOpen, onDeleteSuccess: fetchData });
+
 
   const filteredMenuItems = menuItems.filter(item => {
     const nameMatch = item.nama.toLowerCase().includes(menuSearchTerm.toLowerCase());
@@ -213,6 +228,7 @@ export default function MenuPage() {
           onSuccess={fetchData}
           menuItem={editingMenu}
           categories={categories}
+          additionals={additionals}
         />
       )}
       {isCategoryFormOpen && (
@@ -231,23 +247,31 @@ export default function MenuPage() {
           discount={editingDiscount}
         />
       )}
+      {isAdditionalFormOpen && (
+         <AdditionalForm
+          isOpen={isAdditionalFormOpen}
+          onClose={() => setIsAdditionalFormOpen(false)}
+          onSuccess={fetchData}
+          additional={editingAdditional}
+        />
+      )}
 
       <div>
         <h1 className="text-3xl font-headline font-bold tracking-tight">Manajemen Menu</h1>
         <p className="text-muted-foreground">Tambah, ubah, dan kelola menu kedai kopi Anda.</p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-gradient-to-tr from-blue-500 to-blue-700 text-white" />
         <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-gradient-to-tr from-amber-500 to-amber-700 text-white" />
         <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
-        <StatCard title="Total Stok" value={stats.totalStock.toString()} icon={Archive} description="Item yang saat ini tersedia." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
       </div>
       
       <Tabs defaultValue="menu">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 h-auto">
           <TabsTrigger value="menu">Menu</TabsTrigger>
           <TabsTrigger value="stock">Stok</TabsTrigger>
+          <TabsTrigger value="additional">Tambahan</TabsTrigger>
           <TabsTrigger value="discount">Diskon</TabsTrigger>
           <TabsTrigger value="category">Kategori</TabsTrigger>
           <TabsTrigger value="bestseller">Menu Terlaris</TabsTrigger>
@@ -345,6 +369,17 @@ export default function MenuPage() {
             </Card>
           </div>
         </TabsContent>
+        <TabsContent value="additional" className="mt-6">
+          <TabHeader icon={PlusCircle} title="Kelola Tambahan" description="Kelola item tambahan untuk menu" buttonText="Buat Tambahan Baru" onButtonClick={() => handleAdditionalFormOpen()} />
+           <Card className="rounded-xl">
+             <CardContent className="p-0">
+                <DataTable
+                columns={additionalColumnsWithHandlers}
+                data={additionals}
+                />
+            </CardContent>
+          </Card>
+        </TabsContent>
         <TabsContent value="discount" className="mt-6">
           <TabHeader icon={Percent} title="Kelola Diskon" description="Buat dan kelola promosi untuk item menu" buttonText="Buat Diskon Baru" onButtonClick={() => handleDiscountFormOpen()} />
           <Card className="rounded-xl">
@@ -368,7 +403,17 @@ export default function MenuPage() {
           </Card>
         </TabsContent>
         <TabsContent value="bestseller" className="mt-6">
-          <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}} buttonDisabled={true} />
+          <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}} buttonDisabled={true}>
+             <div className="flex items-center space-x-2">
+                <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Manual</Label>
+                <Switch
+                  id="bestseller-mode"
+                  checked={isAutomaticBestSeller}
+                  onCheckedChange={setIsAutomaticBestSeller}
+                />
+                <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Otomatis</Label>
+              </div>
+          </TabHeader>
           <Card className="rounded-xl">
              <CardHeader>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -380,15 +425,6 @@ export default function MenuPage() {
                       value={bestSellerSearchTerm}
                       onChange={(e) => setBestSellerSearchTerm(e.target.value)}
                     />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Label htmlFor="bestseller-mode" className={cn(!isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Manual</Label>
-                    <Switch
-                      id="bestseller-mode"
-                      checked={isAutomaticBestSeller}
-                      onCheckedChange={setIsAutomaticBestSeller}
-                    />
-                    <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Otomatis</Label>
                   </div>
                 </div>
             </CardHeader>
