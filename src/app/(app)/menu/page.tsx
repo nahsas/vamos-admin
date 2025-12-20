@@ -92,7 +92,7 @@ export default function MenuPage() {
     totalMenu: 0,
     totalCoffee: 0,
     totalFoodAndSnack: 0,
-    totalStock: 0,
+    totalCategories: 0,
   });
 
   const [isMenuFormOpen, setIsMenuFormOpen] = useState(false);
@@ -132,7 +132,7 @@ export default function MenuPage() {
       const bestSellerData = bestSellerRes.ok ? await bestSellerRes.json() : { data: [] };
       setBestSellers(bestSellerData.data || []);
       
-       if (menuData.data) {
+       if (menuData.data && categoryData.data) {
         const foodAndSnackCategoryIds = [3, 4, 5, 6, 7];
         const coffeeCategoryId = 1;
 
@@ -144,7 +144,7 @@ export default function MenuPage() {
           totalMenu,
           totalCoffee,
           totalFoodAndSnack,
-          totalStock: 0,
+          totalCategories: categoryData.data.length,
         });
       }
 
@@ -196,12 +196,14 @@ export default function MenuPage() {
 
 
   const filteredMenuItems = menuItems.filter(item => {
+    if (!item.nama) return false;
     const nameMatch = item.nama.toLowerCase().includes(menuSearchTerm.toLowerCase());
     const categoryMatch = menuFilterCategory === 'all' || (item.kategori_id !== null && item.kategori_id.toString() === menuFilterCategory);
     return nameMatch && categoryMatch;
   });
   
   const filteredStockItems = menuItems.filter(item => {
+    if (!item.nama) return false;
     const nameMatch = item.nama.toLowerCase().includes(stockSearchTerm.toLowerCase());
     const categoryMatch = stockFilterCategory === 'all' || (item.kategori_id !== null && item.kategori_id.toString() === stockFilterCategory);
     
@@ -213,11 +215,11 @@ export default function MenuPage() {
   });
 
   const filteredBestSellerMenuItems = menuItems.filter(item =>
-    item.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
+    item.nama && item.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
   );
   
   const filteredAutomaticBestSellers = bestSellers.filter(item => 
-    item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
+    item.menu && item.menu.nama && item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
   ).map((item:any, index:number) => ({...item, rank: index + 1}));
 
 
@@ -267,7 +269,7 @@ export default function MenuPage() {
         <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-gradient-to-tr from-blue-500 to-blue-700 text-white" />
         <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-gradient-to-tr from-amber-500 to-amber-700 text-white" />
         <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
-        <StatCard title="Kategori" value={stats.totalStock.toString()} icon={Layers3} description="Item yang saat ini tersedia." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
+        <StatCard title="Kategori" value={stats.totalCategories.toString()} icon={Layers3} description="Item yang saat ini tersedia." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
       </div>
       
       <Tabs defaultValue="menu">
