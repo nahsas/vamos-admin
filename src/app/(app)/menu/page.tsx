@@ -1,3 +1,4 @@
+
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -200,6 +201,7 @@ export default function MenuPage() {
   }
 
   const menuColumnsWithHandlers = menuColumns({ onEdit: handleMenuFormOpen, onDeleteSuccess: fetchData, categories, variants, additionals });
+  const categoryColumnsWithHandlers = categoryColumns({ onEdit: handleCategoryFormOpen, onDeleteSuccess: fetchData });
   const bestSellerColumnsWithHandlers = bestSellerColumns({ onUpdateSuccess: fetchData });
   const additionalColumnsWithHandlers = additionalColumns({ onEdit: handleAdditionalFormOpen, onDeleteSuccess: fetchData });
   const variantColumnsWithHandlers = variantColumns({ onEdit: handleVariantFormOpen, onDeleteSuccess: fetchData });
@@ -340,7 +342,7 @@ export default function MenuPage() {
           <Card className="rounded-xl">
              <CardContent className="p-0">
                 <DataTable
-                columns={categoryColumns({ onEdit: handleCategoryFormOpen, onDeleteSuccess: fetchData })}
+                columns={categoryColumnsWithHandlers}
                 data={categories}
                 />
             </CardContent>
