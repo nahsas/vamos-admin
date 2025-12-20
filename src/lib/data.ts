@@ -1,22 +1,17 @@
 
 export type MenuItem = {
   id: number;
-  nama: string;
-  kategori: string;
-  harga: string;
-  is_available: boolean;
-  is_recommendation: boolean;
+  name: string;
+  price: string;
+  image: string;
   description: string;
+  is_available: boolean;
+  is_best_seller: boolean;
+  category_id: number;
   created_at: string;
   updated_at: string;
-  is_hidden: boolean;
-  is_special: boolean;
-  image_url: string;
-  foto: string; // The API seems to use 'foto' field for image path
-  kategori_id: number;
-  stok: number;
-  kategori_struk?: 'makanan' | 'minuman';
-  available_variants?: string; // e.g., "['Hot','Ice']"
+  variant_ids?: number[];
+  additional_ids?: number[];
 };
 
 export type OrderItem = {
@@ -67,13 +62,10 @@ export type Order = {
 
 export type Additional = {
     id: number;
-    nama: string;
-    harga: string;
-    kategori_id: number;
-    urutan: number;
-    is_active: boolean;
+    name: string;
+    price: number;
+    is_available: boolean;
     created_at: string;
-    tipe: 'regular' | 'dimsum';
 };
 
 export type Struk = {

@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Additional } from '@/lib/types';
+import { Variant } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 
@@ -32,23 +32,23 @@ const formSchema = z.object({
   is_available: z.boolean(),
 });
 
-type AdditionalFormValues = z.infer<typeof formSchema>;
+type VariantFormValues = z.infer<typeof formSchema>;
 
-interface AdditionalFormProps {
+interface VariantFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  additional: Additional | null;
+  variant: Variant | null;
 }
 
-export function AdditionalForm({
+export function VariantForm({
   isOpen,
   onClose,
   onSuccess,
-  additional,
-}: AdditionalFormProps) {
+  variant,
+}: VariantFormProps) {
   const { toast } = useToast();
-  const form = useForm<AdditionalFormValues>({
+  const form = useForm<VariantFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -58,11 +58,11 @@ export function AdditionalForm({
   });
 
   useEffect(() => {
-    if (additional) {
+    if (variant) {
       form.reset({
-        name: additional.name,
-        price: additional.price,
-        is_available: additional.is_available,
+        name: variant.name,
+        price: variant.price,
+        is_available: variant.is_available,
       });
     } else {
       form.reset({
@@ -71,14 +71,14 @@ export function AdditionalForm({
         is_available: true,
       });
     }
-  }, [additional, form, isOpen]);
+  }, [variant, form, isOpen]);
 
-  const onSubmit = async (values: AdditionalFormValues) => {
+  const onSubmit = async (values: VariantFormValues) => {
     try {
-      const method = additional ? 'PUT' : 'POST';
-      const url = additional
-        ? `https://sejadikopi-api-v2.sejadikopi.com/api/additionals/${additional.id}`
-        : 'https://sejadikopi-api-v2.sejadikopi.com/api/additionals';
+      const method = variant ? 'PUT' : 'POST';
+      const url = variant
+        ? `https://sejadikopi-api-v2.sejadikopi.com/api/variants/${variant.id}`
+        : 'https://sejadikopi-api-v2.sejadikopi.com/api/variants';
 
       const response = await fetch(url, {
         method,
@@ -86,11 +86,11 @@ export function AdditionalForm({
         body: JSON.stringify(values),
       });
 
-      if (!response.ok) throw new Error('Gagal menyimpan item tambahan.');
+      if (!response.ok) throw new Error('Gagal menyimpan varian.');
 
       toast({
         title: 'Sukses',
-        description: `Item tambahan berhasil ${additional ? 'diperbarui' : 'dibuat'}.`,
+        description: `Varian berhasil ${variant ? 'diperbarui' : 'dibuat'}.`,
       });
       onSuccess();
       onClose();
@@ -98,7 +98,7 @@ export function AdditionalForm({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Tidak dapat menyimpan item tambahan.',
+        description: 'Tidak dapat menyimpan varian.',
       });
     }
   };
@@ -107,7 +107,7 @@ export function AdditionalForm({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{additional ? 'Ubah Tambahan' : 'Buat Tambahan'}</DialogTitle>
+          <DialogTitle>{variant ? 'Ubah Varian' : 'Buat Varian'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -116,9 +116,9 @@ export function AdditionalForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nama</FormLabel>
+                  <FormLabel>Nama Varian</FormLabel>
                   <FormControl>
-                    <Input placeholder="cth. Ekstra Shot" {...field} />
+                    <Input placeholder="cth. Hot / Large" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +129,7 @@ export function AdditionalForm({
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Harga</FormLabel>
+                  <FormLabel>Harga Tambahan</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>

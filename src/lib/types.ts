@@ -19,9 +19,15 @@ export type Discount = {
 
 export type Additional = {
   id: number;
-  nama: string;
-  harga: number;
-  is_active: boolean;
+  name: string;
+  price: number;
+  is_available: boolean;
 };
 
+export type Variant = {
+  id: number;
+  name: string;
+  price: number;
+  is_available: boolean;
+}
     

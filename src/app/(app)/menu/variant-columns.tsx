@@ -2,7 +2,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, ArrowUpDown, Pencil, Trash2 } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,27 +24,27 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { Additional } from "@/lib/types"
+import { Variant } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 
-type AdditionalColumnsProps = {
-  onEdit: (additional: Additional) => void;
+type VariantColumnsProps = {
+  onEdit: (variant: Variant) => void;
   onDeleteSuccess: () => void;
 }
 
-export const columns = ({ onEdit, onDeleteSuccess }: AdditionalColumnsProps): ColumnDef<Additional>[] => {
+export const columns = ({ onEdit, onDeleteSuccess }: VariantColumnsProps): ColumnDef<Variant>[] => {
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/additionals/${id}`, {
+      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/variants/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Gagal menghapus item tambahan.");
-      toast({ title: "Sukses", description: "Item tambahan berhasil dihapus." });
+      if (!response.ok) throw new Error("Gagal menghapus varian.");
+      toast({ title: "Sukses", description: "Varian berhasil dihapus." });
       onDeleteSuccess();
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Tidak dapat menghapus item tambahan." });
+      toast({ variant: "destructive", title: "Error", description: "Tidak dapat menghapus varian." });
     }
   };
 
@@ -55,7 +55,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: AdditionalColumnsProps): Co
     },
     {
       accessorKey: "price",
-      header: "Harga",
+      header: "Harga Tambahan",
       cell: ({ row }) => {
         const price = parseFloat(row.getValue("price"));
         return new Intl.NumberFormat("id-ID", {
@@ -75,7 +75,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: AdditionalColumnsProps): Co
     {
       id: "actions",
       cell: ({ row }) => {
-        const additional = row.original
+        const variant = row.original
         return (
           <AlertDialog>
             <DropdownMenu>
@@ -87,7 +87,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: AdditionalColumnsProps): Co
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onEdit(additional)}>
+                <DropdownMenuItem onClick={() => onEdit(variant)}>
                    <Pencil className="mr-2 h-4 w-4" />
                   Ubah
                 </DropdownMenuItem>
@@ -104,13 +104,13 @@ export const columns = ({ onEdit, onDeleteSuccess }: AdditionalColumnsProps): Co
               <AlertDialogHeader>
                 <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Tindakan ini tidak bisa dibatalkan. Ini akan menghapus item tambahan secara permanen.
+                  Tindakan ini tidak bisa dibatalkan. Ini akan menghapus varian secara permanen.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Batal</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleDelete(additional.id)}
+                  onClick={() => handleDelete(variant.id)}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   Hapus

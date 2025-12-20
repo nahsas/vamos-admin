@@ -30,20 +30,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MenuItem } from '@/lib/data';
-import { Category, Additional } from '@/lib/types';
+import { Category, Additional, Variant } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 const formSchema = z.object({
-  nama: z.string().min(1, 'Nama wajib diisi'),
-  kategori_id: z.coerce.number().min(1, 'Kategori wajib diisi'),
-  harga: z.coerce.number().min(0, 'Harga harus angka positif'),
+  name: z.string().min(1, 'Nama wajib diisi'),
+  category_id: z.coerce.number().min(1, 'Kategori wajib diisi'),
+  price: z.coerce.number().min(0, 'Harga harus angka positif'),
   image: z.any().optional(),
-  kategori_struk: z.enum(['makanan', 'minuman']),
-  available_variants: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  is_available: z.boolean().default(true),
+  is_best_seller: z.boolean().default(false),
+  variant_ids: z.array(z.number()).optional(),
+  additional_ids: z.array(z.number()).optional(),
 });
 
 type MenuFormValues = z.infer<typeof formSchema>;
@@ -55,6 +59,7 @@ interface MenuFormProps {
   menuItem: MenuItem | null;
   categories: Category[];
   additionals: Additional[];
+  variants: Variant[];
 }
 
 export function MenuForm({
@@ -63,7 +68,8 @@ export function MenuForm({
   onSuccess,
   menuItem,
   categories,
-  additionals
+  additionals,
+  variants,
 }: MenuFormProps) {
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -72,62 +78,44 @@ export function MenuForm({
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nama: '',
-      kategori_id: undefined,
-      harga: 0,
-      kategori_struk: 'makanan',
-      available_variants: [],
+      name: '',
+      category_id: undefined,
+      price: 0,
+      description: '',
+      is_available: true,
+      is_best_seller: false,
+      variant_ids: [],
+      additional_ids: [],
     },
   });
-
-  const kategoriStruk = form.watch('kategori_struk');
   
   useEffect(() => {
-    let variants: string[] = [];
-    if (menuItem?.available_variants) {
-      try {
-        let parsed;
-        // The value from API can be a string like "['Hot','Ice']" or a valid JSON array string
-        if (typeof menuItem.available_variants === 'string') {
-          // Attempt to parse it as JSON directly first
-          try {
-            parsed = JSON.parse(menuItem.available_variants);
-          } catch {
-            // If direct parsing fails, it might be the Python-like list string
-            parsed = JSON.parse(menuItem.available_variants.replace(/'/g, '"'));
-          }
-        } else if (Array.isArray(menuItem.available_variants)) {
-           parsed = menuItem.available_variants;
-        }
-
-        if(Array.isArray(parsed)) {
-          variants = parsed;
-        }
-      } catch(e) {
-        console.error("Failed to parse available_variants", e);
-      }
-    }
-
     if (menuItem) {
       form.reset({
-        nama: menuItem.nama,
-        kategori_id: menuItem.kategori_id,
-        harga: Number(menuItem.harga),
-        kategori_struk: menuItem.kategori_struk || 'makanan',
-        available_variants: variants,
+        name: menuItem.name,
+        category_id: menuItem.category_id,
+        price: Number(menuItem.price),
+        description: menuItem.description || '',
+        is_available: menuItem.is_available,
+        is_best_seller: menuItem.is_best_seller,
+        variant_ids: menuItem.variant_ids || [],
+        additional_ids: menuItem.additional_ids || [],
       });
-      if(menuItem.foto) {
-        setImagePreview(`https://sejadikopi-api-v2.sejadikopi.com/storage/${menuItem.foto}`);
+      if(menuItem.image) {
+        setImagePreview(`https://sejadikopi-api-v2.sejadikopi.com/storage/${menuItem.image}`);
       } else {
         setImagePreview(null);
       }
     } else {
        form.reset({
-        nama: '',
-        kategori_id: undefined,
-        harga: 0,
-        kategori_struk: 'makanan',
-        available_variants: [],
+        name: '',
+        category_id: undefined,
+        price: 0,
+        description: '',
+        is_available: true,
+        is_best_seller: false,
+        variant_ids: [],
+        additional_ids: [],
       });
       setImagePreview(null);
     }
@@ -148,30 +136,32 @@ export function MenuForm({
   const onSubmit = async (values: MenuFormValues) => {
     setIsSubmitting(true);
     const formData = new FormData();
-    formData.append('nama', values.nama);
-    formData.append('kategori_id', values.kategori_id.toString());
-    formData.append('harga', values.harga.toString());
-    formData.append('kategori_struk', values.kategori_struk);
-    
+    formData.append('name', values.name);
+    formData.append('category_id', values.category_id.toString());
+    formData.append('price', values.price.toString());
+    formData.append('description', values.description || '');
+    formData.append('is_available', values.is_available ? '1' : '0');
+    formData.append('is_best_seller', values.is_best_seller ? '1' : '0');
+
     if (values.image instanceof File) {
-      formData.append('foto', values.image);
+      formData.append('image', values.image);
     }
 
-    if (values.available_variants) {
-      values.available_variants.forEach((variant) => {
-        formData.append('available_variants[]', variant);
-      });
-    }
+    (values.variant_ids || []).forEach((id) => {
+      formData.append('variant_ids[]', id.toString());
+    });
+    
+    (values.additional_ids || []).forEach((id) => {
+      formData.append('additional_ids[]', id.toString());
+    });
     
     try {
-      const method = menuItem ? 'POST' : 'POST'; 
+      const method = 'POST';
+      let url = 'https://sejadikopi-api-v2.sejadikopi.com/api/menus';
       if(menuItem) {
+        url = `https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`;
         formData.append('_method', 'PUT');
       }
-      
-      const url = menuItem
-        ? `https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`
-        : 'https://sejadikopi-api-v2.sejadikopi.com/api/menus';
       
       const response = await fetch(url, {
         method,
@@ -180,7 +170,6 @@ export function MenuForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("API Error:", errorData);
         throw new Error(errorData.message || 'Gagal menyimpan item menu.');
       }
 
@@ -203,7 +192,7 @@ export function MenuForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg p-0">
+      <DialogContent className="sm:max-w-2xl p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>{menuItem ? 'Ubah Menu' : 'Buat Menu'}</DialogTitle>
         </DialogHeader>
@@ -212,149 +201,236 @@ export function MenuForm({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                 control={form.control}
-                name="nama"
+                name="name"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Nama</FormLabel>
+                    <FormLabel>Nama Menu</FormLabel>
                     <FormControl>
-                        <Input placeholder="cth. Espresso" {...field} />
+                        <Input placeholder="cth. Kopi Susu Gula Aren" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
-                {imagePreview && (
-                <div className="w-full h-40 relative">
-                    <Image src={imagePreview} alt="Pratinjau Gambar" layout="fill" objectFit="cover" className="rounded-md" unoptimized />
-                </div>
-                )}
-                <FormItem>
-                <FormLabel>Gambar Menu</FormLabel>
-                <FormControl>
-                    <Input type="file" accept="image/*" onChange={handleImageChange} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
                 
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                    control={form.control}
-                    name="kategori_id"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Kategori Menu</FormLabel>
-                        <Select onValueChange={field.onChange} value={String(field.value || '')}>
-                            <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Pilih kategori" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                            {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={String(cat.id)}>
-                                {cat.nama}
-                                </SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    {imagePreview && (
+                      <div className="w-full h-40 relative">
+                          <Image src={imagePreview} alt="Pratinjau Gambar" layout="fill" objectFit="cover" className="rounded-md" unoptimized />
+                      </div>
                     )}
+                    <FormItem>
+                    <FormLabel>Gambar Menu</FormLabel>
+                    <FormControl>
+                        <Input type="file" accept="image/*" onChange={handleImageChange} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Deskripsi</FormLabel>
+                          <FormControl>
+                              <Input placeholder="cth. Perpaduan kopi dan susu..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
                     />
+                  </div>
+                  <div className="space-y-4">
                      <FormField
-                        control={form.control}
-                        name="kategori_struk"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Kategori Struk</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Kategori Menu</FormLabel>
+                          <Select onValueChange={field.onChange} value={String(field.value || '')}>
+                              <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Pilih kategori" />
+                              </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                              {categories.map((cat) => (
+                                  <SelectItem key={cat.id} value={String(cat.id)}>
+                                  {cat.nama}
+                                  </SelectItem>
+                              ))}
+                              </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                    />
+
+                    <FormItem>
+                        <FormLabel>Harga</FormLabel>
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">Rp</span>
+                            <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
                                 <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih kategori struk" />
-                                </SelectTrigger>
+                                    <Input type="number" className="pl-8" {...field} />
                                 </FormControl>
-                                <SelectContent>
-                                <SelectItem value="minuman">Minuman</SelectItem>
-                                <SelectItem value="makanan">Makanan</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
+                            )}
+                            />
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+
+                     <div className='flex gap-4'>
+                      <FormField
+                        control={form.control}
+                        name="is_available"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
+                            <div className="space-y-0.5">
+                              <FormLabel>Tersedia</FormLabel>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
                         )}
-                        />
+                      />
+                      <FormField
+                        control={form.control}
+                        name="is_best_seller"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
+                            <div className="space-y-0.5">
+                              <FormLabel>Terlaris</FormLabel>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <FormItem>
-                    <FormLabel>Harga</FormLabel>
-                    <div className="relative">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">Rp</span>
-                        <FormField
-                        control={form.control}
-                        name="harga"
-                        render={({ field }) => (
-                            <FormControl>
-                                <Input type="number" className="pl-8" {...field} />
-                            </FormControl>
-                        )}
-                        />
-                    </div>
-                    <FormMessage />
-                </FormItem>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="variant_ids"
+                      render={() => (
+                        <FormItem className="rounded-lg border p-3 shadow-sm">
+                          <div className="mb-2">
+                            <FormLabel className="text-base">Varian Terhubung</FormLabel>
+                            <FormDescription>
+                              Pilih varian yang berlaku untuk item ini.
+                            </FormDescription>
+                          </div>
+                          <div className="max-h-32 overflow-y-auto space-y-2 pr-2">
+                            {variants.map((item) => (
+                              <FormField
+                                key={item.id}
+                                control={form.control}
+                                name="variant_ids"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(item.id)}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([...(field.value || []), item.id])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== item.id
+                                                  )
+                                                )
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal flex-1">
+                                        {item.name} (+{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(item.price)})
+                                      </FormLabel>
+                                    </FormItem>
+                                  )
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="available_variants"
-                  render={() => (
-                    <FormItem>
-                      <div className="mb-4">
-                        <FormLabel className="text-base">Varian</FormLabel>
-                        <FormDescription>
-                          Pilih varian yang tersedia untuk item ini.
-                        </FormDescription>
-                      </div>
-                      <div className="flex gap-4">
-                        {['Hot', 'Ice'].map((item) => (
-                          <FormField
-                            key={item}
-                            control={form.control}
-                            name="available_variants"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  key={item}
-                                  className="flex flex-row items-start space-x-3 space-y-0"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item)}
-                                      onCheckedChange={(checked) => {
-                                        return checked
-                                          ? field.onChange([...(field.value || []), item])
-                                          : field.onChange(
-                                              field.value?.filter(
-                                                (value) => value !== item
-                                              )
-                                            )
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {item}
-                                  </FormLabel>
-                                </FormItem>
-                              )
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </form>
+                     <FormField
+                      control={form.control}
+                      name="additional_ids"
+                      render={() => (
+                        <FormItem className="rounded-lg border p-3 shadow-sm">
+                          <div className="mb-2">
+                            <FormLabel className="text-base">Tambahan Terhubung</FormLabel>
+                            <FormDescription>
+                              Pilih item tambahan untuk menu ini.
+                            </FormDescription>
+                          </div>
+                          <div className="max-h-32 overflow-y-auto space-y-2 pr-2">
+                            {additionals.map((item) => (
+                              <FormField
+                                key={item.id}
+                                control={form.control}
+                                name="additional_ids"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(item.id)}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([...(field.value || []), item.id])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== item.id
+                                                  )
+                                                )
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal flex-1">
+                                        {item.name} (+{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(item.price)})
+                                      </FormLabel>
+                                    </FormItem>
+                                  )
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                </div>
+              </form>
             </Form>
         </div>
-        <DialogFooter className="sticky bottom-0 bg-background p-6 pt-2">
+        <DialogFooter className="sticky bottom-0 bg-background p-6 pt-2 border-t">
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                 Batal
             </Button>

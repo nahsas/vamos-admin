@@ -1,4 +1,3 @@
-
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,26 +7,27 @@ import { DataTable } from "@/components/data-table";
 import { columns as menuColumns } from "./columns";
 import { columns as categoryColumns } from "./category-columns";
 import { columns as discountColumns } from "./discount-columns";
-import { columns as stockColumns } from "./stock-columns";
 import { columns as bestSellerColumns } from "./best-seller-columns";
 import { columns as autoBestSellerColumns } from "./auto-best-seller-columns";
+import { columns as variantColumns } from "./variant-columns";
+import { columns as additionalColumns } from './additional-columns';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 
-import { PlusCircle, Coffee, Utensils, BookOpen, Archive, Percent, Star, Search, Filter, Layers3 } from "lucide-react";
+import { PlusCircle, Coffee, Utensils, BookOpen, Archive, Percent, Star, Search, Filter, Layers, Package, Puzzle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { MenuItem } from '@/lib/data';
-import { Category, Discount, Additional } from '@/lib/types';
+import { Category, Discount, Additional, Variant } from '@/lib/types';
 import { MenuForm } from './menu-form';
 import { CategoryForm } from './category-form';
 import { DiscountForm } from './discount-form';
 import { AdditionalForm } from './additional-form';
-import { columns as additionalColumns } from './additional-columns';
+import { VariantForm } from './variant-form';
 
 
 function StatCard({ title, value, icon: Icon, description, color }: { title: string, value: string, icon: React.ElementType, description: string, color: string }) {
@@ -77,13 +77,11 @@ export default function MenuPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [additionals, setAdditionals] = useState<Additional[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
 
   const [menuSearchTerm, setMenuSearchTerm] = useState('');
   const [menuFilterCategory, setMenuFilterCategory] = useState('all');
-  const [stockSearchTerm, setStockSearchTerm] = useState('');
-  const [stockFilterCategory, setStockFilterCategory] = useState('all');
-  const [stockFilterAvailability, setStockFilterAvailability] = useState('all');
   const [bestSellerSearchTerm, setBestSellerSearchTerm] = useState('');
 
   const [isAutomaticBestSeller, setIsAutomaticBestSeller] = useState(true);
@@ -107,14 +105,18 @@ export default function MenuPage() {
   const [isAdditionalFormOpen, setIsAdditionalFormOpen] = useState(false);
   const [editingAdditional, setEditingAdditional] = useState<Additional | null>(null);
 
+  const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
+  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
+
   const fetchData = useCallback(async () => {
     try {
-      const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes] = await Promise.all([
+      const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes, variantRes] = await Promise.all([
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus'),
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/categories'),
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes'),
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus?best_seller=1'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals?order=nama.asc'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/variants'),
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };
@@ -129,16 +131,19 @@ export default function MenuPage() {
       const additionalData = additionalRes.ok ? await additionalRes.json() : { data: [] };
       setAdditionals(additionalData.data || []);
 
+      const variantData = variantRes.ok ? await variantRes.json() : { data: [] };
+      setVariants(variantData.data || []);
+
       const bestSellerData = bestSellerRes.ok ? await bestSellerRes.json() : { data: [] };
       setBestSellers(bestSellerData.data || []);
       
        if (menuData.data && categoryData.data) {
-        const foodAndSnackCategoryIds = [3, 4, 5, 6, 7];
-        const coffeeCategoryId = 1;
+        const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => c.nama.toLowerCase().includes('food') || c.nama.toLowerCase().includes('snack')).map((c: Category) => c.id);
+        const coffeeCategoryId = categoryData.data.find((c: Category) => c.nama.toLowerCase().includes('coffee'))?.id;
 
         const totalMenu = menuData.data.length;
-        const totalCoffee = menuData.data.filter((item: { kategori_id: number }) => item.kategori_id === coffeeCategoryId).length;
-        const totalFoodAndSnack = menuData.data.filter((item: { kategori_id: number }) => foodAndSnackCategoryIds.includes(item.kategori_id)).length;
+        const totalCoffee = menuData.data.filter((item: MenuItem) => item.category_id === coffeeCategoryId).length;
+        const totalFoodAndSnack = menuData.data.filter((item: MenuItem) => foodAndSnackCategoryIds.includes(item.category_id)).length;
         
         setStats({
           totalMenu,
@@ -189,37 +194,30 @@ export default function MenuPage() {
     setIsAdditionalFormOpen(true);
   };
 
-  const menuColumnsWithCategories = menuColumns({ onEdit: handleMenuFormOpen, onDeleteSuccess: fetchData, categories });
-  const stockColumnsWithHandlers = stockColumns({ onUpdateSuccess: fetchData, categories });
+  const handleVariantFormOpen = (variant: Variant | null = null) => {
+    setEditingVariant(variant);
+    setIsVariantFormOpen(true);
+  }
+
+  const menuColumnsWithHandlers = menuColumns({ onEdit: handleMenuFormOpen, onDeleteSuccess: fetchData, categories, variants, additionals });
   const bestSellerColumnsWithHandlers = bestSellerColumns({ onUpdateSuccess: fetchData });
   const additionalColumnsWithHandlers = additionalColumns({ onEdit: handleAdditionalFormOpen, onDeleteSuccess: fetchData });
+  const variantColumnsWithHandlers = variantColumns({ onEdit: handleVariantFormOpen, onDeleteSuccess: fetchData });
 
 
   const filteredMenuItems = menuItems.filter(item => {
-    if (!item.nama) return false;
-    const nameMatch = item.nama.toLowerCase().includes(menuSearchTerm.toLowerCase());
-    const categoryMatch = menuFilterCategory === 'all' || (item.kategori_id !== null && item.kategori_id.toString() === menuFilterCategory);
+    if (!item.name) return false;
+    const nameMatch = item.name.toLowerCase().includes(menuSearchTerm.toLowerCase());
+    const categoryMatch = menuFilterCategory === 'all' || (item.category_id !== null && item.category_id.toString() === menuFilterCategory);
     return nameMatch && categoryMatch;
   });
   
-  const filteredStockItems = menuItems.filter(item => {
-    if (!item.nama) return false;
-    const nameMatch = item.nama.toLowerCase().includes(stockSearchTerm.toLowerCase());
-    const categoryMatch = stockFilterCategory === 'all' || (item.kategori_id !== null && item.kategori_id.toString() === stockFilterCategory);
-    
-    const availabilityMatch = stockFilterAvailability === 'all' 
-      || (stockFilterAvailability === 'available' && item.is_available)
-      || (stockFilterAvailability === 'unavailable' && !item.is_available);
-
-    return nameMatch && categoryMatch && availabilityMatch;
-  });
-
   const filteredBestSellerMenuItems = menuItems.filter(item =>
-    item.nama && item.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
+    item.name && item.name.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
   );
   
   const filteredAutomaticBestSellers = bestSellers.filter(item => 
-    item.menu && item.menu.nama && item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
+    item.menu && item.menu.name && item.menu.name.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
   ).map((item:any, index:number) => ({...item, rank: index + 1}));
 
 
@@ -233,6 +231,7 @@ export default function MenuPage() {
           menuItem={editingMenu}
           categories={categories}
           additionals={additionals}
+          variants={variants}
         />
       )}
       {isCategoryFormOpen && (
@@ -259,33 +258,41 @@ export default function MenuPage() {
           additional={editingAdditional}
         />
       )}
+      {isVariantFormOpen && (
+        <VariantForm 
+          isOpen={isVariantFormOpen}
+          onClose={() => setIsVariantFormOpen(false)}
+          onSuccess={fetchData}
+          variant={editingVariant}
+        />
+      )}
 
       <div>
         <h1 className="text-3xl font-headline font-bold tracking-tight">Manajemen Menu</h1>
-        <p className="text-muted-foreground">Tambah, ubah, dan kelola menu kedai kopi Anda.</p>
+        <p className="text-muted-foreground">Tambah, ubah, dan kelola semua aspek menu kedai kopi Anda.</p>
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-gradient-to-tr from-blue-500 to-blue-700 text-white" />
         <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-gradient-to-tr from-amber-500 to-amber-700 text-white" />
         <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
-        <StatCard title="Kategori" value={stats.totalCategories.toString()} icon={Layers3} description="Item yang saat ini tersedia." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
+        <StatCard title="Kategori" value={stats.totalCategories.toString()} icon={Layers} description="Jumlah kategori yang ada." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
       </div>
       
       <Tabs defaultValue="menu">
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 h-auto">
-          <TabsTrigger value="menu">Menu</TabsTrigger>
-          <TabsTrigger value="stock">Stok</TabsTrigger>
+          <TabsTrigger value="menu">Menu Utama</TabsTrigger>
+          <TabsTrigger value="category">Kategori</TabsTrigger>
+          <TabsTrigger value="variant">Varian</TabsTrigger>
           <TabsTrigger value="additional">Tambahan</TabsTrigger>
           <TabsTrigger value="discount">Diskon</TabsTrigger>
-          <TabsTrigger value="category">Kategori</TabsTrigger>
           <TabsTrigger value="bestseller">Menu Terlaris</TabsTrigger>
         </TabsList>
         <TabsContent value="menu" className="mt-6">
           <div className="space-y-6">
             <TabHeader 
               icon={BookOpen} 
-              title="Kelola Menu" 
+              title="Kelola Menu Utama" 
               description="Tambah dan kelola menu kopi & makanan" 
               buttonText="Buat Menu Baru" 
               onButtonClick={() => handleMenuFormOpen()} 
@@ -320,62 +327,40 @@ export default function MenuPage() {
               </CardHeader>
               <CardContent className="p-0">
                 <DataTable 
-                  columns={menuColumnsWithCategories} 
+                  columns={menuColumnsWithHandlers} 
                   data={filteredMenuItems} 
                 />
               </CardContent>
             </Card>
           </div>
         </TabsContent>
-        <TabsContent value="stock" className="mt-6">
-          <div className="space-y-6">
-            <TabHeader 
-              icon={Archive}
-              title="Manajemen Stok" 
-              description="Atur ketersediaan item menu secara cepat." 
-              buttonText=""
-              onButtonClick={() => {}}
-              buttonDisabled={true}
-            />
-            <Card className="rounded-xl">
-              <CardHeader>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <div className="relative flex-grow w-full md:w-auto">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      placeholder="Cari nama item..."
-                      className="pl-10"
-                      value={stockSearchTerm}
-                      onChange={(e) => setStockSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <Select value={stockFilterCategory} onValueChange={setStockFilterCategory}>
-                    <SelectTrigger className="w-full md:w-[240px]">
-                      <div className="flex items-center gap-2">
-                        <Filter className="h-4 w-4" />
-                        <SelectValue placeholder="Filter Kategori" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Semua Kategori</SelectItem>
-                      {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <DataTable 
-                  columns={stockColumnsWithHandlers}
-                  data={filteredStockItems} 
+        
+        <TabsContent value="category" className="mt-6">
+          <TabHeader icon={Layers} title="Kelola Kategori" description="Kelompokkan item menu ke dalam kategori" buttonText="Buat Kategori Baru" onButtonClick={() => handleCategoryFormOpen()} />
+          <Card className="rounded-xl">
+             <CardContent className="p-0">
+                <DataTable
+                columns={categoryColumns({ onEdit: handleCategoryFormOpen, onDeleteSuccess: fetchData })}
+                data={categories}
                 />
-              </CardContent>
-            </Card>
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
+        
+        <TabsContent value="variant" className="mt-6">
+          <TabHeader icon={Package} title="Kelola Varian" description="Kelola varian menu seperti ukuran atau tipe" buttonText="Buat Varian Baru" onButtonClick={() => handleVariantFormOpen()} />
+           <Card className="rounded-xl">
+             <CardContent className="p-0">
+                <DataTable
+                  columns={variantColumnsWithHandlers}
+                  data={variants}
+                />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="additional" className="mt-6">
-          <TabHeader icon={PlusCircle} title="Kelola Tambahan" description="Kelola item tambahan untuk menu" buttonText="Buat Tambahan Baru" onButtonClick={() => handleAdditionalFormOpen()} />
+          <TabHeader icon={Puzzle} title="Kelola Tambahan" description="Kelola item tambahan untuk menu" buttonText="Buat Tambahan Baru" onButtonClick={() => handleAdditionalFormOpen()} />
            <Card className="rounded-xl">
              <CardContent className="p-0">
                 <DataTable
@@ -385,6 +370,7 @@ export default function MenuPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
         <TabsContent value="discount" className="mt-6">
           <TabHeader icon={Percent} title="Kelola Diskon" description="Buat dan kelola promosi untuk item menu" buttonText="Buat Diskon Baru" onButtonClick={() => handleDiscountFormOpen()} />
           <Card className="rounded-xl">
@@ -396,17 +382,7 @@ export default function MenuPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="category" className="mt-6">
-          <TabHeader icon={Utensils} title="Kelola Kategori" description="Kelompokkan item menu ke dalam kategori" buttonText="Buat Kategori Baru" onButtonClick={() => handleCategoryFormOpen()} />
-          <Card className="rounded-xl">
-             <CardContent className="p-0">
-                <DataTable
-                columns={categoryColumns({ onEdit: handleCategoryFormOpen, onDeleteSuccess: fetchData })}
-                data={categories}
-                />
-            </CardContent>
-          </Card>
-        </TabsContent>
+
         <TabsContent value="bestseller" className="mt-6">
           <TabHeader icon={Star} title="Manajer Menu Terlaris" description="Atur item menu yang paling direkomendasikan" buttonText="" onButtonClick={() => {}} buttonDisabled={true}>
              <div className="flex items-center space-x-2">
