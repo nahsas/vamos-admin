@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Category } from "@/lib/types"
+import { Badge } from "@/components/ui/badge"
 
 type CategoryColumnsProps = {
   onEdit: (category: Category) => void;
@@ -39,7 +40,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
       const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/categories/${id}`, {
         method: 'DELETE',
       });
-      if (!response.ok) throw new Error("Gagal menghapus kategori. Endpoint tidak ada.");
+      if (!response.ok) throw new Error("Gagal menghapus kategori.");
       toast({ title: "Sukses", description: "Kategori berhasil dihapus." });
       onDeleteSuccess();
     } catch (error) {
@@ -49,7 +50,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
 
   return [
     {
-      accessorKey: "nama",
+      accessorKey: "name",
       header: ({ column }) => {
         return (
           <Button
@@ -61,11 +62,15 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
           </Button>
         )
       },
-      cell: ({ row }) => <div className="pl-4">{row.getValue("nama")}</div>
+      cell: ({ row }) => <div className="pl-4">{row.getValue("name")}</div>
     },
     {
-      accessorKey: "urutan",
-      header: "Urutan"
+      accessorKey: "is_available",
+      header: "Status",
+       cell: ({ row }) => {
+          const isAvailable = row.getValue("is_available");
+          return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? 'Tersedia' : 'Tidak Tersedia'}</Badge>
+      }
     },
     {
       id: "actions",
@@ -88,7 +93,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive" disabled>
+                  <DropdownMenuItem className="text-destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Hapus
                   </DropdownMenuItem>

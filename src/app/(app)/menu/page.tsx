@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 
-import { PlusCircle, Coffee, Utensils, BookOpen, Archive, Percent, Star, Search, Filter, Layers, Package, Puzzle } from "lucide-react";
+import { PlusCircle, Coffee, Utensils, BookOpen, Percent, Star, Search, Filter, Layers, Package, Puzzle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -139,8 +139,8 @@ export default function MenuPage() {
       setBestSellers(bestSellerData.data || []);
       
        if (menuData.data && categoryData.data) {
-        const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => c.nama.toLowerCase().includes('food') || c.nama.toLowerCase().includes('snack')).map((c: Category) => c.id);
-        const coffeeCategoryId = categoryData.data.find((c: Category) => c.nama.toLowerCase().includes('coffee'))?.id;
+        const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => c.name.toLowerCase().includes('food') || c.name.toLowerCase().includes('snack')).map((c: Category) => c.id);
+        const coffeeCategoryId = categoryData.data.find((c: Category) => c.name.toLowerCase().includes('coffee'))?.id;
 
         const totalMenu = menuData.data.length;
         const totalCoffee = menuData.data.filter((item: MenuItem) => item.category_id === coffeeCategoryId).length;
@@ -321,7 +321,7 @@ export default function MenuPage() {
                     <SelectContent>
                       <SelectItem value="all">Semua Kategori</SelectItem>
                       {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
