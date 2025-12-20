@@ -46,9 +46,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
 
   const handleDelete = async (id: number) => {
     try {
-      // NOTE: The API spec does not officially have DELETE /menu/{id}
-      // but implementing it as requested by the user.
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/menu/${id}`, {
+      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -68,7 +66,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
         header: "Gambar",
         cell: ({ row }) => {
             const imageUrl = row.original.foto;
-            const fullUrl = imageUrl ? `https://vamos-api.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            const fullUrl = imageUrl ? `https://sejadikopi-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.getValue("nama")} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },

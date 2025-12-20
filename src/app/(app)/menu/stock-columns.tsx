@@ -1,3 +1,4 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -41,13 +42,13 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
         stok: newStockLevel,
       };
 
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/menu/${menuItem.id}`, {
-        method: 'PUT',
+      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({...payload, _method: 'PUT'}),
       });
 
       if (!response.ok) {

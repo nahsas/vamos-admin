@@ -101,8 +101,8 @@ export function DiscountForm({
     try {
       const method = discount ? 'PUT' : 'POST';
       const url = discount
-        ? `https://vamos-api.sejadikopi.com/api/discount-codes/${discount.id}`
-        : 'https://vamos-api.sejadikopi.com/api/discount-codes';
+        ? `https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes/${discount.id}`
+        : 'https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes';
 
       const body = {
         ...values,

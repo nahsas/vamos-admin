@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // A mock role mapping based on email
 const getRoleFromEmail = (email: string) => {
-  if (email === 'admin@sejadikopi.com') {
+  if (email === 'admin@sejadi.com') {
     return 'admin';
   }
   if (email === 'kasir@sejadikopi.com') {
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, loading, pathname, router]);
 
   const login = async (email: string, pass: string) => {
-    const response = await fetch('https://vamos-api.sejadikopi.com/api/auth/login', {
+    const response = await fetch('https://sejadikopi-api-v2.sejadikopi.com/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

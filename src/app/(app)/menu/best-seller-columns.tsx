@@ -21,13 +21,13 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
       const payload = { is_recommendation: isBestSeller };
 
       // API endpoint for updating menu isn't fully defined, assuming it exists
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/menu/${menuItem.id}`, {
-        method: 'PUT',
+      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`, {
+        method: 'POST', // using post for multipart
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({...payload, _method: 'PUT'}),
       });
 
       if (!response.ok) {
@@ -73,7 +73,7 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
         header: "Gambar",
         cell: ({ row }) => {
             const imageUrl = row.original.foto;
-            const fullUrl = imageUrl ? `https://vamos-api.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            const fullUrl = imageUrl ? `https://sejadikopi-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.getValue("nama")} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },
@@ -95,4 +95,3 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
     },
   ]
 }
-

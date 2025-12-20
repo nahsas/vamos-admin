@@ -236,9 +236,9 @@ export default function HistoryPage() {
     try {
       const today = format(startOfToday(), 'yyyy-MM-dd');
       const [orderRes, menuRes, strukRes] = await Promise.all([
-        fetch(`https://vamos-api.sejadikopi.com/api/pesanans?status=selesai,cancelled&payment_date=${today}`),
-        fetch('https://vamos-api.sejadikopi.com/api/menu'),
-        fetch(`https://vamos-api.sejadikopi.com/api/struks?created_from=${today}T00:00:00&created_to=${today}T23:59:59`)
+        fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/orders?status=selesai,cancelled&payment_date=${today}`),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus'),
+        fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/struks?created_from=${today}T00:00:00&created_to=${today}T23:59:59`)
       ]);
 
       if (!orderRes.ok) throw new Error("Gagal mengambil riwayat pesanan.");
@@ -401,5 +401,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
-    

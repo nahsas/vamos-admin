@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -8,9 +9,9 @@ export const metadata: Metadata = {
   description: 'Vamos - Coffee Shop Management',
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: 'https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png',
-    shortcut: 'https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png',
-    apple: 'https://vamos-api.sejadikopi.com/storage/Logo/vamos_circle.png',
+    icon: 'https://sejadikopi-api-v2.sejadikopi.com/storage/Logo/vamos_circle.png',
+    shortcut: 'https://sejadikopi-api-v2.sejadikopi.com/storage/Logo/vamos_circle.png',
+    apple: 'https://sejadikopi-api-v2.sejadikopi.com/storage/Logo/vamos_circle.png',
   },
 };
 

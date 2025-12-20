@@ -35,10 +35,8 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
   const { toast } = useToast();
 
   const handleDelete = async (id: number) => {
-    // NOTE: DELETE /categories/{id} is not defined in api.json.
-    // Assuming it's missing and will implement optimistically.
     try {
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/categories/${id}`, {
+      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/categories/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus kategori. Endpoint tidak ada.");

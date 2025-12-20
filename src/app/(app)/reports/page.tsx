@@ -150,7 +150,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                 image: null,
             });
             if(expense.bukti_url) {
-                setImagePreview(`https://vamos-api.sejadikopi.com/storage/${expense.bukti_url}`);
+                setImagePreview(`https://sejadikopi-api-v2.sejadikopi.com/storage/${expense.bukti_url}`);
             } else {
                 setImagePreview(null);
             }
@@ -181,49 +181,29 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
 
     const onSubmit = async (values: ExpenseFormValues) => {
     try {
-      let imageUrl = expense?.bukti_url || '';
-
       const imageFile = form.getValues('image');
+      const formData = new FormData();
+      formData.append('title', values.deskripsi);
+      formData.append('amount', values.jumlah.toString());
+      formData.append('type', values.kategori);
+      formData.append('date', values.tanggal);
+      formData.append('created_by', userEmail);
       if (imageFile instanceof File) {
-        const imageFormData = new FormData();
-        imageFormData.append('image', imageFile);
-        imageFormData.append('folder', 'expenses');
-
-        const imageUploadRes = await fetch('https://vamos-api.sejadikopi.com/api/images/upload', {
-          method: 'POST',
-          body: imageFormData,
-        });
-
-        if (!imageUploadRes.ok) {
-          throw new Error('Gagal mengunggah gambar.');
-        }
-
-        const imageUploadResult = await imageUploadRes.json();
-        imageUrl = imageUploadResult.data.path;
+        formData.append('image', imageFile);
       }
 
-      const method = expense ? 'PUT' : 'POST';
+      const method = expense ? 'POST' : 'POST'; // API uses POST for update with multipart
       const url = expense
-        ? `https://vamos-api.sejadikopi.com/api/pengeluarans/${expense.id}`
-        : 'https://vamos-api.sejadikopi.com/api/pengeluarans';
+        ? `https://sejadikopi-api-v2.sejadikopi.com/api/expenses/${expense.id}`
+        : 'https://sejadikopi-api-v2.sejadikopi.com/api/expenses';
       
-      const payload = {
-        id: values.id || `EXP-${Date.now()}`,
-        kategori: values.kategori,
-        deskripsi: values.deskripsi,
-        jumlah: values.jumlah,
-        tanggal: values.tanggal,
-        created_by: userEmail,
-        bukti_url: imageUrl,
-        foto_url: imageUrl,
-      };
+      if(expense) {
+        formData.append('_method', 'PUT');
+      }
       
       const response = await fetch(url, {
         method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
+        body: formData,
       });
       
       if (!response.ok) {
@@ -381,13 +361,13 @@ export default function ReportsPage() {
       const eDate = endDate ? format(endDate, "yyyy-MM-dd'T'23:59:59") : '';
 
       // --- TRANSACTIONS FETCH ---
-      const transactionUrl = new URL('https://vamos-api.sejadikopi.com/api/pesanans');
-      transactionUrl.searchParams.set('status', 'selesai');
+      const transactionUrl = new URL('https://sejadikopi-api-v2.sejadikopi.com/api/orders');
+      transactionUrl.searchParams.set('status', 'completed');
       if (sDate) transactionUrl.searchParams.set('created_from', sDate);
       if (eDate) transactionUrl.searchParams.set('created_to', eDate);
       
       // --- EXPENSES FETCH ---
-      const expenseUrl = new URL('https://vamos-api.sejadikopi.com/api/pengeluarans');
+      const expenseUrl = new URL('https://sejadikopi-api-v2.sejadikopi.com/api/expenses');
       if (sDate) expenseUrl.searchParams.set('start_date', format(new Date(sDate), 'yyyy-MM-dd'));
       if (eDate) expenseUrl.searchParams.set('end_date', format(new Date(eDate), 'yyyy-MM-dd'));
       expenseUrl.searchParams.set('order', 'tanggal.desc');
@@ -395,7 +375,7 @@ export default function ReportsPage() {
       const [transactionRes, expenseRes, menuRes] = await Promise.all([
           fetch(transactionUrl.toString()),
           fetch(expenseUrl.toString()),
-          fetch('https://vamos-api.sejadikopi.com/api/menu'),
+          fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus'),
       ]);
 
       let allTransactions: any[] = [];
@@ -493,7 +473,7 @@ export default function ReportsPage() {
   const handleDeleteExpense = async (id: string) => {
     if (!confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?')) return;
     try {
-        const response = await fetch(`https://vamos-api.sejadikopi.com/api/pengeluarans/${id}`, {
+        const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/expenses/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Gagal menghapus pengeluaran.');
@@ -880,12 +860,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-    
-
-    
-
-    
-
-    
-
-    

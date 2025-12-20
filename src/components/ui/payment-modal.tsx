@@ -22,9 +22,9 @@ import { printPaymentStruk } from '@/lib/print-utils';
 import { appEventEmitter } from '@/lib/event-emitter';
 
 const banks = [
-    { id: 'BCA', name: 'BCA', logo: 'https://vamos-api.sejadikopi.com/storage/images/BCA.png' },
-    { id: 'BRI', name: 'BRI', logo: 'https://vamos-api.sejadikopi.com/storage/images/BRI.png' },
-    { id: 'BSI', name: 'BSI', logo: 'https://vamos-api.sejadikopi.com/storage/images/BSI.png' },
+    { id: 'BCA', name: 'BCA', logo: 'https://sejadikopi-api-v2.sejadikopi.com/storage/images/BCA.png' },
+    { id: 'BRI', name: 'BRI', logo: 'https://sejadikopi-api-v2.sejadikopi.com/storage/images/BRI.png' },
+    { id: 'BSI', name: 'BSI', logo: 'https://sejadikopi-api-v2.sejadikopi.com/storage/images/BSI.png' },
 ]
 
 export function PaymentModal({
@@ -50,10 +50,10 @@ export function PaymentModal({
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
   React.useEffect(() => {
-    fetch('https://vamos-api.sejadikopi.com/api/menu')
+    fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus')
         .then(res => res.json())
         .then(data => setMenuItems(data.data || []));
-    fetch('https://vamos-api.sejadikopi.com/api/additionals')
+    fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals')
         .then(res => res.json())
         .then(data => setAdditionals(data.data || []));
   }, []);
@@ -79,8 +79,7 @@ export function PaymentModal({
     setIsApplyingDiscount(true);
 
     try {
-        // NOTE: This endpoint is not in api.json, but implementing as requested
-        const response = await fetch('https://vamos-api.sejadikopi.com/api/discount-codes/apply', {
+        const response = await fetch('https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes/apply', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -137,11 +136,11 @@ export function PaymentModal({
     const now = new Date().toISOString();
 
     const finalPayload: Partial<Order> = {
-        status: "selesai",
+        status: "completed",
         updated_at: now,
         completed_at: now,
         is_final: true,
-        metode_pembayaran: paymentMethod.toLowerCase() as 'cash' | 'qris',
+        payment_method: paymentMethod.toLowerCase() as 'cash' | 'qris',
         bank_qris: paymentMethod === 'QRIS' ? selectedBank : null,
         discount_code: appliedDiscount?.code || order.discount_code || null,
         discount_amount: appliedDiscount?.amount || order.discount_amount || 0,
@@ -149,7 +148,7 @@ export function PaymentModal({
     };
     
     try {
-        const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${order.id}`, {
+        const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/orders/${order.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

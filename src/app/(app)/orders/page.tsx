@@ -87,9 +87,9 @@ export default function OrdersPage() {
     setLoading(true);
     try {
       const [ordersRes, menuRes, additionalsRes] = await Promise.all([
-        fetch("https://vamos-api.sejadikopi.com/api/pesanans?order=updated_at.desc&status=pending,diproses"),
-        fetch("https://vamos-api.sejadikopi.com/api/menu"),
-        fetch("https://vamos-api.sejadikopi.com/api/additionals")
+        fetch("https://sejadikopi-api-v2.sejadikopi.com/api/orders?order=updated_at.desc&status=pending,diproses"),
+        fetch("https://sejadikopi-api-v2.sejadikopi.com/api/menus"),
+        fetch("https://sejadikopi-api-v2.sejadikopi.com/api/additionals")
       ]);
       
       const allActiveOrders = ordersRes.ok ? (await ordersRes.json()).data : [];
@@ -138,12 +138,12 @@ export default function OrdersPage() {
   
   const handleUpdateStatus = async (order: Order) => {
     try {
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${order.id}`, {
+      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/orders/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'diproses' }),
+        body: JSON.stringify({ status: 'process' }),
       });
 
       if (!response.ok) {
@@ -218,7 +218,7 @@ export default function OrdersPage() {
 
   const renderOrderList = (orders: Order[], type: 'dine-in' | 'take-away', onUpdateStatus: (order: Order) => void) => {
     const pendingOrders = orders.filter(o => o.status === 'pending');
-    const processingOrders = orders.filter(o => o.status === 'diproses');
+    const processingOrders = orders.filter(o => o.status === 'diproses' || o.status === 'process');
 
     if (loading) {
       return <div className="text-center py-16">Loading...</div>;
@@ -365,5 +365,3 @@ export default function OrdersPage() {
     </div>
   );
 }
-
-    

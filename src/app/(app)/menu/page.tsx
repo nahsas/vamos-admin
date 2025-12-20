@@ -109,11 +109,11 @@ export default function MenuPage() {
   const fetchData = useCallback(async () => {
     try {
       const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes] = await Promise.all([
-        fetch('https://vamos-api.sejadikopi.com/api/menu'),
-        fetch('https://vamos-api.sejadikopi.com/api/categories'),
-        fetch('https://vamos-api.sejadikopi.com/api/discount-codes'),
-        fetch('https://vamos-api.sejadikopi.com/api/best-sellers?limit=10&days=30'),
-        fetch('https://vamos-api.sejadikopi.com/api/additionals?order=nama.asc'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/categories'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/best-sellers?limit=10&days=30'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals?order=nama.asc'),
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };

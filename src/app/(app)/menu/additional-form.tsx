@@ -79,8 +79,8 @@ export function AdditionalForm({
     try {
       const method = additional ? 'PUT' : 'POST';
       const url = additional
-        ? `https://vamos-api.sejadikopi.com/api/additionals/${additional.id}`
-        : 'https://vamos-api.sejadikopi.com/api/additionals';
+        ? `https://sejadikopi-api-v2.sejadikopi.com/api/additionals/${additional.id}`
+        : 'https://sejadikopi-api-v2.sejadikopi.com/api/additionals';
 
       const response = await fetch(url, {
         method,

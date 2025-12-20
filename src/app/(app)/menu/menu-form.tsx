@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MenuItem } from '@/lib/data';
-import { Category } from '@/lib/types';
+import { Category, Additional } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -54,6 +54,7 @@ interface MenuFormProps {
   onSuccess: () => void;
   menuItem: MenuItem | null;
   categories: Category[];
+  additionals: Additional[];
 }
 
 export function MenuForm({
@@ -62,6 +63,7 @@ export function MenuForm({
   onSuccess,
   menuItem,
   categories,
+  additionals
 }: MenuFormProps) {
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -115,7 +117,7 @@ export function MenuForm({
         available_variants: variants,
       });
       if(menuItem.foto) {
-        setImagePreview(`https://vamos-api.sejadikopi.com/storage/${menuItem.foto}`);
+        setImagePreview(`https://sejadikopi-api-v2.sejadikopi.com/storage/${menuItem.foto}`);
       } else {
         setImagePreview(null);
       }
@@ -145,48 +147,35 @@ export function MenuForm({
 
   const onSubmit = async (values: MenuFormValues) => {
     setIsSubmitting(true);
-    try {
-      let imageUrl = menuItem?.foto || '';
+    const formData = new FormData();
+    formData.append('nama', values.nama);
+    formData.append('kategori_id', values.kategori_id.toString());
+    formData.append('harga', values.harga.toString());
+    formData.append('kategori_struk', values.kategori_struk);
+    
+    if (values.image instanceof File) {
+      formData.append('foto', values.image);
+    }
 
-      if (values.image instanceof File) {
-        const imageFormData = new FormData();
-        imageFormData.append('image', values.image);
-        imageFormData.append('folder', 'menu');
-        const res = await fetch('https://vamos-api.sejadikopi.com/api/images/upload', {
-            method: 'POST',
-            body: imageFormData,
-        });
-        const uploadResult = await res.json();
-        if (!res.ok) {
-            throw new Error(uploadResult.message || 'Gagal mengunggah gambar');
-        }
-        imageUrl = uploadResult.data.path;
+    if (values.available_variants) {
+      values.available_variants.forEach((variant) => {
+        formData.append('available_variants[]', variant);
+      });
+    }
+    
+    try {
+      const method = menuItem ? 'POST' : 'POST'; 
+      if(menuItem) {
+        formData.append('_method', 'PUT');
       }
       
-      const payload: any = {
-        nama: values.nama,
-        harga: Number(values.harga),
-        kategori_id: values.kategori_id,
-        available_variants: values.available_variants || null,
-        foto: imageUrl,
-        stok: 1000,
-        is_available: true,
-        kategori_struk: values.kategori_struk,
-      };
-
-      const method = menuItem ? 'PUT' : 'POST'; 
-      // NOTE: PUT /menu/{id} and POST /menu are not in api.json, but necessary for functionality
       const url = menuItem
-        ? `https://vamos-api.sejadikopi.com/api/menu/${menuItem.id}`
-        : 'https://vamos-api.sejadikopi.com/api/menu';
+        ? `https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`
+        : 'https://sejadikopi-api-v2.sejadikopi.com/api/menus';
       
       const response = await fetch(url, {
         method,
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (!response.ok) {

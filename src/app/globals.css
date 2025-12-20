@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,7 +97,7 @@
 @layer utilities {
   .login-bg {
     @apply bg-cover bg-center bg-no-repeat;
-    background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://api.sejadikopi.com/storage/images/tes.jpg');
+    background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://sejadikopi-api-v2.sejadikopi.com/storage/images/tes.jpg');
   }
 
   /* Custom Scrollbar for Webkit browsers */
