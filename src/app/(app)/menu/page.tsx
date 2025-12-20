@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 
-import { PlusCircle, Coffee, Utensils, BookOpen, Archive, Percent, Star, Search, Filter } from "lucide-react";
+import { PlusCircle, Coffee, Utensils, BookOpen, Archive, Percent, Star, Search, Filter, Layers3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -92,6 +92,7 @@ export default function MenuPage() {
     totalMenu: 0,
     totalCoffee: 0,
     totalFoodAndSnack: 0,
+    totalStock: 0,
   });
 
   const [isMenuFormOpen, setIsMenuFormOpen] = useState(false);
@@ -112,7 +113,7 @@ export default function MenuPage() {
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus'),
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/categories'),
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/best-sellers?limit=10&days=30'),
+        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus?best_seller=1'),
         fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals?order=nama.asc'),
       ]);
       
@@ -143,6 +144,7 @@ export default function MenuPage() {
           totalMenu,
           totalCoffee,
           totalFoodAndSnack,
+          totalStock: 0,
         });
       }
 
@@ -216,7 +218,7 @@ export default function MenuPage() {
   
   const filteredAutomaticBestSellers = bestSellers.filter(item => 
     item.menu.nama.toLowerCase().includes(bestSellerSearchTerm.toLowerCase())
-  ).map((item, index) => ({...item, rank: index + 1}));
+  ).map((item:any, index:number) => ({...item, rank: index + 1}));
 
 
   return (
@@ -261,10 +263,11 @@ export default function MenuPage() {
         <p className="text-muted-foreground">Tambah, ubah, dan kelola menu kedai kopi Anda.</p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-gradient-to-tr from-blue-500 to-blue-700 text-white" />
         <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-gradient-to-tr from-amber-500 to-amber-700 text-white" />
         <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
+        <StatCard title="Kategori" value={stats.totalStock.toString()} icon={Layers3} description="Item yang saat ini tersedia." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
       </div>
       
       <Tabs defaultValue="menu">
