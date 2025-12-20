@@ -1,97 +1,24 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Sejadi Kopi API",
-        "description": "Complete API documentation for Sejadi Kopi cafe management system with detailed request/response schemas",
-        "version": "1.0.0",
-        "contact": {
-            "name": "API Support"
-        }
+        "title": "Sejadi Group POS & Mechanism API",
+        "description": "Full CRUD & POS API with Search, Filter, Sort, and Image handling. Optimized for low latency. Includes Best Seller tracking.",
+        "version": "1.0.1"
     },
     "servers": [
         {
-            "url": "/api",
-            "description": "API Base URL"
-        }
-    ],
-    "tags": [
-        {
-            "name": "Authentication",
-            "description": "User authentication endpoints"
-        },
-        {
-            "name": "Users",
-            "description": "User management operations"
-        },
-        {
-            "name": "Menu",
-            "description": "Menu item management"
-        },
-        {
-            "name": "Categories",
-            "description": "Menu category operations"
-        },
-        {
-            "name": "Orders",
-            "description": "Order management (Pesanan)"
-        },
-        {
-            "name": "Order Details",
-            "description": "Order line items"
-        },
-        {
-            "name": "Receipts",
-            "description": "Receipt management (Struk)"
-        },
-        {
-            "name": "Cafe Settings",
-            "description": "Cafe configuration settings"
-        },
-        {
-            "name": "Additionals",
-            "description": "Menu additional items and toppings"
-        },
-        {
-            "name": "Menu Additional Config",
-            "description": "Menu-additional relationship configuration"
-        },
-        {
-            "name": "Discount Codes",
-            "description": "Discount code management"
-        },
-        {
-            "name": "Best Sellers",
-            "description": "Best selling items analytics"
-        },
-        {
-            "name": "Income",
-            "description": "Other income tracking (Pemasukan Lain)"
-        },
-        {
-            "name": "Expenses",
-            "description": "Expense tracking (Pengeluaran)"
-        },
-        {
-            "name": "Export History",
-            "description": "Data export history"
-        },
-        {
-            "name": "History Archive",
-            "description": "Historical data archive"
-        },
-        {
-            "name": "Images",
-            "description": "Image upload and management"
+            "url": "https://sejadikopi-api-v2.sejadikopi.com/api",
+            "description": "Local server"
         }
     ],
     "paths": {
-        "/auth/login": {
+        "/login": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "User login",
-                "description": "Authenticate user with email and password",
+                "summary": "Admin Login",
+                "description": "Authenticate user and return a Bearer token.",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -106,10 +33,11 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "admin@sejadikopi.com"
+                                        "example": "admin@sejadi.com"
                                     },
                                     "password": {
                                         "type": "string",
+                                        "format": "password",
                                         "example": "password123"
                                     }
                                 }
@@ -132,113 +60,17 @@
                                             "type": "string",
                                             "example": "Bearer"
                                         },
-                                        "expires_in": {
-                                            "type": "integer"
-                                        },
                                         "user": {
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid credentials"
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get all users with filters",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Comma-separated fields (e.g., id,name,email)",
-                        "example": "id,name,email"
-                    },
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Filter by name (partial match)"
-                    },
-                    {
-                        "name": "email",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Filter by exact email"
-                    },
-                    {
-                        "name": "created_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        },
-                        "description": "Filter created from date"
-                    },
-                    {
-                        "name": "created_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        },
-                        "description": "Filter created to date"
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Sort by field.direction",
-                        "example": "created_at.desc"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "email": {
-                                                        "type": "string"
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time"
-                                                    }
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
                                                 }
                                             }
                                         }
@@ -246,210 +78,69 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
                     }
                 }
-            },
+            }
+        },
+        "/logout": {
             "post": {
                 "tags": [
-                    "Users"
+                    "Authentication"
                 ],
-                "summary": "Create new user",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "maxLength": 255,
-                                        "example": "John Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "maxLength": 255,
-                                        "example": "john@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "minLength": 8,
-                                        "example": "password123"
+                "summary": "Admin Logout",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get authenticated user details",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
-                            },
-                            "example": {
-                                "name": "John Doe",
-                                "email": "john@example.com",
-                                "password": "password123"
                             }
                         }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "User created successfully"
                     },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/users/{id}": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get user by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    },
-                    "404": {
-                        "description": "User not found"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update user",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "maxLength": 255
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "maxLength": 255
-                                    }
-                                }
-                            },
-                            "example": {
-                                "name": "John Updated",
-                                "email": "john.updated@example.com"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "User updated"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Delete user",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "User deleted"
-                    }
-                }
-            }
-        },
-        "/menu": {
-            "get": {
-                "tags": [
-                    "Menu"
-                ],
-                "summary": "Get all menu items",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Comma-separated fields"
-                    },
-                    {
-                        "name": "id",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Filter by ID (format: eq.123)"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            }
-        },
-        "/menu/{id}": {
-            "get": {
-                "tags": [
-                    "Menu"
-                ],
-                "summary": "Get menu item by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    },
-                    "404": {
-                        "description": "Menu not found"
+                    "401": {
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -462,48 +153,107 @@
                 "summary": "Get all categories",
                 "parameters": [
                     {
-                        "name": "select",
+                        "name": "search",
                         "in": "query",
                         "schema": {
                             "type": "string"
                         },
-                        "description": "Comma-separated fields"
+                        "description": "Search by name"
+                    },
+                    {
+                        "name": "is_available",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "default": "desc"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create category",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
                                     }
                                 }
                             }
                         }
                     }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
                 }
             }
         },
-        "/cafe_settings": {
+        "/categories/{id}": {
             "get": {
                 "tags": [
-                    "Cafe Settings"
+                    "Categories"
                 ],
-                "summary": "Get cafe settings",
+                "summary": "Get one category",
                 "parameters": [
                     {
-                        "name": "select",
-                        "in": "query",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
@@ -515,157 +265,57 @@
             },
             "put": {
                 "tags": [
-                    "Cafe Settings"
+                    "Categories"
                 ],
-                "summary": "Update cafe settings",
+                "summary": "Update category",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object"
-                            },
-                            "example": {
-                                "cafe_name": "Sejadi Kopi",
-                                "address": "Jl. Example No. 123",
-                                "phone": "08123456789"
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
+                                    }
+                                }
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Settings updated"
+                        "description": "Success"
                     }
                 }
-            }
-        },
-        "/best-sellers": {
-            "get": {
+            },
+            "delete": {
                 "tags": [
-                    "Best Sellers"
+                    "Categories"
                 ],
-                "summary": "Get best selling items",
+                "summary": "Delete category",
                 "parameters": [
                     {
-                        "name": "limit",
-                        "in": "query",
+                        "name": "id",
+                        "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "minimum": 1
-                        },
-                        "example": 10
-                    },
-                    {
-                        "name": "days",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 0
-                        },
-                        "example": 30,
-                        "description": "Number of days to look back"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "menu_id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "total_sold": {
-                                                        "type": "integer"
-                                                    },
-                                                    "menu": {
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/additionals": {
-            "get": {
-                "tags": [
-                    "Additionals"
-                ],
-                "summary": "Get all additional items",
-                "parameters": [
-                    {
-                        "name": "is_active",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Filter by active status (true/false)"
-                    },
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "name.asc"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/menu-additional-config": {
-            "get": {
-                "tags": [
-                    "Menu Additional Config"
-                ],
-                "summary": "Get menu additional configurations",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
@@ -676,15 +326,257 @@
                 }
             }
         },
-        "/menu-additional-configs": {
+        "/menus": {
             "get": {
                 "tags": [
-                    "Menu Additional Config"
+                    "Menus"
                 ],
-                "summary": "Get all menu-additional configs with filters",
+                "summary": "Get all menus",
                 "parameters": [
                     {
-                        "name": "select",
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by name, description"
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_available",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "name": "best_seller",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        },
+                        "description": "Filter top 5 best sellers"
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "price",
+                                "best_seller"
+                            ],
+                            "default": "created_at"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Menus"
+                ],
+                "summary": "Create menu",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "name",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "number"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
+                                    },
+                                    "variant_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "additional_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/menus/{id}": {
+            "get": {
+                "tags": [
+                    "Menus"
+                ],
+                "summary": "Get one menu",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Menus"
+                ],
+                "summary": "Update menu (using POST for multipart compatibility)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "description": "Use POST with _method=PUT to update with images",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "default": "PUT"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "number"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
+                                    },
+                                    "variant_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "additional_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Menus"
+                ],
+                "summary": "Delete menu",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/variants": {
+            "get": {
+                "tags": [
+                    "Variants"
+                ],
+                "summary": "Get all variants",
+                "parameters": [
+                    {
+                        "name": "search",
                         "in": "query",
                         "schema": {
                             "type": "string"
@@ -698,33 +590,14 @@
                         }
                     },
                     {
-                        "name": "additional_id",
+                        "name": "is_available",
                         "in": "query",
                         "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "created_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "created_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
                         }
                     }
                 ],
@@ -736,31 +609,32 @@
             },
             "post": {
                 "tags": [
-                    "Menu Additional Config"
+                    "Variants"
                 ],
-                "summary": "Create menu-additional config",
+                "summary": "Create variant",
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "required": [
-                                    "menu_id",
-                                    "additional_id"
+                                    "name",
+                                    "price"
                                 ],
                                 "properties": {
-                                    "menu_id": {
-                                        "type": "integer"
+                                    "name": {
+                                        "type": "string"
                                     },
-                                    "additional_id": {
-                                        "type": "integer"
+                                    "price": {
+                                        "type": "number"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
                                     }
                                 }
-                            },
-                            "example": {
-                                "menu_id": 1,
-                                "additional_id": 5
                             }
                         }
                     }
@@ -772,12 +646,12 @@
                 }
             }
         },
-        "/menu-additional-configs/{id}": {
+        "/variants/{id}": {
             "get": {
                 "tags": [
-                    "Menu Additional Config"
+                    "Variants"
                 ],
-                "summary": "Get config by ID",
+                "summary": "Get one variant",
                 "parameters": [
                     {
                         "name": "id",
@@ -791,17 +665,14 @@
                 "responses": {
                     "200": {
                         "description": "Success"
-                    },
-                    "404": {
-                        "description": "Not found"
                     }
                 }
             },
             "put": {
                 "tags": [
-                    "Menu Additional Config"
+                    "Variants"
                 ],
-                "summary": "Update config",
+                "summary": "Update variant",
                 "parameters": [
                     {
                         "name": "id",
@@ -818,11 +689,17 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "menu_id": {
-                                        "type": "integer"
+                                    "name": {
+                                        "type": "string"
                                     },
-                                    "additional_id": {
-                                        "type": "integer"
+                                    "price": {
+                                        "type": "number"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
                                     }
                                 }
                             }
@@ -831,15 +708,15 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Updated"
+                        "description": "Success"
                     }
                 }
             },
             "delete": {
                 "tags": [
-                    "Menu Additional Config"
+                    "Variants"
                 ],
-                "summary": "Delete config",
+                "summary": "Delete variant",
                 "parameters": [
                     {
                         "name": "id",
@@ -851,38 +728,372 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "Deleted"
+                    "200": {
+                        "description": "Success"
                     }
                 }
             }
         },
-        "/discount-codes": {
+        "/additionals": {
             "get": {
                 "tags": [
-                    "Discount Codes"
+                    "Additionals"
                 ],
-                "summary": "Get all discount codes with filters",
+                "summary": "Get all additionals",
                 "parameters": [
                     {
-                        "name": "select",
+                        "name": "search",
                         "in": "query",
                         "schema": {
                             "type": "string"
                         }
                     },
                     {
-                        "name": "code",
+                        "name": "menu_id",
                         "in": "query",
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     },
                     {
-                        "name": "is_active",
+                        "name": "is_available",
                         "in": "query",
                         "schema": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Additionals"
+                ],
+                "summary": "Create additional",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "number"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/additionals/{id}": {
+            "get": {
+                "tags": [
+                    "Additionals"
+                ],
+                "summary": "Get one additional",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Additionals"
+                ],
+                "summary": "Update additional",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "number"
+                                    },
+                                    "is_available": {
+                                        "type": "boolean"
+                                    },
+                                    "is_best_seller": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Additionals"
+                ],
+                "summary": "Delete additional",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/expenses": {
+            "get": {
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Get all expenses",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Create expense",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title",
+                                    "amount",
+                                    "created_by",
+                                    "type",
+                                    "date"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "amount": {
+                                        "type": "number"
+                                    },
+                                    "created_by": {
+                                        "type": "integer"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Bahan baku",
+                                            "Lainnya",
+                                            "Operasional"
+                                        ]
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/expenses/{id}": {
+            "get": {
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Get one expense",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Update expense (using POST for multipart)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "description": "Use POST with _method=PUT to update with images",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "_method": {
+                                        "type": "string",
+                                        "default": "PUT"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "amount": {
+                                        "type": "number"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Bahan baku",
+                                            "Lainnya",
+                                            "Operasional"
+                                        ]
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Delete expense",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get all orders",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "process",
+                                "completed",
+                                "cancelled"
+                            ]
                         }
                     },
                     {
@@ -891,583 +1102,78 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "percentage",
-                                "fixed"
+                                "takeaway",
+                                "dine_in"
                             ]
-                        }
-                    },
-                    {
-                        "name": "min_amount",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "max_discount_amount",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "valid_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "valid_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        "description": "Success"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Discount Codes"
+                    "Orders"
                 ],
-                "summary": "Create discount code",
+                "summary": "Create order (POS Mechanism)",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "required": [
-                                    "code",
-                                    "type",
-                                    "value"
-                                ],
                                 "properties": {
-                                    "code": {
-                                        "type": "string",
-                                        "example": "DISCOUNT20"
-                                    },
                                     "type": {
                                         "type": "string",
                                         "enum": [
-                                            "percentage",
-                                            "fixed"
-                                        ],
-                                        "example": "percentage"
-                                    },
-                                    "value": {
-                                        "type": "number",
-                                        "minimum": 0,
-                                        "example": 20
-                                    },
-                                    "is_active": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "min_amount": {
-                                        "type": "number",
-                                        "example": 50000
-                                    },
-                                    "max_discount_amount": {
-                                        "type": "number",
-                                        "example": 100000
-                                    },
-                                    "valid_from": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-01-01"
-                                    },
-                                    "valid_to": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-12-31"
-                                    },
-                                    "usage_limit": {
-                                        "type": "integer",
-                                        "example": 100
-                                    },
-                                    "used_count": {
-                                        "type": "integer",
-                                        "example": 0
-                                    }
-                                }
-                            },
-                            "example": {
-                                "code": "DISCOUNT20",
-                                "type": "percentage",
-                                "value": 20,
-                                "is_active": true,
-                                "min_amount": 50000,
-                                "max_discount_amount": 100000,
-                                "valid_from": "2024-01-01",
-                                "valid_to": "2024-12-31",
-                                "usage_limit": 100
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/discount-codes/{id}": {
-            "get": {
-                "tags": [
-                    "Discount Codes"
-                ],
-                "summary": "Get discount code by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    },
-                    "404": {
-                        "description": "Not found"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Discount Codes"
-                ],
-                "summary": "Update discount code",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "code": {
-                                        "type": "string"
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "percentage",
-                                            "fixed"
+                                            "takeaway",
+                                            "dine_in"
                                         ]
                                     },
-                                    "value": {
+                                    "customer_name": {
+                                        "type": "string"
+                                    },
+                                    "table_name": {
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "enum": [
+                                            "billiard",
+                                            "outdoor",
+                                            "indoor"
+                                        ]
+                                    },
+                                    "discount": {
                                         "type": "number"
                                     },
-                                    "is_active": {
-                                        "type": "boolean"
-                                    },
-                                    "min_amount": {
+                                    "cash_received": {
                                         "type": "number"
                                     },
-                                    "max_discount_amount": {
-                                        "type": "number"
+                                    "payment_method": {
+                                        "type": "string"
                                     },
-                                    "valid_from": {
-                                        "type": "string",
-                                        "format": "date"
-                                    },
-                                    "valid_to": {
-                                        "type": "string",
-                                        "format": "date"
-                                    },
-                                    "usage_limit": {
-                                        "type": "integer"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Discount Codes"
-                ],
-                "summary": "Delete discount code",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    }
-                }
-            }
-        },
-        "/pesanan": {
-            "get": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Get all orders (basic)",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Create new order",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "no_meja": {
-                                        "type": "integer",
-                                        "example": 5
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "example": "pending"
-                                    },
-                                    "total": {
-                                        "type": "number",
-                                        "example": 75000
-                                    },
-                                    "note": {
-                                        "type": "string",
-                                        "example": "Extra pedas"
-                                    },
-                                    "cancellation_reason": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "cancelled_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "location_type": {
-                                        "type": "string",
-                                        "example": "dine_in"
-                                    },
-                                    "pickup_time": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "discount_code": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "discount_amount": {
-                                        "type": "number",
-                                        "example": 0
-                                    },
-                                    "total_after_discount": {
-                                        "type": "number",
-                                        "example": 75000
-                                    },
-                                    "processed_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "completed_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "is_hidden": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "archived_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "location_area": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "metode_pembayaran": {
-                                        "type": "string",
-                                        "example": "cash"
-                                    },
-                                    "bank_qris": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "is_final": {
-                                        "type": "boolean",
-                                        "example": false
-                                    }
-                                }
-                            },
-                            "example": {
-                                "no_meja": 5,
-                                "status": "pending",
-                                "total": 75000,
-                                "note": "Extra pedas",
-                                "location_type": "dine_in",
-                                "metode_pembayaran": "cash",
-                                "discount_amount": 0,
-                                "total_after_discount": 75000,
-                                "is_hidden": false,
-                                "is_final": false
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "boolean"
-                                        },
-                                        "id": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/pesanan/{id}": {
-            "get": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Get order by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            }
-        },
-        "/pesanans": {
-            "get": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Get all orders with advanced filters",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "no_meja",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "location_type",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "dine_in, take_away, or delivery"
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "description": "Comma-separated statuses"
-                    },
-                    {
-                        "name": "discount_code",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "is_hidden",
-                        "in": "query",
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "name": "is_final",
-                        "in": "query",
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "name": "total_min",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "total_max",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "created_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "created_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "payment_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        },
-                        "description": "Filter by payment date (updated_at)"
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "created_at.desc"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "menu_id": {
+                                                    "type": "integer"
+                                                },
+                                                "variant_id": {
+                                                    "type": "integer"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer"
+                                                },
+                                                "additional_ids": {
+                                                    "type": "array",
+                                                    "items": {
                                                         "type": "integer"
-                                                    },
-                                                    "no_meja": {
-                                                        "type": "integer"
-                                                    },
-                                                    "status": {
-                                                        "type": "string"
-                                                    },
-                                                    "total": {
-                                                        "type": "number"
-                                                    },
-                                                    "location_type": {
-                                                        "type": "string"
-                                                    },
-                                                    "detailPesanans": {
-                                                        "type": "array"
                                                     }
                                                 }
                                             }
@@ -1477,129 +1183,20 @@
                             }
                         }
                     }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Orders"
-                ],
-                "summary": "Create order (advanced)",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "status",
-                                    "total"
-                                ],
-                                "properties": {
-                                    "no_meja": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "pending",
-                                            "processed",
-                                            "completed",
-                                            "cancelled"
-                                        ]
-                                    },
-                                    "total": {
-                                        "type": "number"
-                                    },
-                                    "note": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "cancellation_reason": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "cancelled_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "location_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "dine_in",
-                                            "take_away",
-                                            "delivery"
-                                        ],
-                                        "nullable": true
-                                    },
-                                    "pickup_time": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "discount_code": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "discount_amount": {
-                                        "type": "number",
-                                        "nullable": true
-                                    },
-                                    "total_after_discount": {
-                                        "type": "number",
-                                        "nullable": true
-                                    },
-                                    "processed_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "completed_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "is_hidden": {
-                                        "type": "boolean"
-                                    },
-                                    "archived_at": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "nullable": true
-                                    },
-                                    "location_area": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "metode_pembayaran": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "bank_qris": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "is_final": {
-                                        "type": "boolean"
-                                    }
-                                }
-                            }
-                        }
-                    }
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Order created"
                     }
                 }
             }
         },
-        "/pesanans/{id}": {
+        "/orders/{id}": {
             "get": {
                 "tags": [
                     "Orders"
                 ],
-                "summary": "Get order by ID with details",
+                "summary": "Get one order",
                 "parameters": [
                     {
                         "name": "id",
@@ -1613,9 +1210,6 @@
                 "responses": {
                     "200": {
                         "description": "Success"
-                    },
-                    "404": {
-                        "description": "Not found"
                     }
                 }
             },
@@ -1623,7 +1217,7 @@
                 "tags": [
                     "Orders"
                 ],
-                "summary": "Update order",
+                "summary": "Update order status",
                 "parameters": [
                     {
                         "name": "id",
@@ -1640,55 +1234,26 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "no_meja": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
                                     "status": {
                                         "type": "string",
                                         "enum": [
                                             "pending",
-                                            "diproses",
-                                            "selesai",
+                                            "process",
+                                            "completed",
                                             "cancelled"
                                         ]
                                     },
-                                    "total": {
-                                        "type": "number",
-                                        "nullable": true
-                                    },
-                                    "note": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "location_type": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "metode_pembayaran": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "is_hidden": {
-                                        "type": "boolean",
-                                        "nullable": true
-                                    },
-                                    "is_final": {
-                                        "type": "boolean",
-                                        "nullable": true
+                                    "payment_method": {
+                                        "type": "string"
                                     }
                                 }
-                            },
-                            "example": {
-                                "status": "completed",
-                                "is_final": true
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Updated"
+                        "description": "Success"
                     }
                 }
             },
@@ -1708,1295 +1273,8 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    }
-                }
-            }
-        },
-        "/detail_pesanan": {
-            "get": {
-                "tags": [
-                    "Order Details"
-                ],
-                "summary": "Get all order details",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
                     "200": {
                         "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Order Details"
-                ],
-                "summary": "Create order details (batch)",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "pesanan_id": {
-                                            "type": "integer"
-                                        },
-                                        "menu_id": {
-                                            "type": "integer"
-                                        },
-                                        "jumlah": {
-                                            "type": "integer"
-                                        },
-                                        "subtotal": {
-                                            "type": "number"
-                                        },
-                                        "note": {
-                                            "type": "string",
-                                            "nullable": true
-                                        },
-                                        "varian": {
-                                            "type": "string",
-                                            "nullable": true
-                                        },
-                                        "additionals": {
-                                            "type": "string",
-                                            "nullable": true
-                                        },
-                                        "dimsum_additionals": {
-                                            "type": "string",
-                                            "nullable": true
-                                        },
-                                        "additional_price": {
-                                            "type": "number"
-                                        },
-                                        "base_price": {
-                                            "type": "number"
-                                        },
-                                        "is_locked": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            },
-                            "example": [
-                                {
-                                    "pesanan_id": 1,
-                                    "menu_id": 5,
-                                    "jumlah": 2,
-                                    "subtotal": 50000,
-                                    "note": "Extra pedas",
-                                    "varian": "Hot",
-                                    "additionals": "Extra cheese",
-                                    "additional_price": 5000,
-                                    "base_price": 22500,
-                                    "is_locked": false
-                                }
-                            ]
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/detail_pesanan/{id}": {
-            "get": {
-                "tags": [
-                    "Order Details"
-                ],
-                "summary": "Get order detail by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            }
-        },
-        "/struks": {
-            "get": {
-                "tags": [
-                    "Receipts"
-                ],
-                "summary": "Get all receipts with filters",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "pesanan_id",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "kasir_id",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "total_min",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "total_max",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "dibayar_min",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "dibayar_max",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "kembalian_min",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "kembalian_max",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "created_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "created_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Receipts"
-                ],
-                "summary": "Create receipt",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "pesanan_id",
-                                    "kasir_id",
-                                    "total",
-                                    "dibayar",
-                                    "kembalian"
-                                ],
-                                "properties": {
-                                    "pesanan_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "kasir_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "total": {
-                                        "type": "number",
-                                        "example": 75000
-                                    },
-                                    "dibayar": {
-                                        "type": "number",
-                                        "example": 100000
-                                    },
-                                    "kembalian": {
-                                        "type": "number",
-                                        "example": 25000
-                                    }
-                                }
-                            },
-                            "example": {
-                                "pesanan_id": 1,
-                                "kasir_id": 1,
-                                "total": 75000,
-                                "dibayar": 100000,
-                                "kembalian": 25000
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/struks/{id}": {
-            "get": {
-                "tags": [
-                    "Receipts"
-                ],
-                "summary": "Get receipt by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Receipts"
-                ],
-                "summary": "Update receipt",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "pesanan_id": {
-                                        "type": "integer"
-                                    },
-                                    "kasir_id": {
-                                        "type": "integer"
-                                    },
-                                    "total": {
-                                        "type": "number"
-                                    },
-                                    "dibayar": {
-                                        "type": "number"
-                                    },
-                                    "kembalian": {
-                                        "type": "number"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Receipts"
-                ],
-                "summary": "Delete receipt",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    }
-                }
-            }
-        },
-        "/pemasukan-lains": {
-            "get": {
-                "tags": [
-                    "Income"
-                ],
-                "summary": "Get all other income with filters",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "kategori",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "created_by",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "tanggal_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "tanggal_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "jumlah_min",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "jumlah_max",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Income"
-                ],
-                "summary": "Create income record",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "id",
-                                    "kategori",
-                                    "jumlah",
-                                    "tanggal"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "type": "string",
-                                        "example": "INC001"
-                                    },
-                                    "kategori": {
-                                        "type": "string",
-                                        "example": "Donasi"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "nullable": true,
-                                        "example": "Donasi dari pelanggan"
-                                    },
-                                    "jumlah": {
-                                        "type": "number",
-                                        "example": 50000
-                                    },
-                                    "tanggal": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-01-15"
-                                    },
-                                    "created_by": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "bukti_url": {
-                                        "type": "string",
-                                        "nullable": true
-                                    }
-                                }
-                            },
-                            "example": {
-                                "id": "INC001",
-                                "kategori": "Donasi",
-                                "deskripsi": "Donasi dari pelanggan",
-                                "jumlah": 50000,
-                                "tanggal": "2024-01-15"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/pemasukan-lains/{id}": {
-            "get": {
-                "tags": [
-                    "Income"
-                ],
-                "summary": "Get income by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Income"
-                ],
-                "summary": "Update income",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "kategori": {
-                                        "type": "string"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "jumlah": {
-                                        "type": "number"
-                                    },
-                                    "tanggal": {
-                                        "type": "string",
-                                        "format": "date"
-                                    },
-                                    "created_by": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "bukti_url": {
-                                        "type": "string",
-                                        "nullable": true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Income"
-                ],
-                "summary": "Delete income",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    }
-                }
-            }
-        },
-        "/pengeluarans": {
-            "get": {
-                "tags": [
-                    "Expenses"
-                ],
-                "summary": "Get all expenses with filters",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "kategori",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "created_by",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "tanggal_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "tanggal_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "start_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        },
-                        "description": "Filter start date"
-                    },
-                    {
-                        "name": "end_date",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        },
-                        "description": "Filter end date"
-                    },
-                    {
-                        "name": "jumlah_min",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "jumlah_max",
-                        "in": "query",
-                        "schema": {
-                            "type": "number"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Expenses"
-                ],
-                "summary": "Create expense record",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "id",
-                                    "kategori",
-                                    "jumlah",
-                                    "tanggal"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "type": "string",
-                                        "example": "EXP001"
-                                    },
-                                    "kategori": {
-                                        "type": "string",
-                                        "example": "Bahan Baku"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "nullable": true,
-                                        "example": "Pembelian kopi"
-                                    },
-                                    "jumlah": {
-                                        "type": "number",
-                                        "example": 500000
-                                    },
-                                    "tanggal": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-01-15"
-                                    },
-                                    "created_by": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "bukti_url": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "foto_url": {
-                                        "type": "string",
-                                        "nullable": true
-                                    }
-                                }
-                            },
-                            "example": {
-                                "id": "EXP001",
-                                "kategori": "Bahan Baku",
-                                "deskripsi": "Pembelian kopi arabica 5kg",
-                                "jumlah": 500000,
-                                "tanggal": "2024-01-15"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/pengeluarans/{id}": {
-            "get": {
-                "tags": [
-                    "Expenses"
-                ],
-                "summary": "Get expense by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Expenses"
-                ],
-                "summary": "Update expense",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "kategori": {
-                                        "type": "string"
-                                    },
-                                    "deskripsi": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "jumlah": {
-                                        "type": "number"
-                                    },
-                                    "tanggal": {
-                                        "type": "string",
-                                        "format": "date"
-                                    },
-                                    "created_by": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "bukti_url": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "foto_url": {
-                                        "type": "string",
-                                        "nullable": true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Expenses"
-                ],
-                "summary": "Delete expense",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    }
-                }
-            }
-        },
-        "/export-histories": {
-            "get": {
-                "tags": [
-                    "Export History"
-                ],
-                "summary": "Get export histories",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "export_type",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "order",
-                                "menu",
-                                "report"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "pending",
-                                "completed",
-                                "failed"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "user_id",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "created_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "created_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Export History"
-                ],
-                "summary": "Create export history",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "export_type",
-                                    "status"
-                                ],
-                                "properties": {
-                                    "export_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "order",
-                                            "menu",
-                                            "report"
-                                        ]
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "pending",
-                                            "completed",
-                                            "failed"
-                                        ]
-                                    },
-                                    "file_path": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
-                                    "metadata": {
-                                        "type": "string",
-                                        "nullable": true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/export-histories/{id}": {
-            "get": {
-                "tags": [
-                    "Export History"
-                ],
-                "summary": "Get export history by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Export History"
-                ],
-                "summary": "Update export history",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "export_type": {
-                                        "type": "string"
-                                    },
-                                    "status": {
-                                        "type": "string"
-                                    },
-                                    "file_path": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "metadata": {
-                                        "type": "string",
-                                        "nullable": true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Export History"
-                ],
-                "summary": "Delete export history",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    }
-                }
-            }
-        },
-        "/history-archives": {
-            "get": {
-                "tags": [
-                    "History Archive"
-                ],
-                "summary": "Get history archives",
-                "parameters": [
-                    {
-                        "name": "select",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "archive_type",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "order",
-                                "menu",
-                                "report",
-                                "user"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "user_id",
-                        "in": "query",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "created_from",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "created_to",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "History Archive"
-                ],
-                "summary": "Create history archive",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "archive_type",
-                                    "data"
-                                ],
-                                "properties": {
-                                    "archive_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "order",
-                                            "menu",
-                                            "report",
-                                            "user"
-                                        ]
-                                    },
-                                    "data": {
-                                        "type": "string",
-                                        "description": "JSON string"
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/history-archives/{id}": {
-            "get": {
-                "tags": [
-                    "History Archive"
-                ],
-                "summary": "Get history archive by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "History Archive"
-                ],
-                "summary": "Update history archive",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "archive_type": {
-                                        "type": "string"
-                                    },
-                                    "data": {
-                                        "type": "string"
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "History Archive"
-                ],
-                "summary": "Delete history archive",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
                     }
                 }
             }
@@ -3006,34 +1284,26 @@
                 "tags": [
                     "Images"
                 ],
-                "summary": "Upload and compress image",
-                "description": "Upload an image file with automatic compression. Supports JPEG, PNG, WebP, and GIF formats.",
+                "summary": "Upload image",
+                "parameters": [
+                    {
+                        "name": "folder",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Custom folder name"
+                    }
+                ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "multipart/form-data": {
                             "schema": {
                                 "type": "object",
-                                "required": [
-                                    "image"
-                                ],
                                 "properties": {
                                     "image": {
                                         "type": "string",
-                                        "format": "binary",
-                                        "description": "Image file (jpeg, png, jpg, gif, webp, max 5MB)"
-                                    },
-                                    "folder": {
-                                        "type": "string",
-                                        "description": "Optional subfolder name (default: 'general')",
-                                        "example": "products"
-                                    },
-                                    "quality": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "maximum": 100,
-                                        "description": "Compression quality (1-100, default: 80)",
-                                        "example": 80
+                                        "format": "binary"
                                     }
                                 }
                             }
@@ -3041,171 +1311,22 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Image uploaded and compressed successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Image uploaded and compressed successfully"
-                                        },
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "filename": {
-                                                    "type": "string",
-                                                    "example": "1732934610_abc123.jpg"
-                                                },
-                                                "path": {
-                                                    "type": "string",
-                                                    "example": "images/products/1732934610_abc123.jpg"
-                                                },
-                                                "url": {
-                                                    "type": "string",
-                                                    "example": "http://localhost/storage/images/products/1732934610_abc123.jpg"
-                                                },
-                                                "full_url": {
-                                                    "type": "string",
-                                                    "example": "http://localhost/storage/images/products/1732934610_abc123.jpg"
-                                                },
-                                                "original_size": {
-                                                    "type": "integer",
-                                                    "example": 2457890,
-                                                    "description": "Original file size in bytes"
-                                                },
-                                                "compressed_size": {
-                                                    "type": "integer",
-                                                    "example": 456789,
-                                                    "description": "Compressed file size in bytes"
-                                                },
-                                                "size_reduction": {
-                                                    "type": "string",
-                                                    "example": "81.42%",
-                                                    "description": "Percentage of size reduction"
-                                                },
-                                                "mime_type": {
-                                                    "type": "string",
-                                                    "example": "image/jpeg"
-                                                },
-                                                "quality": {
-                                                    "type": "integer",
-                                                    "example": 80
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "example": {
-                                    "success": true,
-                                    "message": "Image uploaded and compressed successfully",
-                                    "data": {
-                                        "filename": "1732934610_abc123.jpg",
-                                        "path": "images/products/1732934610_abc123.jpg",
-                                        "url": "http://localhost/storage/images/products/1732934610_abc123.jpg",
-                                        "full_url": "http://localhost/storage/images/products/1732934610_abc123.jpg",
-                                        "original_size": 2457890,
-                                        "compressed_size": 456789,
-                                        "size_reduction": "81.42%",
-                                        "mime_type": "image/jpeg",
-                                        "quality": 80
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Upload failed"
+                    "200": {
+                        "description": "Upload success"
                     }
                 }
             }
         },
-        "/images/{folder}/{filename}": {
+        "/images": {
             "get": {
                 "tags": [
                     "Images"
                 ],
-                "summary": "Retrieve an image",
-                "description": "Get the actual image file",
+                "summary": "Get image by path",
                 "parameters": [
                     {
-                        "name": "folder",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "products"
-                    },
-                    {
-                        "name": "filename",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "1732934610_abc123.jpg"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Image file",
-                        "content": {
-                            "image/*": {
-                                "schema": {
-                                    "type": "string",
-                                    "format": "binary"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Image not found"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Images"
-                ],
-                "summary": "Delete an image",
-                "parameters": [
-                    {
-                        "name": "folder",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "filename",
-                        "in": "path",
+                        "name": "path",
+                        "in": "query",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -3214,30 +1335,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Image deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean"
-                                        },
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Image not found"
-                    },
-                    "500": {
-                        "description": "Delete failed"
+                        "description": "Image file"
                     }
                 }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
             }
         }
     }
