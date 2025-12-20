@@ -7,8 +7,8 @@ import { useRouter, usePathname } from 'next/navigation';
 interface User {
   id: number;
   email: string;
-  role: string; // I will assume role is part of user metadata or can be inferred
-  // add other user properties here
+  role: 'admin' | 'kasir';
+  is_admin: boolean;
 }
 
 interface AuthContextType {
@@ -19,18 +19,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// A mock role mapping based on email
-const getRoleFromEmail = (email: string) => {
-  if (email === 'admin@sejadi.com') {
-    return 'admin';
-  }
-  if (email === 'kasir@sejadikopi.com') {
-    return 'kasir';
-  }
-  return 'authenticated';
-}
-
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -45,8 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session) {
         const { user: userData, access_token } = JSON.parse(session);
         if (userData && access_token) {
-           const role = getRoleFromEmail(userData.email);
-           setUser({ ...userData, role });
+           setUser(userData);
         }
       }
     } catch (error) {
@@ -80,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await response.json();
 
     if (data.access_token && data.user) {
-      const role = getRoleFromEmail(data.user.email);
+      const role = data.user.is_admin ? 'admin' : 'kasir';
       const userWithRole = { ...data.user, role };
       localStorage.setItem('sejadikopi-session', JSON.stringify({ ...data, user: userWithRole }));
       setUser(userWithRole);
