@@ -149,12 +149,12 @@ export function SidebarNav() {
             title: "Sukses",
             description: `Toko berhasil di${newStatus ? 'buka' : 'tutup'}.`,
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Gagal memperbarui status toko:", error);
          toast({
             variant: "destructive",
             title: "Error",
-            description: "Tidak dapat memperbarui status toko.",
+            description: error.message || "Tidak dapat memperbarui status toko.",
         });
     } finally {
         setIsLoading(false);
