@@ -18,7 +18,7 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
 
   const handleToggleBestSeller = async (menuItem: MenuItem, isBestSeller: boolean) => {
     try {
-      const payload = { is_recommendation: isBestSeller };
+      const payload = { is_best_seller: isBestSeller };
 
       // API endpoint for updating menu isn't fully defined, assuming it exists
       const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`, {
@@ -36,7 +36,7 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
 
       toast({
         title: 'Sukses',
-        description: `${menuItem.nama} telah ${isBestSeller ? 'ditambahkan ke' : 'dihapus dari'} menu terlaris.`,
+        description: `${menuItem.name} telah ${isBestSeller ? 'ditambahkan ke' : 'dihapus dari'} menu terlaris.`,
       });
       onUpdateSuccess();
     } catch (error: any) {
@@ -49,7 +49,7 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
   }
 
   const BestSellerToggle: React.FC<{ menuItem: MenuItem }> = ({ menuItem }) => {
-    const [isBestSeller, setIsBestSeller] = React.useState(menuItem.is_recommendation);
+    const [isBestSeller, setIsBestSeller] = React.useState(menuItem.is_best_seller);
 
     const handleClick = () => {
       const newStatus = !isBestSeller;
@@ -69,16 +69,16 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
   
   return [
     {
-        accessorKey: "foto",
+        accessorKey: "image",
         header: "Gambar",
         cell: ({ row }) => {
-            const imageUrl = row.original.foto;
+            const imageUrl = row.original.image;
             const fullUrl = imageUrl ? `https://sejadikopi-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
-            return <Image src={fullUrl} alt={row.getValue("nama")} width={40} height={40} className="rounded-md object-cover" unoptimized />
+            return <Image src={fullUrl} alt={row.getValue("name")} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },
     {
-      accessorKey: "nama",
+      accessorKey: "name",
       header: "Nama Menu",
     },
     {
