@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "https://sejadikopi-api-v2.sejadikopi.com/api",
+            "url": "https://vamos-api-v2.sejadikopi.com/api",
             "description": "Local server"
         }
     ],
