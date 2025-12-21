@@ -38,7 +38,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: DiscountColumnsProps): Colu
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/discounts/${id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/discounts/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus diskon.");
@@ -141,3 +141,5 @@ export const columns = ({ onEdit, onDeleteSuccess }: DiscountColumnsProps): Colu
     },
   ]
 }
+
+    

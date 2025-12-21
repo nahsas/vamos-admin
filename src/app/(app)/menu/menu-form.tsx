@@ -102,7 +102,7 @@ export function MenuForm({
         additional_ids: menuItem.additional_ids || [],
       });
       if(menuItem.image) {
-        setImagePreview(`https://sejadikopi-api-v2.sejadikopi.com/storage/${menuItem.image}`);
+        setImagePreview(`https://vamos-api-v2.sejadikopi.com/storage/${menuItem.image}`);
       } else {
         setImagePreview(null);
       }
@@ -157,9 +157,9 @@ export function MenuForm({
     
     try {
       const method = 'POST';
-      let url = 'https://sejadikopi-api-v2.sejadikopi.com/api/menus';
+      let url = 'https://vamos-api-v2.sejadikopi.com/api/menus';
       if(menuItem) {
-        url = `https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`;
+        url = `https://vamos-api-v2.sejadikopi.com/api/menus/${menuItem.id}`;
         formData.append('_method', 'PUT');
       }
       
@@ -258,7 +258,7 @@ export function MenuForm({
                               <SelectContent>
                               {categories.map((cat) => (
                                   <SelectItem key={cat.id} value={String(cat.id)}>
-                                  {cat.nama}
+                                  {cat.name}
                                   </SelectItem>
                               ))}
                               </SelectContent>
@@ -443,3 +443,5 @@ export function MenuForm({
     </Dialog>
   );
 }
+
+    

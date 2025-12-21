@@ -23,7 +23,7 @@ export const columns: ColumnDef<BestSellerItem>[] = [
         header: "Gambar",
         cell: ({ row }) => {
             const imageUrl = row.original.menu.foto;
-            const fullUrl = imageUrl ? `https://sejadikopi-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            const fullUrl = imageUrl ? `https://vamos-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.original.menu.nama} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },
@@ -38,3 +38,5 @@ export const columns: ColumnDef<BestSellerItem>[] = [
       cell: ({ row }) => <div className="font-semibold">{row.original.total_sold}</div>,
     },
 ]
+
+    

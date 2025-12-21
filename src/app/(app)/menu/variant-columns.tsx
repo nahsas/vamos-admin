@@ -37,7 +37,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: VariantColumnsProps): Colum
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/variants/${id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/variants/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus varian.");
@@ -123,3 +123,5 @@ export const columns = ({ onEdit, onDeleteSuccess }: VariantColumnsProps): Colum
     },
   ]
 }
+
+    

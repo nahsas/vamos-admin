@@ -77,8 +77,8 @@ export function VariantForm({
     try {
       const method = variant ? 'PUT' : 'POST';
       const url = variant
-        ? `https://sejadikopi-api-v2.sejadikopi.com/api/variants/${variant.id}`
-        : 'https://sejadikopi-api-v2.sejadikopi.com/api/variants';
+        ? `https://vamos-api-v2.sejadikopi.com/api/variants/${variant.id}`
+        : 'https://vamos-api-v2.sejadikopi.com/api/variants';
 
       const response = await fetch(url, {
         method,
@@ -166,3 +166,5 @@ export function VariantForm({
     </Dialog>
   );
 }
+
+    

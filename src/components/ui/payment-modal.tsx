@@ -22,9 +22,9 @@ import { printPaymentStruk } from '@/lib/print-utils';
 import { appEventEmitter } from '@/lib/event-emitter';
 
 const banks = [
-    { id: 'BCA', name: 'BCA', logo: 'https://sejadikopi-api-v2.sejadikopi.com/storage/images/BCA.png' },
-    { id: 'BRI', name: 'BRI', logo: 'https://sejadikopi-api-v2.sejadikopi.com/storage/images/BRI.png' },
-    { id: 'BSI', name: 'BSI', logo: 'https://sejadikopi-api-v2.sejadikopi.com/storage/images/BSI.png' },
+    { id: 'BCA', name: 'BCA', logo: 'https://vamos-api-v2.sejadikopi.com/storage/images/BCA.png' },
+    { id: 'BRI', name: 'BRI', logo: 'https://vamos-api-v2.sejadikopi.com/storage/images/BRI.png' },
+    { id: 'BSI', name: 'BSI', logo: 'https://vamos-api-v2.sejadikopi.com/storage/images/BSI.png' },
 ]
 
 export function PaymentModal({
@@ -50,10 +50,10 @@ export function PaymentModal({
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
   React.useEffect(() => {
-    fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus')
+    fetch('https://vamos-api-v2.sejadikopi.com/api/menus')
         .then(res => res.json())
         .then(data => setMenuItems(data.data || []));
-    fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals')
+    fetch('https://vamos-api-v2.sejadikopi.com/api/additionals')
         .then(res => res.json())
         .then(data => setAdditionals(data.data || []));
   }, []);
@@ -79,7 +79,7 @@ export function PaymentModal({
     setIsApplyingDiscount(true);
 
     try {
-        const response = await fetch('https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes/apply', {
+        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/discount-codes/apply', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ export function PaymentModal({
     };
     
     try {
-        const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/orders/${order.id}`, {
+        const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/${order.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -404,3 +404,5 @@ export function PaymentModal({
     </Dialog>
   );
 }
+
+    

@@ -79,7 +79,7 @@ export function OrderDetailModal({
   React.useEffect(() => {
     setCurrentOrder(order);
     if(open) {
-      fetch('https://vamos-api.sejadikopi.com/api/additionals')
+      fetch('https://vamos-api-v2.sejadikopi.com/api/additionals')
         .then(res => res.json())
         .then(data => setAdditionals(data.data || []))
         .catch(console.error);
@@ -91,7 +91,7 @@ export function OrderDetailModal({
     if (!currentOrder) return;
 
     try {
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${currentOrder.id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/pesanans/${currentOrder.id}`, {
         method: 'DELETE',
       });
 
@@ -118,7 +118,7 @@ export function OrderDetailModal({
   
   const updateOrderTotalOnBackend = async (orderId: number, newTotal: number) => {
     try {
-        const response = await fetch(`https://vamos-api.sejadikopi.com/api/pesanans/${orderId}`, {
+        const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/pesanans/${orderId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ total: newTotal, total_after_discount: newTotal }),
@@ -143,7 +143,7 @@ export function OrderDetailModal({
     const newSubtotal = (item.base_price + (parseInt(item.additional_price, 10) || 0)) * newQuantity;
 
     try {
-      const response = await fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/detail_pesanan/${item.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ export function OrderDetailModal({
   const handleDeleteItem = async (itemId: number) => {
     if (!currentOrder) return;
     try {
-        const response = await fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${itemId}`, {
+        const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/detail_pesanan/${itemId}`, {
             method: 'DELETE',
         });
         if (!response.ok) {
@@ -252,7 +252,7 @@ export function OrderDetailModal({
         if (itemAdditionals[id]) {
             const additional = additionals.find(add => add.id === parseInt(id));
             if (additional) {
-                names.push(additional.nama);
+                names.push(additional.name);
             }
         }
     }
@@ -260,7 +260,7 @@ export function OrderDetailModal({
         if (itemDimsumAdditionals[id]) {
             const additional = additionals.find(add => add.id === parseInt(id));
             if (additional) {
-                names.push(additional.nama);
+                names.push(additional.name);
             }
         }
     }
@@ -336,7 +336,7 @@ export function OrderDetailModal({
                         <div className="flex justify-between items-start gap-4">
                            <div className="flex-1 space-y-1">
                                 <div className="font-bold flex items-center gap-2">
-                                    {menuItem?.nama || 'Nama tidak ditemukan'}{' '}
+                                    {menuItem?.name || 'Nama tidak ditemukan'}{' '}
                                      {item.printed === 0 && !isCompleted && (
                                       <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
                                           <Bell className="w-2.5 h-2.5 mr-1"/>
@@ -489,3 +489,5 @@ export function OrderDetailModal({
     </>
   );
 }
+
+    

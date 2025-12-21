@@ -83,7 +83,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
   const getCategoryName = (categoryId: number) => {
     if (!categories) return 'N/A';
     const category = categories.find(c => c.id === categoryId);
-    return category ? category.nama : 'N/A';
+    return category ? category.name : 'N/A';
   }
   
   const getLinkedNames = (ids: number[], source: (Variant | Additional)[]) => {
@@ -94,7 +94,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
 
   const handleUpdate = async (id: number, data: Partial<MenuItem>) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/menus/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, _method: 'PUT' }),
@@ -111,7 +111,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/menus/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -131,7 +131,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
         header: "Gambar",
         cell: ({ row }) => {
             const imageUrl = row.original.image;
-            const fullUrl = imageUrl ? `https://sejadikopi-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            const fullUrl = imageUrl ? `https://vamos-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.getValue("name")} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },
@@ -269,3 +269,5 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
     },
   ]
 }
+
+    

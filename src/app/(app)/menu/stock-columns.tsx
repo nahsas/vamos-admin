@@ -42,7 +42,7 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
         stok: newStockLevel,
       };
 
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/menus/${menuItem.id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/menus/${menuItem.id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -157,3 +157,5 @@ export const columns = ({ onUpdateSuccess, categories }: StockColumnsProps): Col
     },
   ]
 }
+
+    

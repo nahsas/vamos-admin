@@ -50,8 +50,8 @@ const managementNavItems = [
 ];
 
 const externalNavItems = [
-    { href: "https://sejadikopi-api-v2.sejadikopi.com/admin", label: "Admin Menu", icon: UserCog, roles: ['admin'], target: "_blank" },
-    { href: "https://sejadikopi-api-v2.sejadikopi.com", label: "Absensi Karyawan", icon: Fingerprint, roles: ['admin', 'kasir'], target: "_blank" },
+    { href: "https://vamos-api-v2.sejadikopi.com/admin", label: "Admin Menu", icon: UserCog, roles: ['admin'], target: "_blank" },
+    { href: "https://vamos-api-v2.sejadikopi.com", label: "Absensi Karyawan", icon: Fingerprint, roles: ['admin', 'kasir'], target: "_blank" },
 ];
 
 
@@ -109,7 +109,7 @@ export function SidebarNav() {
 
   const fetchShopStatus = async () => {
     try {
-        const response = await fetch('https://sejadikopi-api-v2.sejadikopi.com/api/cafe_settings?select=is_open');
+        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/cafe_settings?select=is_open');
         const data = await response.json();
         setIsShopOpen(data.is_open);
     } catch (error) {
@@ -136,7 +136,7 @@ export function SidebarNav() {
     setIsLoading(true);
     try {
         const newStatus = !isShopOpen;
-        const response = await fetch('https://sejadikopi-api-v2.sejadikopi.com/api/cafe_settings', {
+        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/cafe_settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ is_open: newStatus }),
@@ -187,7 +187,7 @@ export function SidebarNav() {
       <Sidebar>
         <SidebarHeader className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-             <Image src="https://sejadikopi-api-v2.sejadikopi.com/storage/Logo/vamos.png" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg border border-sidebar-border shadow-lg" unoptimized />
+             <Image src="https://vamos-api-v2.sejadikopi.com/storage/Logo/vamos.png" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg border border-sidebar-border shadow-lg" unoptimized />
             <div>
               <h1 className="text-lg font-headline font-bold">VAMOS</h1>
               <p className="text-sm text-muted-foreground">Panel Admin</p>
@@ -281,3 +281,5 @@ export function SidebarNav() {
     </>
   );
 }
+
+    

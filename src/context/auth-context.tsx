@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, loading, pathname, router]);
 
   const login = async (email: string, pass: string) => {
-    const response = await fetch('https://sejadikopi-api-v2.sejadikopi.com/api/login', {
+    const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -99,3 +99,5 @@ export function useAuth() {
   }
   return context;
 }
+
+    

@@ -112,12 +112,12 @@ export default function MenuPage() {
   const fetchData = useCallback(async () => {
     try {
       const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes, variantRes] = await Promise.all([
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/categories'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/discount-codes'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/menus?best_seller=1'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/additionals'),
-        fetch('https://sejadikopi-api-v2.sejadikopi.com/api/variants'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/categories'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/discount-codes'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/menus?best_seller=1'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/additionals'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/variants'),
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };
@@ -139,8 +139,8 @@ export default function MenuPage() {
       setBestSellers(bestSellerData.data || []);
       
        if (menuData.data && categoryData.data) {
-        const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => c.name.toLowerCase().includes('food') || c.name.toLowerCase().includes('snack')).map((c: Category) => c.id);
-        const coffeeCategoryId = categoryData.data.find((c: Category) => c.name.toLowerCase().includes('coffee'))?.id;
+        const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => (c.name?.toLowerCase().includes('food') || c.name?.toLowerCase().includes('snack'))).map((c: Category) => c.id);
+        const coffeeCategoryId = categoryData.data.find((c: Category) => c.name?.toLowerCase().includes('coffee'))?.id;
 
         const totalMenu = menuData.data.length;
         const totalCoffee = menuData.data.filter((item: MenuItem) => item.category_id === coffeeCategoryId).length;
@@ -430,3 +430,5 @@ export default function MenuPage() {
     </div>
   );
 }
+
+    

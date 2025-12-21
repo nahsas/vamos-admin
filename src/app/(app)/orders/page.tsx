@@ -87,9 +87,9 @@ export default function OrdersPage() {
     setLoading(true);
     try {
       const [ordersRes, menuRes, additionalsRes] = await Promise.all([
-        fetch("https://sejadikopi-api-v2.sejadikopi.com/api/orders?order=updated_at.desc&status=pending,diproses"),
-        fetch("https://sejadikopi-api-v2.sejadikopi.com/api/menus"),
-        fetch("https://sejadikopi-api-v2.sejadikopi.com/api/additionals")
+        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?order=updated_at.desc&status=pending,diproses"),
+        fetch("https://vamos-api-v2.sejadikopi.com/api/menus"),
+        fetch("https://vamos-api-v2.sejadikopi.com/api/additionals")
       ]);
       
       const allActiveOrders = ordersRes.ok ? (await ordersRes.json()).data : [];
@@ -138,7 +138,7 @@ export default function OrdersPage() {
   
   const handleUpdateStatus = async (order: Order) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/orders/${order.id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/${order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -365,3 +365,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+    

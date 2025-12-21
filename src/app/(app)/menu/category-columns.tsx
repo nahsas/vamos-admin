@@ -37,7 +37,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://sejadikopi-api-v2.sejadikopi.com/api/categories/${id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/categories/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus kategori.");
@@ -123,3 +123,5 @@ export const columns = ({ onEdit, onDeleteSuccess }: CategoryColumnsProps): Colu
     },
   ]
 }
+
+    

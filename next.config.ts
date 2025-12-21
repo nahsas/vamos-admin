@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'sejadikopi-api-v2.sejadikopi.com',
+        hostname: 'vamos-api-v2.sejadikopi.com',
         port: '',
         pathname: '/**',
       },
@@ -55,3 +55,5 @@ const nextConfig: NextConfig = {
 };
 
 export default process.env.NODE_ENV === 'development' ? nextConfig : withPWA(nextConfig);
+
+    

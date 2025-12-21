@@ -73,8 +73,8 @@ export function CategoryForm({
     try {
       const method = category ? 'PUT' : 'POST';
       const url = category
-        ? `https://sejadikopi-api-v2.sejadikopi.com/api/categories/${category.id}`
-        : 'https://sejadikopi-api-v2.sejadikopi.com/api/categories';
+        ? `https://vamos-api-v2.sejadikopi.com/api/categories/${category.id}`
+        : 'https://vamos-api-v2.sejadikopi.com/api/categories';
 
       const response = await fetch(url, {
         method,
@@ -151,3 +151,5 @@ export function CategoryForm({
     </Dialog>
   );
 }
+
+    
