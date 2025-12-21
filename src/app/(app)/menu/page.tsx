@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
+import { useToast } from '@/hooks/use-toast';
 
 import { PlusCircle, Coffee, Utensils, BookOpen, Percent, Star, Search, Filter, Layers, Package, Puzzle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,6 +74,7 @@ function TabHeader({ icon: Icon, title, description, buttonText, onButtonClick, 
 export default function MenuPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -111,13 +113,14 @@ export default function MenuPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes, variantRes] = await Promise.all([
+      const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes, variantRes, settingsRes] = await Promise.all([
         fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/categories'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/discount-codes'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/menus?best_seller=1'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/additionals'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/variants'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/settings'),
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };
@@ -137,6 +140,11 @@ export default function MenuPage() {
 
       const bestSellerData = bestSellerRes.ok ? await bestSellerRes.json() : { data: [] };
       setBestSellers(bestSellerData.data || []);
+
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json();
+        setIsAutomaticBestSeller(settingsData.is_auto_best_seller);
+      }
       
        if (menuData.data && categoryData.data) {
         const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => (c.name?.toLowerCase().includes('food') || c.name?.toLowerCase().includes('snack'))).map((c: Category) => c.id);
@@ -158,6 +166,32 @@ export default function MenuPage() {
       console.error("Gagal mengambil data menu", error);
     }
   }, []);
+
+  const handleBestSellerToggle = async (checked: boolean) => {
+    setIsAutomaticBestSeller(checked);
+    try {
+        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_auto_best_seller: checked }),
+        });
+        if (!response.ok) {
+            throw new Error('Gagal memperbarui pengaturan menu terlaris.');
+        }
+        toast({
+            title: 'Sukses',
+            description: `Mode menu terlaris telah diubah ke ${checked ? 'Otomatis' : 'Manual'}.`,
+        });
+    } catch (error: any) {
+        setIsAutomaticBestSeller(!checked); // Revert on failure
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: error.message,
+        });
+    }
+  };
+
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -392,7 +426,7 @@ export default function MenuPage() {
                 <Switch
                   id="bestseller-mode"
                   checked={isAutomaticBestSeller}
-                  onCheckedChange={setIsAutomaticBestSeller}
+                  onCheckedChange={handleBestSellerToggle}
                 />
                 <Label htmlFor="bestseller-mode" className={cn(isAutomaticBestSeller && "bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold")}>Otomatis</Label>
               </div>
@@ -430,5 +464,3 @@ export default function MenuPage() {
     </div>
   );
 }
-
-    

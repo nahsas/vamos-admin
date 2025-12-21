@@ -109,7 +109,7 @@ export function SidebarNav() {
 
   const fetchShopStatus = async () => {
     try {
-        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/cafe_settings?select=is_open');
+        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/settings');
         const data = await response.json();
         setIsShopOpen(data.is_open);
     } catch (error) {
@@ -136,7 +136,7 @@ export function SidebarNav() {
     setIsLoading(true);
     try {
         const newStatus = !isShopOpen;
-        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/cafe_settings', {
+        const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ is_open: newStatus }),
@@ -281,5 +281,3 @@ export function SidebarNav() {
     </>
   );
 }
-
-    
