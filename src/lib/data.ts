@@ -1,4 +1,5 @@
 
+
 export type MenuItem = {
   id: number;
   name: string;
@@ -12,6 +13,8 @@ export type MenuItem = {
   updated_at: string;
   variant_ids?: number[];
   additional_ids?: number[];
+  variants?: { id: number; name: string; price: number; is_available: boolean }[];
+  additionals?: { id: number; name: string; price: number; is_available: boolean }[];
 };
 
 export type OrderItem = {

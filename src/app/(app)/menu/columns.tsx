@@ -77,7 +77,7 @@ const ToggleSwitch = ({
 };
 
 
-export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additionals }: MenuColumnsProps): ColumnDef<MenuItem>[] => {
+export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProps): ColumnDef<MenuItem>[] => {
   const { toast } = useToast();
 
   const getCategoryName = (categoryId: number) => {
@@ -86,12 +86,6 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
     return category ? category.name : 'N/A';
   }
   
-  const getLinkedNames = (ids: number[], source: (Variant | Additional)[]) => {
-    if (!ids || ids.length === 0 || !source) return [];
-    return ids.map(id => source.find(item => item.id === id)?.name).filter(Boolean) as string[];
-  }
-
-
   const handleUpdate = async (id: number, data: Partial<MenuItem>) => {
     try {
       const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/menus/${id}`, {
@@ -161,32 +155,30 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
       },
     },
      {
-      accessorKey: "variant_ids",
+      accessorKey: "variants",
       header: "Varian Terhubung",
       cell: ({ row }) => {
-        const variantIds = row.original.variant_ids || [];
-        const variantNames = getLinkedNames(variantIds, variants);
-        if (variantNames.length === 0) return <span>-</span>;
+        const variants = row.original.variants || [];
+        if (variants.length === 0) return <span>-</span>;
         return (
           <div className="flex flex-wrap gap-1">
-            {variantNames.map(name => (
-              <Badge key={name} variant="secondary">{name}</Badge>
+            {variants.map(variant => (
+              <Badge key={variant.id} variant="secondary">{variant.name}</Badge>
             ))}
           </div>
         );
       }
     },
     {
-      accessorKey: "additional_ids",
+      accessorKey: "additionals",
       header: "Tambahan Terhubung",
       cell: ({ row }) => {
-        const additionalIds = row.original.additional_ids || [];
-        const additionalNames = getLinkedNames(additionalIds, additionals);
-        if (additionalNames.length === 0) return <span>-</span>;
+        const additionals = row.original.additionals || [];
+        if (additionals.length === 0) return <span>-</span>;
         return (
           <div className="flex flex-wrap gap-1">
-            {additionalNames.map(name => (
-              <Badge key={name} variant="outline" className="bg-purple-100 text-purple-800">{name}</Badge>
+            {additionals.map(additional => (
+              <Badge key={additional.id} variant="outline" className="bg-purple-100 text-purple-800">{additional.name}</Badge>
             ))}
           </div>
         );
