@@ -149,13 +149,21 @@ export function MenuForm({
       formData.append('image', values.image);
     }
 
-    (values.variant_ids || []).forEach((id) => {
-      formData.append('variant_ids[]', id.toString());
-    });
+    if (values.variant_ids && values.variant_ids.length > 0) {
+      values.variant_ids.forEach((id) => {
+        formData.append('variant_ids[]', id.toString());
+      });
+    } else {
+      formData.append('variant_ids', ''); // Send empty if none selected
+    }
     
-    (values.additional_ids || []).forEach((id) => {
-      formData.append('additional_ids[]', id.toString());
-    });
+    if (values.additional_ids && values.additional_ids.length > 0) {
+      values.additional_ids.forEach((id) => {
+        formData.append('additional_ids[]', id.toString());
+      });
+    } else {
+      formData.append('additional_ids', ''); // Send empty if none selected
+    }
     
     try {
       const method = 'POST';
