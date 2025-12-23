@@ -206,19 +206,6 @@ export const columns = ({ onEdit, onDeleteSuccess, categories, variants, additio
       ),
     },
     {
-      accessorKey: "is_best_seller",
-      header: "Terlaris",
-      cell: ({ row }) => (
-        <ToggleSwitch 
-          item={row.original} 
-          field="is_best_seller" 
-          onUpdate={handleUpdate}
-          trueIcon={CheckCircle}
-          falseIcon={XCircle}
-        />
-      ),
-    },
-    {
       id: "actions",
       cell: ({ row }) => {
         const menuItem = row.original
