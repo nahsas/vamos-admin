@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Verify the user's session from localStorage
     try {
       const session = localStorage.getItem('sejadikopi-session');
       if (session) {
@@ -37,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Gagal mengurai sesi dari localStorage", error);
-      // If parsing fails, clear the broken session
       localStorage.removeItem('sejadikopi-session');
     } finally {
       setLoading(false);
@@ -99,5 +97,3 @@ export function useAuth() {
   }
   return context;
 }
-
-    
