@@ -56,7 +56,7 @@ interface MenuFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  menuItem: MenuItem | null;
+  menuItem: MenuItem & { variants?: any[], additionals?: any[] } | null;
   categories: Category[];
   additionals: Additional[];
   variants: Variant[];
@@ -91,6 +91,9 @@ export function MenuForm({
   
   useEffect(() => {
     if (menuItem) {
+      const variantIds = menuItem.variants?.map(v => v.id) || [];
+      const additionalIds = menuItem.additionals?.map(a => a.id) || [];
+      
       form.reset({
         name: menuItem.name,
         category_id: menuItem.category_id,
@@ -98,8 +101,8 @@ export function MenuForm({
         description: menuItem.description || '',
         is_available: menuItem.is_available,
         is_best_seller: menuItem.is_best_seller,
-        variant_ids: menuItem.variant_ids || [],
-        additional_ids: menuItem.additional_ids || [],
+        variant_ids: variantIds,
+        additional_ids: additionalIds,
       });
       if(menuItem.image) {
         setImagePreview(`https://vamos-api-v2.sejadikopi.com/api/images?path=${menuItem.image}`);
@@ -141,8 +144,7 @@ export function MenuForm({
     formData.append('price', values.price.toString());
     formData.append('description', values.description || '');
     formData.append('is_available', values.is_available ? '1' : '0');
-    formData.append('is_best_seller', values.is_best_seller ? '1' : '0');
-
+    
     if (values.image instanceof File) {
       formData.append('image', values.image);
     }
@@ -293,23 +295,6 @@ export function MenuForm({
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
                             <div className="space-y-0.5">
                               <FormLabel>Tersedia</FormLabel>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="is_best_seller"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm flex-1">
-                            <div className="space-y-0.5">
-                              <FormLabel>Terlaris</FormLabel>
                             </div>
                             <FormControl>
                               <Switch

@@ -116,7 +116,7 @@ export default function MenuPage() {
       const [menuRes, categoryRes, discountRes, bestSellerRes, additionalRes, variantRes, settingsRes] = await Promise.all([
         fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/categories'),
-        fetch('https://vamos-api-v2.sejadikopi.com/api/discount-codes'),
+        fetch('https://vamos-api-v2.sejadikopi.com/api/discounts'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/menus?best_seller=1'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/additionals'),
         fetch('https://vamos-api-v2.sejadikopi.com/api/variants'),
@@ -209,8 +209,19 @@ export default function MenuPage() {
     return <div className="flex items-center justify-center h-screen">Akses Ditolak</div>;
   }
 
-  const handleMenuFormOpen = (menuItem: MenuItem | null = null) => {
-    setEditingMenu(menuItem);
+  const handleMenuFormOpen = async (menuItem: MenuItem | null = null) => {
+    if (menuItem) {
+      try {
+        const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/menus/${menuItem.id}`);
+        const data = await response.json();
+        setEditingMenu(data.data);
+      } catch (error) {
+        console.error("Gagal mengambil detail menu:", error);
+        setEditingMenu(menuItem); // fallback to original data
+      }
+    } else {
+      setEditingMenu(null);
+    }
     setIsMenuFormOpen(true);
   };
   
