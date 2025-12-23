@@ -192,11 +192,11 @@ export function MenuForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl p-0">
+      <DialogContent className="sm:max-w-2xl p-0 flex flex-col h-[90vh]">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>{menuItem ? 'Ubah Menu' : 'Buat Menu'}</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[80vh] overflow-y-auto px-6">
+        <div className="flex-grow overflow-y-auto px-6">
             <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -430,7 +430,7 @@ export function MenuForm({
               </form>
             </Form>
         </div>
-        <DialogFooter className="sticky bottom-0 bg-background p-6 pt-2 border-t">
+        <DialogFooter className="p-6 pt-2 border-t">
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                 Batal
             </Button>
@@ -443,5 +443,3 @@ export function MenuForm({
     </Dialog>
   );
 }
-
-    
