@@ -19,7 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { useToast } from '@/hooks/use-toast';
 
-import { PlusCircle, Coffee, Utensils, BookOpen, Percent, Star, Search, Filter, Layers, Package, Puzzle } from "lucide-react";
+import { PlusCircle, Coffee, Utensils, BookOpen, Percent, Star, Search, Filter, Layers, Package, Puzzle, CheckCircle, XCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -91,9 +91,8 @@ export default function MenuPage() {
 
   const [stats, setStats] = useState({
     totalMenu: 0,
-    totalCoffee: 0,
-    totalFoodAndSnack: 0,
-    totalCategories: 0,
+    activeMenu: 0,
+    inactiveMenu: 0,
   });
 
   const [isMenuFormOpen, setIsMenuFormOpen] = useState(false);
@@ -124,7 +123,8 @@ export default function MenuPage() {
       ]);
       
       const menuData = menuRes.ok ? await menuRes.json() : { data: [] };
-      setMenuItems(menuData.data || []);
+      const menuItemsData = menuData.data || [];
+      setMenuItems(menuItemsData);
       
       const categoryData = categoryRes.ok ? await categoryRes.json() : { data: [] };
       setCategories(categoryData.data || []);
@@ -146,19 +146,11 @@ export default function MenuPage() {
         setIsAutomaticBestSeller(settingsData.is_auto_best_seller);
       }
       
-       if (menuData.data && categoryData.data) {
-        const foodAndSnackCategoryIds = categoryData.data.filter((c: Category) => (c.name?.toLowerCase().includes('food') || c.name?.toLowerCase().includes('snack'))).map((c: Category) => c.id);
-        const coffeeCategoryId = categoryData.data.find((c: Category) => c.name?.toLowerCase().includes('coffee'))?.id;
-
-        const totalMenu = menuData.data.length;
-        const totalCoffee = menuData.data.filter((item: MenuItem) => item.category_id === coffeeCategoryId).length;
-        const totalFoodAndSnack = menuData.data.filter((item: MenuItem) => foodAndSnackCategoryIds.includes(item.category_id)).length;
-        
+       if (menuItemsData) {
         setStats({
-          totalMenu,
-          totalCoffee,
-          totalFoodAndSnack,
-          totalCategories: categoryData.data.length,
+          totalMenu: menuItemsData.length,
+          activeMenu: menuItemsData.filter((item: MenuItem) => item.is_available).length,
+          inactiveMenu: menuItemsData.filter((item: MenuItem) => !item.is_available).length,
         });
       }
 
@@ -319,11 +311,10 @@ export default function MenuPage() {
         <p className="text-muted-foreground">Tambah, ubah, dan kelola semua aspek menu kedai kopi Anda.</p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-3">
         <StatCard title="Total Menu" value={stats.totalMenu.toString()} icon={BookOpen} description="Semua item di menu Anda." color="bg-gradient-to-tr from-blue-500 to-blue-700 text-white" />
-        <StatCard title="Kopi" value={stats.totalCoffee.toString()} icon={Coffee} description="Jumlah varian kopi." color="bg-gradient-to-tr from-amber-500 to-amber-700 text-white" />
-        <StatCard title="Makanan & Snack" value={stats.totalFoodAndSnack.toString()} icon={Utensils} description="Kue kering dan makanan ringan lainnya." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
-        <StatCard title="Kategori" value={stats.totalCategories.toString()} icon={Layers} description="Jumlah kategori yang ada." color="bg-gradient-to-tr from-slate-600 to-slate-800 text-white" />
+        <StatCard title="Menu Aktif" value={stats.activeMenu.toString()} icon={CheckCircle} description="Item menu yang tersedia untuk dijual." color="bg-gradient-to-tr from-green-500 to-green-700 text-white" />
+        <StatCard title="Menu Tidak Aktif" value={stats.inactiveMenu.toString()} icon={XCircle} description="Item menu yang tidak tersedia." color="bg-gradient-to-tr from-red-500 to-red-700 text-white" />
       </div>
       
       <Tabs defaultValue="menu">
