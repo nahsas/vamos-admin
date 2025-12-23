@@ -105,7 +105,7 @@ export function MenuForm({
         additional_ids: additionalIds,
       });
       if(menuItem.image) {
-        setImagePreview(`https://vamos-api-v2.sejadikopi.com/api/images?path=${menuItem.image}`);
+        setImagePreview(menuItem.image);
       } else {
         setImagePreview(null);
       }

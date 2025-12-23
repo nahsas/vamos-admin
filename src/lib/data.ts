@@ -15,6 +15,8 @@ export type MenuItem = {
   additional_ids?: number[];
   variants?: { id: number; name: string; price: number; is_available: boolean }[];
   additionals?: { id: number; name: string; price: number; is_available: boolean }[];
+  kategori_struk?: 'makanan' | 'minuman';
+  stok: number;
 };
 
 export type OrderItem = {

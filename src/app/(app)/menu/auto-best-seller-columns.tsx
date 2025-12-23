@@ -23,7 +23,7 @@ export const columns: ColumnDef<BestSellerItem>[] = [
         header: "Gambar",
         cell: ({ row }) => {
             const imageUrl = row.original.menu.image;
-            const fullUrl = imageUrl ? `https://vamos-api-v2.sejadikopi.com/api/images?path=${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            const fullUrl = imageUrl || 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.original.menu.name} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },

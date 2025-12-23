@@ -73,7 +73,7 @@ export const columns = ({ onUpdateSuccess }: BestSellerColumnsProps): ColumnDef<
         header: "Gambar",
         cell: ({ row }) => {
             const imageUrl = row.original.image;
-            const fullUrl = imageUrl ? `https://vamos-api-v2.sejadikopi.com/api/images?path=${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            const fullUrl = imageUrl || 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
             return <Image src={fullUrl} alt={row.getValue("name")} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },
