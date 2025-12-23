@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   description: 'Vamos - Coffee Shop Management',
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: 'https://vamos-api-v2.sejadikopi.com/storage/Logo/vamos_circle.png',
-    shortcut: 'https://vamos-api-v2.sejadikopi.com/storage/Logo/vamos_circle.png',
-    apple: 'https://vamos-api-v2.sejadikopi.com/storage/Logo/vamos_circle.png',
+    icon: 'https://vamos-api-v2.sejadikopi.com/api/images?path=Logo/vamos_circle.png',
+    shortcut: 'https://vamos-api-v2.sejadikopi.com/api/images?path=Logo/vamos_circle.png',
+    apple: 'https://vamos-api-v2.sejadikopi.com/api/images?path=Logo/vamos_circle.png',
   },
 };
 
@@ -46,5 +46,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

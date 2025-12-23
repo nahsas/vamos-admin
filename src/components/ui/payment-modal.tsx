@@ -22,9 +22,9 @@ import { printPaymentStruk } from '@/lib/print-utils';
 import { appEventEmitter } from '@/lib/event-emitter';
 
 const banks = [
-    { id: 'BCA', name: 'BCA', logo: 'https://vamos-api-v2.sejadikopi.com/storage/images/BCA.png' },
-    { id: 'BRI', name: 'BRI', logo: 'https://vamos-api-v2.sejadikopi.com/storage/images/BRI.png' },
-    { id: 'BSI', name: 'BSI', logo: 'https://vamos-api-v2.sejadikopi.com/storage/images/BSI.png' },
+    { id: 'BCA', name: 'BCA', logo: 'https://vamos-api-v2.sejadikopi.com/api/images?path=images/BCA.png' },
+    { id: 'BRI', name: 'BRI', logo: 'https://vamos-api-v2.sejadikopi.com/api/images?path=images/BRI.png' },
+    { id: 'BSI', name: 'BSI', logo: 'https://vamos-api-v2.sejadikopi.com/api/images?path=images/BSI.png' },
 ]
 
 export function PaymentModal({
@@ -135,7 +135,7 @@ export function PaymentModal({
 
     const now = new Date().toISOString();
 
-    const finalPayload: Partial<Order> = {
+    const finalPayload: Partial<Order> & { cash_received?: number } = {
         status: "completed",
         updated_at: now,
         completed_at: now,
@@ -146,6 +146,10 @@ export function PaymentModal({
         discount_amount: appliedDiscount?.amount || order.discount_amount || 0,
         total_after_discount: appliedDiscount?.finalTotal || order.total_after_discount || orderTotal
     };
+
+    if (paymentMethod === 'Cash') {
+      finalPayload.cash_received = Number(paymentAmount);
+    }
     
     try {
         const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/${order.id}`, {
@@ -404,5 +408,3 @@ export function PaymentModal({
     </Dialog>
   );
 }
-
-    

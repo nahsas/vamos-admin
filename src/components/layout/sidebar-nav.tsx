@@ -187,7 +187,7 @@ export function SidebarNav() {
       <Sidebar>
         <SidebarHeader className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-             <Image src="https://vamos-api-v2.sejadikopi.com/storage/Logo/vamos.png" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg border border-sidebar-border shadow-lg" unoptimized />
+             <Image src="https://vamos-api-v2.sejadikopi.com/api/images?path=Logo/vamos.png" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg border border-sidebar-border shadow-lg" unoptimized />
             <div>
               <h1 className="text-lg font-headline font-bold">VAMOS</h1>
               <p className="text-sm text-muted-foreground">Panel Admin</p>

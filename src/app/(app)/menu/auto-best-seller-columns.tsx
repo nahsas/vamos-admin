@@ -19,18 +19,18 @@ export const columns: ColumnDef<BestSellerItem>[] = [
         cell: ({ row }) => <div className="font-bold text-lg text-muted-foreground">{row.original.rank}</div>,
     },
     {
-        accessorKey: "menu.foto",
+        accessorKey: "menu.image",
         header: "Gambar",
         cell: ({ row }) => {
-            const imageUrl = row.original.menu.foto;
-            const fullUrl = imageUrl ? `https://vamos-api-v2.sejadikopi.com/storage/${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
-            return <Image src={fullUrl} alt={row.original.menu.nama} width={40} height={40} className="rounded-md object-cover" unoptimized />
+            const imageUrl = row.original.menu.image;
+            const fullUrl = imageUrl ? `https://vamos-api-v2.sejadikopi.com/api/images?path=${imageUrl}` : 'https://placehold.co/40x40/FFFAF0/6F4E37?text=Kopi';
+            return <Image src={fullUrl} alt={row.original.menu.name} width={40} height={40} className="rounded-md object-cover" unoptimized />
         }
     },
     {
-      accessorKey: "menu.nama",
+      accessorKey: "menu.name",
       header: "Nama Menu",
-      cell: ({ row }) => <div className="font-medium">{row.original.menu.nama}</div>,
+      cell: ({ row }) => <div className="font-medium">{row.original.menu.name}</div>,
     },
     {
       accessorKey: "total_sold",
@@ -38,5 +38,3 @@ export const columns: ColumnDef<BestSellerItem>[] = [
       cell: ({ row }) => <div className="font-semibold">{row.original.total_sold}</div>,
     },
 ]
-
-    

@@ -44,16 +44,8 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'api.sejadikopi.com',
-        port: '',
-        pathname: '/**',
-      },
     ],
   },
 };
 
 export default process.env.NODE_ENV === 'development' ? nextConfig : withPWA(nextConfig);
-
-    

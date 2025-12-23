@@ -150,7 +150,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                 image: null,
             });
             if(expense.bukti_url) {
-                setImagePreview(`https://vamos-api-v2.sejadikopi.com/storage/${expense.bukti_url}`);
+                setImagePreview(`https://vamos-api-v2.sejadikopi.com/api/images?path=${expense.bukti_url}`);
             } else {
                 setImagePreview(null);
             }
@@ -362,7 +362,7 @@ export default function ReportsPage() {
 
       // --- TRANSACTIONS FETCH ---
       const transactionUrl = new URL('https://vamos-api-v2.sejadikopi.com/api/orders');
-      transactionUrl.searchParams.set('status', 'completed');
+      transactionUrl.searchParams.set('status', 'completed,selesai');
       if (sDate) transactionUrl.searchParams.set('created_from', sDate);
       if (eDate) transactionUrl.searchParams.set('created_to', eDate);
       
@@ -860,5 +860,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-
-    

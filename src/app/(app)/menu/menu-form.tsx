@@ -102,7 +102,7 @@ export function MenuForm({
         additional_ids: menuItem.additional_ids || [],
       });
       if(menuItem.image) {
-        setImagePreview(`https://vamos-api-v2.sejadikopi.com/storage/${menuItem.image}`);
+        setImagePreview(`https://vamos-api-v2.sejadikopi.com/api/images?path=${menuItem.image}`);
       } else {
         setImagePreview(null);
       }
