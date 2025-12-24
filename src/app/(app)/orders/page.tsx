@@ -87,15 +87,15 @@ export default function OrdersPage() {
     setLoading(true);
     try {
       const [pendingRes, processingRes, menuRes, additionalsRes] = await Promise.all([
-        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending"),
-        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process"),
+        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending&with=items"),
+        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process&with=items"),
         fetch("https://vamos-api-v2.sejadikopi.com/api/menus"),
         fetch("https://vamos-api-v2.sejadikopi.com/api/additionals")
       ]);
       
       const pendingOrders = pendingRes.ok ? (await pendingRes.json()).data : [];
       const processingOrders = processingRes.ok ? (await processingRes.json()).data : [];
-      const allActiveOrders = [...pendingOrders, ...processingOrders];
+      const allActiveOrders = [...(pendingOrders || []), ...(processingOrders || [])];
 
       const allDineInOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'dine_in');
       const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'take-away');
@@ -368,3 +368,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+    

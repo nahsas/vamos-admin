@@ -234,7 +234,7 @@ export default function HistoryPage() {
     try {
       const today = format(startOfToday(), 'yyyy-MM-dd');
       const [orderRes, menuRes, strukRes] = await Promise.all([
-        fetch(`https://vamos-api-v2.sejadikopi.com/api/orders?status=completed,cancelled&created_from=${today}T00:00:00&created_to=${today}T23:59:59`),
+        fetch(`https://vamos-api-v2.sejadikopi.com/api/orders?status=completed,cancelled&created_from=${today}T00:00:00&created_to=${today}T23:59:59&with=items`),
         fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
         fetch(`https://vamos-api-v2.sejadikopi.com/api/struks?created_from=${today}T00:00:00&created_to=${today}T23:59:59`)
       ]);
@@ -273,7 +273,7 @@ export default function HistoryPage() {
   }, [fetchData]);
   
   const getMenuItemName = (id: number) => {
-    return menuItems.find((item) => item.id === id)?.nama || "";
+    return menuItems.find((item) => item.id === id)?.name || "";
   };
 
   const handleDetailClick = (order: Order) => {
@@ -399,3 +399,5 @@ export default function HistoryPage() {
     </div>
   );
 }
+
+    

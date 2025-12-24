@@ -107,8 +107,8 @@ export default function DashboardPage() {
       setOrdersError(null);
       try {
           const [pendingRes, processingRes] = await Promise.all([
-            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending"),
-            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process"),
+            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending&with=items"),
+            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process&with=items"),
           ]);
           
           if (!pendingRes.ok) throw new Error('Gagal mengambil pesanan pending.');
@@ -117,7 +117,7 @@ export default function DashboardPage() {
           const pendingData = await pendingRes.json();
           const processingData = await processingRes.json();
 
-          const allOrders = [...pendingData.data, ...processingData.data];
+          const allOrders = [...(pendingData.data || []), ...(processingData.data || [])];
 
           setDineInOrders(allOrders.filter(o => o.order_type === 'dine-in'));
           setTakeawayOrders(allOrders.filter(o => o.order_type === 'take-away'));
@@ -265,3 +265,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

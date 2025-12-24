@@ -363,6 +363,7 @@ export default function ReportsPage() {
       // --- TRANSACTIONS FETCH ---
       const transactionUrl = new URL('https://vamos-api-v2.sejadikopi.com/api/orders');
       transactionUrl.searchParams.set('status', 'completed,selesai');
+      transactionUrl.searchParams.set('with', 'items');
       if (sDate) transactionUrl.searchParams.set('created_from', sDate);
       if (eDate) transactionUrl.searchParams.set('created_to', eDate);
       
@@ -493,7 +494,7 @@ export default function ReportsPage() {
 
     const displayedTransactions = transactions.filter(t =>
       (t.id && t.id.toString().includes(transactionSearch)) ||
-      (t.no_meja && t.no_meja.toLowerCase().includes(transactionSearch.toLowerCase()))
+      (t.identifier && t.identifier.toLowerCase().includes(transactionSearch.toLowerCase()))
     );
     
     const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_after_discount || parseInt(t.total) || 0), 0);
@@ -502,7 +503,7 @@ export default function ReportsPage() {
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
     
     const paymentBreakdown = displayedTransactions.reduce((acc, t) => {
-        const method = t.metode_pembayaran || 'unknown';
+        const method = t.payment_method || 'unknown';
         const bank = t.bank_qris || 'other';
         const amount = t.total_after_discount || parseInt(t.total) || 0;
         
@@ -581,8 +582,8 @@ export default function ReportsPage() {
             const transactionsData = displayedTransactions.map(t => ({
                 "ID": t.id,
                 "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
-                "Meja/Pelanggan": t.no_meja,
-                "Metode": `${t.metode_pembayaran}${t.metode_pembayaran === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
+                "Meja/Pelanggan": t.identifier,
+                "Metode": `${t.payment_method}${t.payment_method === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
                 "Subtotal": { v: t.total, t: 'n', z: currencyFormat },
                 "Diskon": { v: t.discount_amount || 0, t: 'n', z: currencyFormat },
                 "Total Akhir": { v: t.total_after_discount, t: 'n', z: currencyFormat },
@@ -860,3 +861,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    

@@ -27,7 +27,7 @@ export function useOrderNotification() {
 
   const fetchActiveOrders = useCallback(async () => {
     try {
-      const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/orders?status=pending,process');
+      const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/orders?status=pending,process&with=items');
       if (!response.ok) {
         throw new Error('Failed to fetch active orders');
       }
@@ -140,3 +140,5 @@ export function useOrderNotification() {
     return () => clearInterval(interval);
   }, [fetchActiveOrders]);
 }
+
+    
