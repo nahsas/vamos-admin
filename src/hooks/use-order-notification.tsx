@@ -41,7 +41,7 @@ export function useOrderNotification() {
         return;
       }
       
-      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.detail_pesanans.length]));
+      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.detail_pesanans?.length ?? 0]));
 
       if (isFirstLoad.current) {
         setLastKnownOrdersState(currentOrdersState);
@@ -54,7 +54,7 @@ export function useOrderNotification() {
 
       for (const order of activeOrders) {
           const lastItemCount = lastKnownOrdersState.get(order.id);
-          const currentItemCount = order.detail_pesanans.length;
+          const currentItemCount = order.detail_pesanans?.length ?? 0;
 
           // Case 1: A completely new order has arrived.
           if (lastItemCount === undefined) {
@@ -78,7 +78,7 @@ export function useOrderNotification() {
         
         // Handle new orders
         newOrders.forEach(order => {
-            const customer = order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}`: order.no_meja;
+            const customer = order.order_type.toLowerCase() === 'dine_in' ? `Meja ${order.identifier}`: order.identifier;
             toast({
                 title: '🔔 Pesanan Baru Diterima!',
                 description: `Pesanan baru dari ${customer} telah diterima.`,
@@ -93,7 +93,7 @@ export function useOrderNotification() {
 
         // Handle updated orders
         updatedOrders.forEach(order => {
-            const customer = order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}`: order.no_meja;
+            const customer = order.order_type.toLowerCase() === 'dine_in' ? `Meja ${order.identifier}`: order.identifier;
             toast({
                 title: '🔔 Item Baru Ditambahkan!',
                 description: `Item baru ditambahkan ke pesanan ${customer}.`,
@@ -140,5 +140,3 @@ export function useOrderNotification() {
     return () => clearInterval(interval);
   }, [fetchActiveOrders]);
 }
-
-    

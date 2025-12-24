@@ -98,7 +98,7 @@ export default function OrdersPage() {
       const allActiveOrders = [...pendingOrders, ...processingOrders];
 
       const allDineInOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'dine_in');
-      const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'takeaway');
+      const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'take-away');
 
       setDineInOrders(allDineInOrders);
       setTakeawayOrders(allTakeawayOrders);
@@ -178,7 +178,7 @@ export default function OrdersPage() {
 
   const getMenuName = (menuId: number) => {
     const menuItem = menuItems.find((item) => item.id === menuId);
-    return menuItem ? menuItem.nama : 'Unknown Item';
+    return menuItem ? menuItem.name : 'Unknown Item';
   };
 
   const filteredDineInOrders = dineInOrders
@@ -235,7 +235,7 @@ export default function OrdersPage() {
           </div>
           <h3 className="text-xl font-bold">Belum Ada Pesanan {type === 'dine-in' ? 'Dine-in' : 'Take Away'}</h3>
           <p className="text-muted-foreground">
-            Saat ini tidak ada pesanan {type === 'dine-in' ? 'dine-in' : 'takeaway'} yang aktif.
+            Saat ini tidak ada pesanan {type === 'dine-in' ? 'dine-in' : 'take-away'} yang aktif.
           </p>
         </div>
       );

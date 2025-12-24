@@ -120,7 +120,7 @@ export default function DashboardPage() {
           const allOrders = [...pendingData.data, ...processingData.data];
 
           setDineInOrders(allOrders.filter(o => o.order_type === 'dine-in'));
-          setTakeawayOrders(allOrders.filter(o => o.order_type === 'takeaway'));
+          setTakeawayOrders(allOrders.filter(o => o.order_type === 'take-away'));
           
       } catch (error: any) {
           console.error("Gagal mengambil pesanan aktif:", error);
@@ -176,7 +176,7 @@ export default function DashboardPage() {
                 </div>
                 <h3 className="text-xl font-bold">Tidak Ada Pesanan {type === 'dine-in' ? 'Dine-in' : 'Take Away'}</h3>
                 <p className="text-muted-foreground">
-                    Saat ini tidak ada pesanan {type === 'dine-in' ? 'dine-in' : 'takeaway'} yang aktif
+                    Saat ini tidak ada pesanan {type === 'dine-in' ? 'dine-in' : 'take-away'} yang aktif
                 </p>
             </div>
        )

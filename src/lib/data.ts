@@ -43,7 +43,7 @@ export type Order = {
   id: number;
   identifier: string;
   location_area: string | null;
-  order_type: 'dine-in' | 'takeaway';
+  order_type: 'dine-in' | 'take-away';
   subtotal: number;
   discount: number;
   total_amount: number;

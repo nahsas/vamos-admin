@@ -39,7 +39,7 @@ const updatePrintedStatus = (items: OrderItem[]) => {
   if (unprintedItems.length === 0) return;
 
   const updatePromises = unprintedItems.map(item =>
-    fetch(`https://vamos-api.sejadikopi.com/api/detail_pesanan/${item.id}`, {
+    fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/items/${item.id}/mark-printed`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ printed: 1 }),
@@ -83,8 +83,8 @@ const generateReceiptText = (
     second: "2-digit",
   });
 
-  const isTakeaway = order.location_type === 'TAKEAWAY';
-  const baseType = isTakeaway ? "TAKEAWAY" : "DINE-IN";
+  const isTakeaway = order.order_type === 'take-away';
+  const baseType = isTakeaway ? "TAKE-AWAY" : "DINE-IN";
   const tipeText = order.location_area ? `${baseType}|${order.location_area}` : baseType;
 
   let receipt = "\n\n";
@@ -109,7 +109,7 @@ const generateReceiptText = (
   if (showPrices || title === 'MAIN CHECKER') {
       receipt += createLine("No", `#${order.id}`) + "\n";
   }
-  receipt += createLine("Meja", order.no_meja ? order.no_meja.toString() : "-") + "\n";
+  receipt += createLine("Meja", order.identifier ? order.identifier.toString() : "-") + "\n";
   receipt += createLine("Tipe", tipeText) + "\n";
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
@@ -122,7 +122,7 @@ const generateReceiptText = (
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem || item.jumlah === 0) return;
 
-        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
+        let itemName = `${item.jumlah}x ${menuItem.name.replace(/\*/g, '')}`;
         if (item.varian) itemName += ` (${item.varian})`;
         const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
         receipt += createLine(itemName, subtotal) + "\n";
@@ -137,7 +137,7 @@ const generateReceiptText = (
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem || item.jumlah === 0) return;
 
-        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
+        let itemName = `${item.jumlah}x ${menuItem.name.replace(/\*/g, '')}`;
         if (item.varian) itemName += ` (${item.varian})`;
 
         if (showPrices) {
@@ -169,7 +169,7 @@ const generateReceiptText = (
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         if (!menuItem || item.jumlah === 0) return;
 
-        let itemName = `${item.jumlah}x ${menuItem.nama.replace(/\*/g, '')}`;
+        let itemName = `${item.jumlah}x ${menuItem.name.replace(/\*/g, '')}`;
         if (item.varian) itemName += ` (${item.varian})`;
         const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
         receipt += createLine(itemName, subtotal) + "\n";
@@ -184,24 +184,24 @@ const generateReceiptText = (
   receipt += "-".repeat(paperWidth) + "\n";
   
   if (showPrices) {
-    const total = order.total_after_discount ?? parseInt(order.total, 10);
-    receipt += createLine("TOTAL", `Rp${formatCurrency(parseInt(order.total, 10))}`) + "\n";
-    if (order.discount_amount && order.discount_amount > 0) {
-        receipt += createLine("DISKON", `-Rp${formatCurrency(order.discount_amount)}`) + "\n";
+    const total = order.total_amount ?? parseInt(order.subtotal.toString(), 10);
+    receipt += createLine("TOTAL", `Rp${formatCurrency(parseInt(order.subtotal.toString(), 10))}`) + "\n";
+    if (order.discount && order.discount > 0) {
+        receipt += createLine("DISKON", `-Rp${formatCurrency(order.discount)}`) + "\n";
         receipt += "--------------------------------\n";
     }
     receipt += createLine("TOTAL BAYAR", `Rp${formatCurrency(total)}`) + "\n";
 
-    if (showPrices && order.metode_pembayaran) {
+    if (showPrices && order.payment_method) {
       let metodeLabel = "";
-      if (order.metode_pembayaran === "cash") {
+      if (order.payment_method === "cash") {
         metodeLabel = "CASH";
         if (paymentAmount && paymentAmount > 0) {
             receipt += createLine("DIBAYAR", `Rp${formatCurrency(paymentAmount)}`) + "\n";
             const change = paymentAmount - total;
             receipt += createLine("KEMBALIAN", `Rp${formatCurrency(change)}`) + "\n";
         }
-      } else if (order.metode_pembayaran === "qris") {
+      } else if (order.payment_method === "qris") {
         metodeLabel = order.bank_qris ? `QRIS ${order.bank_qris}` : "QRIS";
       }
       if (metodeLabel) {
@@ -239,11 +239,11 @@ export const printKitchenStruk = (
   additionals: Additional[]
 ) => {
   try {
-    const unprintedFood = order.detail_pesanans.filter(item => {
+    const unprintedFood = order.detail_pesanans?.filter(item => {
       const menuItem = menuItems.find(mi => mi.id === item.menu_id);
       // Item is food and has not been printed by kitchen checker yet
       return menuItem?.kategori_struk === 'makanan' && item.printed === 0;
-    });
+    }) || [];
     
     if (unprintedFood.length > 0) {
       const receiptText = generateReceiptText(order, menuItems, {
@@ -272,10 +272,10 @@ export const printMainCheckerStruk = (
 ) => {
   try {
     // For Main Checker, we are interested in any new DRINK item
-    const newDrinks = order.detail_pesanans.filter(item => {
+    const newDrinks = order.detail_pesanans?.filter(item => {
         const menuItem = menuItems.find(mi => mi.id === item.menu_id);
         return menuItem?.kategori_struk === 'minuman' && item.printed === 0
-    });
+    }) || [];
 
     if (newDrinks.length > 0) {
       const receiptText = generateReceiptText(order, menuItems, {
@@ -306,7 +306,7 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additiona
         const receiptText = generateReceiptText(order, menuItems, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
-            itemsToPrint: order.detail_pesanans,
+            itemsToPrint: order.detail_pesanans || [],
             paymentAmount: paymentAmount,
             additionals
         });
@@ -322,7 +322,7 @@ export const printBillStruk = (order: Order, menuItems: MenuItem[], additionals:
         const receiptText = generateReceiptText(order, menuItems, {
             title: "BILL",
             showPrices: true,
-            itemsToPrint: order.detail_pesanans,
+            itemsToPrint: order.detail_pesanans || [],
             additionals: additionals,
         });
         printJob(receiptText);
