@@ -41,29 +41,23 @@ export type OrderItem = {
 
 export type Order = {
   id: number;
-  no_meja: string;
-  status: string; // 'pending', 'diproses', 'selesai', 'cancelled'
-  total: string;
-  created_at: string;
-  note: string | null;
-  updated_at: string;
-  cancellation_reason: string | null;
-  cancelled_at: string | null;
-  location_type: 'DINE-IN' | 'TAKEAWAY';
-  pickup_time: string | null;
-  discount_code: string | null;
-  discount_amount: number | null;
-  total_after_discount: number | null;
-  processed_at: string | null;
-  completed_at: string | null;
-  is_hidden: boolean | null;
-  archived_at: string | null;
+  identifier: string;
   location_area: string | null;
-  metode_pembayaran: 'cash' | 'qris' | null;
-  bank_qris: string | null;
-  is_final: boolean | null;
-  detail_pesanans: OrderItem[];
+  order_type: 'dine-in' | 'takeaway';
+  subtotal: number;
+  discount: number;
+  total_amount: number;
+  cash_received: number;
+  change_amount: number;
+  payment_method: 'cash' | 'qris' | null;
+  bank_qris?: string | null;
+  status: 'pending' | 'process' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at?: string;
+  completed_at?: string | null;
+  detail_pesanans?: OrderItem[];
 };
+
 
 export type Additional = {
     id: number;

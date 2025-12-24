@@ -86,16 +86,19 @@ export default function OrdersPage() {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [ordersRes, menuRes, additionalsRes] = await Promise.all([
-        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?order=updated_at.desc&status=pending,diproses"),
+      const [pendingRes, processingRes, menuRes, additionalsRes] = await Promise.all([
+        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending"),
+        fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process"),
         fetch("https://vamos-api-v2.sejadikopi.com/api/menus"),
         fetch("https://vamos-api-v2.sejadikopi.com/api/additionals")
       ]);
       
-      const allActiveOrders = ordersRes.ok ? (await ordersRes.json()).data : [];
-      
-      const allDineInOrders = allActiveOrders.filter((o: Order) => o.location_type.toLowerCase() === 'dine-in');
-      const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.location_type.toLowerCase() === 'takeaway');
+      const pendingOrders = pendingRes.ok ? (await pendingRes.json()).data : [];
+      const processingOrders = processingRes.ok ? (await processingRes.json()).data : [];
+      const allActiveOrders = [...pendingOrders, ...processingOrders];
+
+      const allDineInOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'dine_in');
+      const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'takeaway');
 
       setDineInOrders(allDineInOrders);
       setTakeawayOrders(allTakeawayOrders);
@@ -104,7 +107,7 @@ export default function OrdersPage() {
       if (additionalsRes.ok) setAdditionals((await additionalsRes.json()).data);
 
       const uniqueTables = new Set(
-        allDineInOrders.map((order: Order) => order.no_meja)
+        allDineInOrders.map((order: Order) => order.identifier)
       );
       setOccupiedTablesCount(uniqueTables.size);
       
@@ -187,11 +190,11 @@ export default function OrdersPage() {
             return true;
         }
         const lowerCaseSearch = searchTerm.toLowerCase();
-        const hasMatchingItem = order.detail_pesanans.some(item =>
+        const hasMatchingItem = order.detail_pesanans?.some(item =>
             getMenuName(item.menu_id).toLowerCase().includes(lowerCaseSearch) ||
             (item.note && item.note.toLowerCase().includes(lowerCaseSearch))
         );
-        return order.no_meja.toLowerCase().includes(lowerCaseSearch) || hasMatchingItem;
+        return order.identifier.toLowerCase().includes(lowerCaseSearch) || hasMatchingItem;
     });
 
   const filteredTakeawayOrders = takeawayOrders
@@ -203,22 +206,22 @@ export default function OrdersPage() {
             return true;
         }
         const lowerCaseSearch = searchTerm.toLowerCase();
-        const hasMatchingItem = order.detail_pesanans.some(item =>
+        const hasMatchingItem = order.detail_pesanans?.some(item =>
             getMenuName(item.menu_id).toLowerCase().includes(lowerCaseSearch) ||
             (item.note && item.note.toLowerCase().includes(lowerCaseSearch))
         );
-        return order.no_meja.toLowerCase().includes(lowerCaseSearch) || hasMatchingItem;
+        return order.identifier.toLowerCase().includes(lowerCaseSearch) || hasMatchingItem;
     });
 
   const allActiveOrders = [...dineInOrders, ...takeawayOrders];
-  const totalTransactions = allActiveOrders.reduce((sum, order) => sum + parseFloat(order.total), 0)
+  const totalTransactions = allActiveOrders.reduce((sum, order) => sum + order.total_amount, 0)
     .toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
 
-  const totalItems = allActiveOrders.reduce((sum, order) => sum + order.detail_pesanans.reduce((itemSum, item) => itemSum + item.jumlah, 0), 0);
+  const totalItems = allActiveOrders.reduce((sum, order) => sum + (order.detail_pesanans?.reduce((itemSum, item) => itemSum + item.jumlah, 0) || 0), 0);
 
   const renderOrderList = (orders: Order[], type: 'dine-in' | 'take-away', onUpdateStatus: (order: Order) => void) => {
     const pendingOrders = orders.filter(o => o.status === 'pending');
-    const processingOrders = orders.filter(o => o.status === 'diproses' || o.status === 'process');
+    const processingOrders = orders.filter(o => o.status === 'process');
 
     if (loading) {
       return <div className="text-center py-16">Loading...</div>;
@@ -331,7 +334,7 @@ export default function OrdersPage() {
           <SelectContent>
             <SelectItem value="all">Semua Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="diproses">Processing</SelectItem>
+            <SelectItem value="process">Processing</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -365,5 +368,3 @@ export default function OrdersPage() {
     </div>
   );
 }
-
-    

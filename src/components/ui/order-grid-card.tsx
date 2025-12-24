@@ -30,14 +30,14 @@ const statusConfig: {
   };
 } = {
   pending: { label: 'PENDING', color: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' },
-  diproses: { label: 'PROSES', color: 'bg-blue-500 text-white' },
-  selesai: { label: 'SELESAI', color: 'bg-green-500 text-white' },
-  dibatalkan: { label: 'BATAL', color: 'bg-red-500 text-white' },
+  process: { label: 'PROSES', color: 'bg-blue-500 text-white' },
+  completed: { label: 'SELESAI', color: 'bg-green-500 text-white' },
+  cancelled: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
 export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (order: Order) => void; onPaymentClick: (order: Order) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
-  const isProcessing = order.status.toLowerCase() === 'diproses';
+  const isProcessing = order.status.toLowerCase() === 'process';
   
   const [additionals, setAdditionals] = React.useState<Additional[]>([]);
 
@@ -47,14 +47,14 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
       .then(data => setAdditionals(data.data || []));
   }, []);
 
-  const hasNewItems = order.detail_pesanans.some(item => item.printed === 0);
+  const hasNewItems = order.detail_pesanans?.some(item => item.printed === 0);
 
   const getMenuName = (menuId: number) => {
     const menuItem = menuItems.find((item) => item.id === menuId);
     return menuItem ? menuItem.nama : 'Item Tidak Dikenal';
   };
 
-  const totalItems = order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0);
+  const totalItems = order.detail_pesanans?.reduce((acc, item) => acc + item.jumlah, 0) || 0;
   
   const handleActionClick = () => {
     if (isProcessing) {
@@ -90,7 +90,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-bold">
-                  {order.location_type.toLowerCase() === 'dine-in' ? `Meja ${order.no_meja}` : order.no_meja}
+                  {order.identifier}
                 </h3>
                 {hasNewItems && (
                   <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
@@ -125,7 +125,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
               <span className="text-muted-foreground">{totalItems} menu</span>
             </div>
             <div className="space-y-1 text-sm text-muted-foreground">
-              {order.detail_pesanans.slice(0, 2).map((item) => (
+              {order.detail_pesanans?.slice(0, 2).map((item) => (
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                      <span className="truncate">{getMenuName(item.menu_id)}</span>
@@ -146,7 +146,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
                   <span>x {item.jumlah}</span>
                 </div>
               ))}
-              {order.detail_pesanans.length > 2 && (
+              {order.detail_pesanans && order.detail_pesanans.length > 2 && (
                 <div className={cn(
                   "text-center text-xs pt-1",
                   isProcessing ? "text-blue-400" : "text-yellow-400"
@@ -162,7 +162,7 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
           <div className="flex justify-between items-center mb-4">
             <span className="text-muted-foreground">Total Pembayaran:</span>
             <span className="font-bold text-xl">
-              Rp {parseInt(order.total, 10).toLocaleString('id-ID')}
+              Rp {order.total_amount.toLocaleString('id-ID')}
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">

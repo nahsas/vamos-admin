@@ -63,12 +63,12 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
   const isCancelled = order.status.toLowerCase() === 'cancelled';
 
   const statusColor: { [key: string]: string } = {
-    selesai: 'bg-gradient-to-br from-green-400 to-green-600 text-white border-transparent',
+    completed: 'bg-gradient-to-br from-green-400 to-green-600 text-white border-transparent',
     cancelled: 'bg-gradient-to-br from-red-400 to-red-600 text-white border-transparent'
   };
   
   const statusBorderGradient: { [key: string]: string } = {
-    selesai: 'bg-gradient-to-br from-green-400 to-green-600',
+    completed: 'bg-gradient-to-br from-green-400 to-green-600',
     cancelled: 'bg-gradient-to-br from-red-400 to-red-600',
   };
   
@@ -81,16 +81,16 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
   }
 
   const getPaymentInfo = () => {
-    if (!order.metode_pembayaran) return null;
+    if (!order.payment_method) return null;
 
-    if (order.metode_pembayaran === 'cash') {
+    if (order.payment_method === 'cash') {
       return {
         text: 'Tunai',
         colorClass: paymentMethodColor.cash
       }
     }
 
-    if (order.metode_pembayaran === 'qris') {
+    if (order.payment_method === 'qris') {
       const bank = order.bank_qris?.toLowerCase() || 'qris';
       let text = 'QRIS';
       let colorClass = paymentMethodColor.qris;
@@ -120,9 +120,7 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                 <div className="flex justify-between items-start">
                 <div>
                     <h3 className="text-lg font-bold flex items-center gap-2">
-                    {order.location_type.toLowerCase() === "dine-in"
-                        ? `Meja ${order.no_meja}`
-                        : order.no_meja}
+                    {order.identifier}
                     </h3>
                     <div className="flex items-center gap-2 mt-2">
                         <Badge className={cn("text-xs capitalize", statusColor[order.status.toLowerCase()])}>{order.status}</Badge>
@@ -158,16 +156,16 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                 <div className="border-t border-dashed pt-4">
                 <div className="flex justify-between items-center text-sm font-medium mb-2">
                     <h4>Detail Pesanan</h4>
-                    <span className="text-muted-foreground">{order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0)} item</span>
+                    <span className="text-muted-foreground">{order.detail_pesanans?.reduce((acc, item) => acc + item.jumlah, 0) || 0} item</span>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground">
-                    {order.detail_pesanans.slice(0, 2).map((item, index) => (
+                    {order.detail_pesanans?.slice(0, 2).map((item, index) => (
                     <div key={index} className="flex justify-between">
                         <span>{getMenuItemName(item.menu_id)}</span>
                         <span>x {item.jumlah}</span>
                     </div>
                     ))}
-                    {order.detail_pesanans.length > 2 && (
+                    {order.detail_pesanans && order.detail_pesanans.length > 2 && (
                         <div className="text-center text-xs text-primary pt-2">
                             + {order.detail_pesanans.length - 2} menu lainnya...
                         </div>
@@ -176,7 +174,7 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                 </div>
                 
                 <div className="border-t pt-4 space-y-2 text-sm">
-                    {order.metode_pembayaran === 'cash' && struk ? (
+                    {order.payment_method === 'cash' && struk ? (
                         <>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Total Pembayaran:</span>
@@ -195,11 +193,11 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                         <>
                            <div className="flex justify-between">
                                 <span className="text-muted-foreground">Total:</span>
-                                <span className="font-semibold">Rp {parseInt(order.total).toLocaleString('id-ID')}</span>
+                                <span className="font-semibold">Rp {order.subtotal.toLocaleString('id-ID')}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Total Pembayaran:</span>
-                                <span className="font-bold text-base">Rp {(order.total_after_discount ?? order.total).toLocaleString('id-ID')}</span>
+                                <span className="font-bold text-base">Rp {order.total_amount.toLocaleString('id-ID')}</span>
                             </div>
                         </>
                     )}
@@ -236,7 +234,7 @@ export default function HistoryPage() {
     try {
       const today = format(startOfToday(), 'yyyy-MM-dd');
       const [orderRes, menuRes, strukRes] = await Promise.all([
-        fetch(`https://vamos-api-v2.sejadikopi.com/api/orders?status=selesai,cancelled&payment_date=${today}`),
+        fetch(`https://vamos-api-v2.sejadikopi.com/api/orders?status=completed,cancelled&created_from=${today}T00:00:00&created_to=${today}T23:59:59`),
         fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
         fetch(`https://vamos-api-v2.sejadikopi.com/api/struks?created_from=${today}T00:00:00&created_to=${today}T23:59:59`)
       ]);
@@ -292,16 +290,16 @@ export default function HistoryPage() {
 
     const lowerCaseSearch = searchTerm.toLowerCase();
     
-    const nameMatch = order.no_meja.toLowerCase().includes(lowerCaseSearch);
-    const itemMatch = order.detail_pesanans.some(detail => getMenuItemName(detail.menu_id).toLowerCase().includes(lowerCaseSearch));
+    const nameMatch = order.identifier.toLowerCase().includes(lowerCaseSearch);
+    const itemMatch = order.detail_pesanans?.some(detail => getMenuItemName(detail.menu_id).toLowerCase().includes(lowerCaseSearch));
 
     return nameMatch || itemMatch;
   });
 
-  const completedOrders = orders.filter(o => o.status === "selesai").length;
+  const completedOrders = orders.filter(o => o.status === "completed").length;
   const totalRevenue = orders
-    .filter((o) => o.status === "selesai")
-    .reduce((sum, order) => sum + (order.total_after_discount ?? parseInt(order.total, 10)), 0);
+    .filter((o) => o.status === "completed")
+    .reduce((sum, order) => sum + (order.total_amount ?? 0), 0);
 
 
   return (
@@ -401,5 +399,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
-    

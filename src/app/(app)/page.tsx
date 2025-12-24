@@ -56,8 +56,8 @@ export default function DashboardPage() {
             fetch("https://vamos-api-v2.sejadikopi.com/api/categories?select=nama"),
             fetch("https://vamos-api-v2.sejadikopi.com/api/orders?select=id,created_at"),
             fetch("https://vamos-api-v2.sejadikopi.com/api/orders?select=id&status=pending"),
-            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?select=id&status=diproses,process"),
-            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?select=id,created_at&status=selesai,completed")
+            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?select=id&status=process"),
+            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?select=id,created_at&status=completed")
         ]);
 
         if (menuRes.ok) {
@@ -106,22 +106,22 @@ export default function DashboardPage() {
       setOrdersLoading(true);
       setOrdersError(null);
       try {
-          const dineInRes = await fetch("https://vamos-api-v2.sejadikopi.com/api/orders?type=dine_in&status=pending,process");
-          const takeawayRes = await fetch("https://vamos-api-v2.sejadikopi.com/api/orders?type=takeaway&status=pending,process");
+          const [pendingRes, processingRes] = await Promise.all([
+            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending"),
+            fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process"),
+          ]);
+          
+          if (!pendingRes.ok) throw new Error('Gagal mengambil pesanan pending.');
+          if (!processingRes.ok) throw new Error('Gagal mengambil pesanan process.');
 
-          if (dineInRes.ok) {
-              const data = await dineInRes.json();
-              setDineInOrders(data.data);
-          } else {
-              throw new Error('Gagal mengambil pesanan dine-in');
-          }
+          const pendingData = await pendingRes.json();
+          const processingData = await processingRes.json();
 
-          if (takeawayRes.ok) {
-              const data = await takeawayRes.json();
-              setTakeawayOrders(data.data);
-          } else {
-              throw new Error('Gagal mengambil pesanan takeaway');
-          }
+          const allOrders = [...pendingData.data, ...processingData.data];
+
+          setDineInOrders(allOrders.filter(o => o.order_type === 'dine-in'));
+          setTakeawayOrders(allOrders.filter(o => o.order_type === 'takeaway'));
+          
       } catch (error: any) {
           console.error("Gagal mengambil pesanan aktif:", error);
           setOrdersError(error.message || "Terjadi kesalahan tak terduga.");
@@ -265,5 +265,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

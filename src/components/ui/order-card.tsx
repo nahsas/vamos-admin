@@ -20,9 +20,9 @@ const statusConfig: {
   };
 } = {
   pending: { variant: 'secondary', label: 'Tertunda', color: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white' },
-  diproses: { variant: 'default', label: 'Diproses', color: 'bg-blue-500 text-white' },
-  selesai: { variant: 'outline', label: 'Selesai', color: 'bg-green-500 text-white' },
-  dibatalkan: { variant: 'destructive', label: 'Dibatalkan', color: 'bg-red-500 text-white' },
+  process: { variant: 'default', label: 'Diproses', color: 'bg-blue-500 text-white' },
+  completed: { variant: 'outline', label: 'Selesai', color: 'bg-green-500 text-white' },
+  cancelled: { variant: 'destructive', label: 'Dibatalkan', color: 'bg-red-500 text-white' },
 };
 
 export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }) {
@@ -57,7 +57,7 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
               <div className="flex justify-between items-start">
               <div>
                   <h3 className="text-lg font-bold">
-                  {order.location_type.toLowerCase() === 'dine_in' ? `Meja ${order.no_meja}` : order.no_meja}
+                    {order.identifier}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                   <Badge className={cn(
@@ -80,36 +80,38 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
               </div>
               </div>
 
+              { (order.detail_pesanans && order.detail_pesanans.length > 0) &&
               <div className="border-t border-dashed pt-3">
-              <div className="flex justify-between items-center text-sm font-medium mb-2">
-                  <h4>Detail Pesanan</h4>
-                  <span className="text-muted-foreground">
-                      {order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0)} item
-                  </span>
-              </div>
-              <div className="space-y-1 text-sm text-muted-foreground">
-                  {order.detail_pesanans.slice(0, 2).map((item) => (
-                  <div key={item.id} className="flex justify-between">
-                      <span>{getMenuName(item.menu_id)}</span>
-                      <span>x {item.jumlah}</span>
-                  </div>
-                  ))}
-                  {order.detail_pesanans.length > 2 && (
-                    <div className={cn(
-                        "text-center text-xs pt-2",
-                        isPending ? "text-yellow-500" : "text-blue-500"
-                    )}>
-                        + {order.detail_pesanans.length - 2} menu lainnya...
+                <div className="flex justify-between items-center text-sm font-medium mb-2">
+                    <h4>Detail Pesanan</h4>
+                    <span className="text-muted-foreground">
+                        {order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0)} item
+                    </span>
+                </div>
+                <div className="space-y-1 text-sm text-muted-foreground">
+                    {order.detail_pesanans.slice(0, 2).map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                        <span>{getMenuName(item.menu_id)}</span>
+                        <span>x {item.jumlah}</span>
                     </div>
-                  )}
+                    ))}
+                    {order.detail_pesanans.length > 2 && (
+                      <div className={cn(
+                          "text-center text-xs pt-2",
+                          isPending ? "text-yellow-500" : "text-blue-500"
+                      )}>
+                          + {order.detail_pesanans.length - 2} menu lainnya...
+                      </div>
+                    )}
+                </div>
               </div>
-              </div>
+              }
 
               <div className="border-t pt-3 space-y-2 text-sm">
               <div className="flex justify-between">
                   <span className="text-muted-foreground">Total Pembayaran:</span>
                   <span className="font-bold text-base">
-                  Rp {parseInt(order.total, 10).toLocaleString('id-ID')}
+                  Rp {order.total_amount.toLocaleString('id-ID')}
                   </span>
               </div>
               </div>
