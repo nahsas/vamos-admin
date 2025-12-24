@@ -39,7 +39,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from "@/hooks/use-toast"
 import { Textarea } from "@/components/ui/textarea"
-import { Order, MenuItem } from "@/lib/data"
+import { Order } from "@/lib/data"
 import { OrderDetailModal } from "@/components/ui/order-detail-modal"
 import * as XLSX from 'xlsx';
 
@@ -281,7 +281,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 h-full flex flex-col justify-center items-center text-center">
                                       {imagePreview ? (
                                           <div className="relative w-full h-48 mb-4">
-                                              <img src={imagePreview} alt="Pratinjau Bukti" className="rounded-md object-cover w-full h-full" />
+                                              <Image src={imagePreview} alt="Pratinjau Bukti" className="rounded-md object-cover w-full h-full" unoptimized />
                                           </div>
                                       ) : (
                                           <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
@@ -338,7 +338,6 @@ export default function ReportsPage() {
 
   const [transactions, setTransactions] = React.useState<any[]>([]);
   const [expenses, setExpenses] = React.useState<any[]>([]);
-  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
   
   const [dataLoading, setDataLoading] = React.useState(true);
   const [exporting, setExporting] = React.useState(false);
@@ -373,10 +372,9 @@ export default function ReportsPage() {
       if (eDate) expenseUrl.searchParams.set('end_date', format(new Date(eDate), 'yyyy-MM-dd'));
       expenseUrl.searchParams.set('order', 'tanggal.desc');
       
-      const [transactionRes, expenseRes, menuRes] = await Promise.all([
+      const [transactionRes, expenseRes] = await Promise.all([
           fetch(transactionUrl.toString()),
           fetch(expenseUrl.toString()),
-          fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
       ]);
 
       let allTransactions: any[] = [];
@@ -394,23 +392,16 @@ export default function ReportsPage() {
           console.error("Failed to fetch expenses:", await expenseRes.text());
           setExpenses([]);
       }
-
-      if (menuRes.ok) {
-          const menuData = await menuRes.json();
-          setMenuItems(menuData.data || []);
-      } else {
-          setMenuItems([]);
-      }
       
       // --- CLIENT-SIDE FILTERING FOR PAYMENT METHOD ---
       let filteredTransactions = allTransactions;
       if (paymentMethod !== 'all') {
           if (paymentMethod === 'cash' || paymentMethod === 'qris') {
-              filteredTransactions = allTransactions.filter(t => t.metode_pembayaran === paymentMethod);
+              filteredTransactions = allTransactions.filter(t => t.payment_method === paymentMethod);
           } else if (paymentMethod.startsWith('qris-')) {
               const bank = paymentMethod.split('-')[1];
               filteredTransactions = allTransactions.filter(t => 
-                  t.metode_pembayaran === 'qris' && t.bank_qris && t.bank_qris.toLowerCase().includes(bank)
+                  t.payment_method === 'qris' && t.bank_qris && t.bank_qris.toLowerCase().includes(bank)
               );
           }
       }
@@ -497,7 +488,7 @@ export default function ReportsPage() {
       (t.identifier && t.identifier.toLowerCase().includes(transactionSearch.toLowerCase()))
     );
     
-    const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_after_discount || parseInt(t.total) || 0), 0);
+    const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);
     const totalExpenses = displayedExpenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
     const netProfit = totalRevenue - totalExpenses;
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
@@ -505,7 +496,7 @@ export default function ReportsPage() {
     const paymentBreakdown = displayedTransactions.reduce((acc, t) => {
         const method = t.payment_method || 'unknown';
         const bank = t.bank_qris || 'other';
-        const amount = t.total_after_discount || parseInt(t.total) || 0;
+        const amount = t.total_amount || 0;
         
         if (method === 'cash') {
             acc.cash.amount += amount;
@@ -584,9 +575,9 @@ export default function ReportsPage() {
                 "Tanggal": format(new Date(t.completed_at || t.created_at), 'dd MMM yyyy, HH:mm'),
                 "Meja/Pelanggan": t.identifier,
                 "Metode": `${t.payment_method}${t.payment_method === 'qris' ? ` (${t.bank_qris || 'N/A'})` : ''}`,
-                "Subtotal": { v: t.total, t: 'n', z: currencyFormat },
-                "Diskon": { v: t.discount_amount || 0, t: 'n', z: currencyFormat },
-                "Total Akhir": { v: t.total_after_discount, t: 'n', z: currencyFormat },
+                "Subtotal": { v: t.subtotal, t: 'n', z: currencyFormat },
+                "Diskon": { v: t.discount || 0, t: 'n', z: currencyFormat },
+                "Total Akhir": { v: t.total_amount, t: 'n', z: currencyFormat },
             }));
             const transactions_ws = XLSX.utils.json_to_sheet(transactionsData);
             transactions_ws['!cols'] = [{wch: 10}, {wch: 20}, {wch: 20}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}];
@@ -626,7 +617,6 @@ export default function ReportsPage() {
         order={selectedOrder}
         open={isDetailModalOpen}
         onOpenChange={setIsDetailModalOpen}
-        menuItems={menuItems}
         onOrderDeleted={fetchData}
       />
 

@@ -28,7 +28,7 @@ import {
   ClipboardList,
   Hourglass,
 } from "lucide-react";
-import { Order, MenuItem, Additional } from "@/lib/data";
+import { Order } from "@/lib/data";
 import { OrderGridCard } from "@/components/ui/order-grid-card";
 import { OrderDetailModal } from "@/components/ui/order-detail-modal";
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +36,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { PaymentModal } from "@/components/ui/payment-modal";
 import { appEventEmitter } from "@/lib/event-emitter";
-import { printMainCheckerStruk, printKitchenStruk } from "@/lib/print-utils";
-
 
 function StatCard({
   title,
@@ -67,8 +65,6 @@ export default function OrdersPage() {
   const [activeTab, setActiveTab] = React.useState("dine-in");
   const [dineInOrders, setDineInOrders] = React.useState<Order[]>([]);
   const [takeawayOrders, setTakeawayOrders] = React.useState<Order[]>([]);
-  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
-  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [occupiedTablesCount, setOccupiedTablesCount] = React.useState<number | null>(null);
   
@@ -86,25 +82,20 @@ export default function OrdersPage() {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [pendingRes, processingRes, menuRes, additionalsRes] = await Promise.all([
+      const [pendingRes, processingRes] = await Promise.all([
         fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=pending&with=items"),
         fetch("https://vamos-api-v2.sejadikopi.com/api/orders?status=process&with=items"),
-        fetch("https://vamos-api-v2.sejadikopi.com/api/menus"),
-        fetch("https://vamos-api-v2.sejadikopi.com/api/additionals")
       ]);
       
       const pendingOrders = pendingRes.ok ? (await pendingRes.json()).data : [];
       const processingOrders = processingRes.ok ? (await processingRes.json()).data : [];
       const allActiveOrders = [...(pendingOrders || []), ...(processingOrders || [])];
 
-      const allDineInOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'dine_in');
+      const allDineInOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'dine-in');
       const allTakeawayOrders = allActiveOrders.filter((o: Order) => o.order_type.toLowerCase() === 'take-away');
 
       setDineInOrders(allDineInOrders);
       setTakeawayOrders(allTakeawayOrders);
-
-      if (menuRes.ok) setMenuItems((await menuRes.json()).data);
-      if (additionalsRes.ok) setAdditionals((await additionalsRes.json()).data);
 
       const uniqueTables = new Set(
         allDineInOrders.map((order: Order) => order.identifier)
@@ -116,8 +107,6 @@ export default function OrdersPage() {
       setDineInOrders([]);
       setTakeawayOrders([]);
       setOccupiedTablesCount(0);
-      setMenuItems([]);
-      setAdditionals([]);
     } finally {
       setLoading(false);
     }
@@ -176,11 +165,6 @@ export default function OrdersPage() {
     setIsPaymentModalOpen(true);
   }
 
-  const getMenuName = (menuId: number) => {
-    const menuItem = menuItems.find((item) => item.id === menuId);
-    return menuItem ? menuItem.name : 'Unknown Item';
-  };
-
   const filteredDineInOrders = dineInOrders
     .filter(order => {
         if (filterStatus !== 'all' && order.status.toLowerCase() !== filterStatus) {
@@ -190,8 +174,8 @@ export default function OrdersPage() {
             return true;
         }
         const lowerCaseSearch = searchTerm.toLowerCase();
-        const hasMatchingItem = order.detail_pesanans?.some(item =>
-            getMenuName(item.menu_id).toLowerCase().includes(lowerCaseSearch) ||
+        const hasMatchingItem = order.items?.some(item =>
+            item.menu_name.toLowerCase().includes(lowerCaseSearch) ||
             (item.note && item.note.toLowerCase().includes(lowerCaseSearch))
         );
         return order.identifier.toLowerCase().includes(lowerCaseSearch) || hasMatchingItem;
@@ -206,8 +190,8 @@ export default function OrdersPage() {
             return true;
         }
         const lowerCaseSearch = searchTerm.toLowerCase();
-        const hasMatchingItem = order.detail_pesanans?.some(item =>
-            getMenuName(item.menu_id).toLowerCase().includes(lowerCaseSearch) ||
+        const hasMatchingItem = order.items?.some(item =>
+            item.menu_name.toLowerCase().includes(lowerCaseSearch) ||
             (item.note && item.note.toLowerCase().includes(lowerCaseSearch))
         );
         return order.identifier.toLowerCase().includes(lowerCaseSearch) || hasMatchingItem;
@@ -217,7 +201,7 @@ export default function OrdersPage() {
   const totalTransactions = allActiveOrders.reduce((sum, order) => sum + order.total_amount, 0)
     .toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
 
-  const totalItems = allActiveOrders.reduce((sum, order) => sum + (order.detail_pesanans?.reduce((itemSum, item) => itemSum + item.jumlah, 0) || 0), 0);
+  const totalItems = allActiveOrders.reduce((sum, order) => sum + (order.items?.reduce((itemSum, item) => itemSum + item.quantity, 0) || 0), 0);
 
   const renderOrderList = (orders: Order[], type: 'dine-in' | 'take-away', onUpdateStatus: (order: Order) => void) => {
     const pendingOrders = orders.filter(o => o.status === 'pending');
@@ -251,7 +235,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {pendingOrders.map(order => (
-                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={onUpdateStatus} onPaymentClick={handlePaymentClick} />
+                            <OrderGridCard key={order.id} order={order} onDetailClick={handleDetailClick} onUpdateStatus={onUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
                     </div>
                 </div>
@@ -268,7 +252,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {processingOrders.map(order => (
-                            <OrderGridCard key={order.id} order={order} menuItems={menuItems} onDetailClick={handleDetailClick} onUpdateStatus={onUpdateStatus} onPaymentClick={handlePaymentClick} />
+                            <OrderGridCard key={order.id} order={order} onDetailClick={handleDetailClick} onUpdateStatus={onUpdateStatus} onPaymentClick={handlePaymentClick} />
                         ))}
                     </div>
                 </div>
@@ -284,7 +268,6 @@ export default function OrdersPage() {
           order={selectedOrder}
           open={isModalOpen}
           onOpenChange={setIsModalOpen}
-          menuItems={menuItems}
           onOrderDeleted={fetchData}
         />
       )}

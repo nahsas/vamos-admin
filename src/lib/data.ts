@@ -21,22 +21,23 @@ export type MenuItem = {
 
 export type OrderItem = {
   id: number;
-  pesanan_id: number;
   menu_id: number;
-  jumlah: number;
-  subtotal: string;
+  menu_name: string;
+  menu_price: number;
+  menu_base_price: number;
+  category_id: number;
+  variant_id: number | null;
+  variant_name: string | null;
+  variant_price: number;
+  quantity: number;
   note: string | null;
-  varian: string | null;
-  additionals: { [key: string]: boolean } | null;
-  dimsum_additionals: { [key: string]: boolean } | null;
-  additional_price: string;
-  base_price: number;
   is_locked: boolean;
-  cancelled_qty: number;
-  cancellation_notes: string | null;
-  cancelled_at: string | null;
-  jumlah_asli: number | null;
-  printed: number; // 0 for false, 1 for true
+  selected_additional_id: number | null;
+  selected_additional_name: string | null;
+  selected_additional_price: number;
+  item_unit_price: number;
+  item_total_price: number;
+  printed?: number;
 };
 
 export type Order = {
@@ -55,7 +56,8 @@ export type Order = {
   created_at: string;
   updated_at?: string;
   completed_at?: string | null;
-  detail_pesanans?: OrderItem[];
+  items?: OrderItem[];
+  discount_code?: string | null;
 };
 
 
@@ -76,10 +78,3 @@ export type Struk = {
   created_at: string;
 }
 
-
-// The following are mock data and will be replaced by API calls.
-export const menuItems: any[] = [];
-
-export const orders: any[] = [];
-
-    

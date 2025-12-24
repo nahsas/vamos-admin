@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Order, MenuItem, Additional } from '@/lib/data';
+import { Order } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,26 +35,13 @@ const statusConfig: {
   cancelled: { label: 'BATAL', color: 'bg-red-500 text-white' },
 };
 
-export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; menuItems: MenuItem[], onDetailClick: (order: Order) => void; onUpdateStatus: (order: Order) => void; onPaymentClick: (order: Order) => void; }) {
+export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentClick }: { order: Order; onDetailClick: (order: Order) => void; onUpdateStatus: (order: Order) => void; onPaymentClick: (order: Order) => void; }) {
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'process';
   
-  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
+  const hasNewItems = order.items?.some(item => (item as any).printed === 0);
 
-  React.useEffect(() => {
-    fetch('https://vamos-api.sejadikopi.com/api/additionals')
-      .then(res => res.json())
-      .then(data => setAdditionals(data.data || []));
-  }, []);
-
-  const hasNewItems = order.detail_pesanans?.some(item => item.printed === 0);
-
-  const getMenuName = (menuId: number) => {
-    const menuItem = menuItems.find((item) => item.id === menuId);
-    return menuItem ? menuItem.nama : 'Item Tidak Dikenal';
-  };
-
-  const totalItems = order.detail_pesanans?.reduce((acc, item) => acc + item.jumlah, 0) || 0;
+  const totalItems = order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   
   const handleActionClick = () => {
     if (isProcessing) {
@@ -65,11 +52,11 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
   }
 
   const handleKitchenPrint = () => {
-    printKitchenStruk(order, menuItems, additionals);
+    printKitchenStruk(order);
   };
 
   const handleMainCheckerPrint = () => {
-    printMainCheckerStruk(order, menuItems, additionals);
+    printMainCheckerStruk(order);
   }
 
   const borderGradientClass = isProcessing
@@ -125,33 +112,33 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
               <span className="text-muted-foreground">{totalItems} menu</span>
             </div>
             <div className="space-y-1 text-sm text-muted-foreground">
-              {order.detail_pesanans?.slice(0, 2).map((item) => (
+              {order.items?.slice(0, 2).map((item) => (
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                     <span className="truncate">{getMenuName(item.menu_id)}</span>
-                     {item.varian && (
+                     <span className="truncate">{item.menu_name}</span>
+                     {item.variant_name && (
                         <Badge
                             variant="outline"
                             className={cn(
                             "text-xs",
-                            item.varian.toLowerCase() === 'hot' 
+                            item.variant_name.toLowerCase() === 'hot' 
                                 ? 'border-red-300 bg-white text-red-400' 
                                 : 'border-blue-300 bg-white text-blue-400'
                             )}
                         >
-                            {item.varian}
+                            {item.variant_name}
                         </Badge>
                     )}
                   </div>
-                  <span>x {item.jumlah}</span>
+                  <span>x {item.quantity}</span>
                 </div>
               ))}
-              {order.detail_pesanans && order.detail_pesanans.length > 2 && (
+              {order.items && order.items.length > 2 && (
                 <div className={cn(
                   "text-center text-xs pt-1",
                   isProcessing ? "text-blue-400" : "text-yellow-400"
                 )}>
-                  + {order.detail_pesanans.length - 2} menu lainnya...
+                  + {order.items.length - 2} menu lainnya...
                 </div>
               )}
             </div>
@@ -226,3 +213,4 @@ export function OrderGridCard({ order, menuItems, onDetailClick, onUpdateStatus,
     </>
   );
 }
+

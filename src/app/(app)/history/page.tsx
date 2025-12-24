@@ -56,10 +56,7 @@ function StatCard({
   );
 }
 
-function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; menuItems: MenuItem[], struk?: Struk | null, onDetailClick: (order: Order) => void }) {
-  const getMenuItemName = (id: number) => {
-    return menuItems.find((item) => item.id === id)?.nama || "Item Tidak Dikenal";
-  };
+function OrderCard({ order, onDetailClick }: { order: Order; onDetailClick: (order: Order) => void }) {
   const isCancelled = order.status.toLowerCase() === 'cancelled';
 
   const statusColor: { [key: string]: string } = {
@@ -156,40 +153,25 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                 <div className="border-t border-dashed pt-4">
                 <div className="flex justify-between items-center text-sm font-medium mb-2">
                     <h4>Detail Pesanan</h4>
-                    <span className="text-muted-foreground">{order.detail_pesanans?.reduce((acc, item) => acc + item.jumlah, 0) || 0} item</span>
+                    <span className="text-muted-foreground">{order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0} item</span>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground">
-                    {order.detail_pesanans?.slice(0, 2).map((item, index) => (
+                    {order.items?.slice(0, 2).map((item, index) => (
                     <div key={index} className="flex justify-between">
-                        <span>{getMenuItemName(item.menu_id)}</span>
-                        <span>x {item.jumlah}</span>
+                        <span>{item.menu_name}</span>
+                        <span>x {item.quantity}</span>
                     </div>
                     ))}
-                    {order.detail_pesanans && order.detail_pesanans.length > 2 && (
+                    {order.items && order.items.length > 2 && (
                         <div className="text-center text-xs text-primary pt-2">
-                            + {order.detail_pesanans.length - 2} menu lainnya...
+                            + {order.items.length - 2} menu lainnya...
                         </div>
                     )}
                 </div>
                 </div>
                 
                 <div className="border-t pt-4 space-y-2 text-sm">
-                    {order.payment_method === 'cash' && struk ? (
-                        <>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Total Pembayaran:</span>
-                                <span className="font-bold text-base">Rp {struk.total.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Tunai Diterima:</span>
-                                <span className="font-semibold">Rp {struk.dibayar.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Kembalian:</span>
-                                <span className="font-semibold">Rp {struk.kembalian.toLocaleString('id-ID')}</span>
-                            </div>
-                        </>
-                    ) : (
+                    
                         <>
                            <div className="flex justify-between">
                                 <span className="text-muted-foreground">Total:</span>
@@ -200,7 +182,7 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
                                 <span className="font-bold text-base">Rp {order.total_amount.toLocaleString('id-ID')}</span>
                             </div>
                         </>
-                    )}
+                    
                 </div>
 
             </CardContent>
@@ -217,8 +199,6 @@ function OrderCard({ order, menuItems, struk, onDetailClick }: { order: Order; m
 
 export default function HistoryPage() {
   const [orders, setOrders] = React.useState<Order[]>([]);
-  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
-  const [struks, setStruks] = React.useState<Struk[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -233,36 +213,15 @@ export default function HistoryPage() {
     setError(null);
     try {
       const today = format(startOfToday(), 'yyyy-MM-dd');
-      const [orderRes, menuRes, strukRes] = await Promise.all([
-        fetch(`https://vamos-api-v2.sejadikopi.com/api/orders?status=completed,cancelled&created_from=${today}T00:00:00&created_to=${today}T23:59:59&with=items`),
-        fetch('https://vamos-api-v2.sejadikopi.com/api/menus'),
-        fetch(`https://vamos-api-v2.sejadikopi.com/api/struks?created_from=${today}T00:00:00&created_to=${today}T23:59:59`)
-      ]);
+      const orderRes = await fetch(`https://vamos-api-v2.sejadikopi.com/api/orders?status=completed,cancelled&created_from=${today}T00:00:00&created_to=${today}T23:59:59&with=items`);
 
       if (!orderRes.ok) throw new Error("Gagal mengambil riwayat pesanan.");
       const orderData = await orderRes.json();
       setOrders(orderData.data || []);
       
-      if (menuRes.ok) {
-        const menuData = await menuRes.json();
-        setMenuItems(menuData.data || []);
-      } else {
-        setMenuItems([]);
-      }
-      
-       if (strukRes.ok) {
-        const strukData = await strukRes.json();
-        setStruks(strukData.data || []);
-      } else {
-        setStruks([]);
-      }
-
-
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan tidak terduga.');
       setOrders([]);
-      setMenuItems([]);
-      setStruks([]);
     } finally {
       setLoading(false);
     }
@@ -272,10 +231,6 @@ export default function HistoryPage() {
     fetchData();
   }, [fetchData]);
   
-  const getMenuItemName = (id: number) => {
-    return menuItems.find((item) => item.id === id)?.name || "";
-  };
-
   const handleDetailClick = (order: Order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
@@ -291,12 +246,12 @@ export default function HistoryPage() {
     const lowerCaseSearch = searchTerm.toLowerCase();
     
     const nameMatch = order.identifier.toLowerCase().includes(lowerCaseSearch);
-    const itemMatch = order.detail_pesanans?.some(detail => getMenuItemName(detail.menu_id).toLowerCase().includes(lowerCaseSearch));
+    const itemMatch = order.items?.some(detail => detail.menu_name.toLowerCase().includes(lowerCaseSearch));
 
     return nameMatch || itemMatch;
   });
 
-  const completedOrders = orders.filter(o => o.status === "completed").length;
+  const completedOrdersCount = orders.filter(o => o.status === "completed").length;
   const totalRevenue = orders
     .filter((o) => o.status === "completed")
     .reduce((sum, order) => sum + (order.total_amount ?? 0), 0);
@@ -309,7 +264,6 @@ export default function HistoryPage() {
           order={selectedOrder}
           open={isModalOpen}
           onOpenChange={setIsModalOpen}
-          menuItems={menuItems}
           onOrderDeleted={handleOrderAction}
         />
       )}
@@ -343,7 +297,7 @@ export default function HistoryPage() {
         />
         <StatCard
           title="SELESAI"
-          value={completedOrders.toString()}
+          value={completedOrdersCount.toString()}
           icon={CheckCircle}
           bgColor="bg-primary/10"
           iconColor="text-primary"
@@ -377,18 +331,14 @@ export default function HistoryPage() {
       {!loading && !error && (
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => {
-              const matchingStruk = struks.find(s => s.pesanan_id === order.id);
-              return (
+            filteredOrders.map((order) => (
                 <OrderCard 
                   key={order.id} 
                   order={order} 
-                  menuItems={menuItems}
-                  struk={matchingStruk}
                   onDetailClick={handleDetailClick}
                 />
               )
-            })
+            )
           ) : (
             <div className="text-center py-16 text-muted-foreground sm:col-span-1 md:col-span-2 xl:col-span-3">
               <p>Tidak ada riwayat transaksi untuk filter yang dipilih.</p>

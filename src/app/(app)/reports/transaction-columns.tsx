@@ -34,15 +34,15 @@ export const transactionColumns = ({ onViewDetails }: TransactionColumnsProps): 
         }
     },
     {
-        accessorKey: "no_meja",
+        accessorKey: "identifier",
         header: "Meja/Pelanggan",
     },
     {
-        accessorKey: "metode_pembayaran",
+        accessorKey: "payment_method",
         header: "Metode",
         cell: ({ row }) => {
             const transaction = row.original;
-            const method = transaction.metode_pembayaran;
+            const method = transaction.payment_method;
             if (method === 'qris') {
                 return `QRIS (${transaction.bank_qris || 'N/A'})`
             }
@@ -50,11 +50,11 @@ export const transactionColumns = ({ onViewDetails }: TransactionColumnsProps): 
         }
     },
     {
-        accessorKey: "total_after_discount",
+        accessorKey: "total_amount",
         header: "Total",
         cell: ({ row }) => {
-            const total = row.getValue("total_after_discount") as number | null;
-            return <div className="text-right font-medium">{toRupiah(total || parseInt(row.original.total, 10) || 0)}</div>
+            const total = row.getValue("total_amount") as number | null;
+            return <div className="text-right font-medium">{toRupiah(total || 0)}</div>
         }
     },
     {
@@ -73,3 +73,4 @@ export const transactionColumns = ({ onViewDetails }: TransactionColumnsProps): 
         }
     }
 ]
+

@@ -1,15 +1,8 @@
 
-import { Order, OrderItem, MenuItem, Additional } from './data';
+import { Order, OrderItem } from './data';
 import { appEventEmitter } from './event-emitter';
 
 const paperWidth = 32;
-
-// In-memory state to track printing status for each checker type for the current session.
-// This is a workaround because the database only has one 'printed' flag.
-const printSessionState = {
-    main: new Set<number>(),
-    kitchen: new Set<number>(),
-};
 
 const createLine = (left: string, right: string): string => {
     const spaces = paperWidth - left.length - right.length;
@@ -31,11 +24,10 @@ interface ReceiptOptions {
     itemsToPrint: OrderItem[];
     allItemsForSummary?: OrderItem[]; // For main checker summary
     paymentAmount?: number;
-    additionals: Additional[];
 }
 
 const updatePrintedStatus = (items: OrderItem[]) => {
-  const unprintedItems = items.filter(item => item.printed === 0);
+  const unprintedItems = items.filter(item => (item as any).printed === 0);
   if (unprintedItems.length === 0) return;
 
   const updatePromises = unprintedItems.map(item =>
@@ -65,11 +57,10 @@ const updatePrintedStatus = (items: OrderItem[]) => {
 
 const generateReceiptText = (
     order: Order, 
-    menuItems: MenuItem[],
     options: ReceiptOptions
 ): string => {
   
-  const { title, showPrices, itemsToPrint, allItemsForSummary, paymentAmount, additionals } = options;
+  const { title, showPrices, itemsToPrint, allItemsForSummary, paymentAmount } = options;
 
   const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
@@ -114,44 +105,23 @@ const generateReceiptText = (
   receipt += createLine("Tanggal", dateStr + " " + timeStr) + "\n";
   receipt += "-".repeat(paperWidth) + "\n";
   
-  // -- MINUMAN -- section for MAIN CHECKER
-  if (title === 'MAIN CHECKER' && itemsToPrint.length > 0) {
-      receipt += `\x1B\x61\x00`; // Left align
-      receipt += "-- MINUMAN --" + "\n";
-      itemsToPrint.forEach((item) => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        if (!menuItem || item.jumlah === 0) return;
+  itemsToPrint.forEach((item) => {
+      if (item.quantity === 0) return;
 
-        let itemName = `${item.jumlah}x ${menuItem.name.replace(/\*/g, '')}`;
-        if (item.varian) itemName += ` (${item.varian})`;
-        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
-        receipt += createLine(itemName, subtotal) + "\n";
+      let itemName = `${item.quantity}x ${item.menu_name.replace(/\*/g, '')}`;
+      if (item.variant_name) itemName += ` (${item.variant_name})`;
 
-        if (item.note) {
-            receipt += `  Note: ${item.note}\n`;
-        }
-      });
-  } else if (title !== 'MAIN CHECKER') {
-    // Original logic for kitchen and other checkers
-    itemsToPrint.forEach((item) => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        if (!menuItem || item.jumlah === 0) return;
-
-        let itemName = `${item.jumlah}x ${menuItem.name.replace(/\*/g, '')}`;
-        if (item.varian) itemName += ` (${item.varian})`;
-
-        if (showPrices) {
-            const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
-            receipt += createLine(itemName, subtotal) + "\n";
-        } else {
-            receipt += itemName + "\n";
-        }
-        
-        if (item.note) {
-            receipt += `  Note: ${item.note}\n`;
-        }
-      });
-  }
+      if (showPrices) {
+          const subtotal = `Rp${formatCurrency(item.item_total_price)}`;
+          receipt += createLine(itemName, subtotal) + "\n";
+      } else {
+          receipt += itemName + "\n";
+      }
+      
+      if (item.note) {
+          receipt += `  Note: ${item.note}\n`;
+      }
+  });
 
 
   // This section prints all items for the summary
@@ -162,16 +132,14 @@ const generateReceiptText = (
     receipt += `\x1B\x61\x00`; // Align left
     receipt += "-- SEMUA ITEM --" + "\n";
     
-    // Sort allItemsForSummary to have new items (printed === 0) on top
-    const sortedItems = [...allItemsForSummary].sort((a, b) => a.printed - b.printed);
+    const sortedItems = [...allItemsForSummary].sort((a, b) => (a.printed || 0) - (b.printed || 0));
     
     sortedItems.forEach((item) => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        if (!menuItem || item.jumlah === 0) return;
+        if (item.quantity === 0) return;
 
-        let itemName = `${item.jumlah}x ${menuItem.name.replace(/\*/g, '')}`;
-        if (item.varian) itemName += ` (${item.varian})`;
-        const subtotal = `Rp${formatCurrency(parseInt(item.subtotal, 10))}`;
+        let itemName = `${item.quantity}x ${item.menu_name.replace(/\*/g, '')}`;
+        if (item.variant_name) itemName += ` (${item.variant_name})`;
+        const subtotal = `Rp${formatCurrency(item.item_total_price)}`;
         receipt += createLine(itemName, subtotal) + "\n";
 
         if (item.note) {
@@ -184,8 +152,8 @@ const generateReceiptText = (
   receipt += "-".repeat(paperWidth) + "\n";
   
   if (showPrices) {
-    const total = order.total_amount ?? parseInt(order.subtotal.toString(), 10);
-    receipt += createLine("TOTAL", `Rp${formatCurrency(parseInt(order.subtotal.toString(), 10))}`) + "\n";
+    const total = order.total_amount;
+    receipt += createLine("SUBTOTAL", `Rp${formatCurrency(order.subtotal)}`) + "\n";
     if (order.discount && order.discount > 0) {
         receipt += createLine("DISKON", `-Rp${formatCurrency(order.discount)}`) + "\n";
         receipt += "--------------------------------\n";
@@ -234,30 +202,28 @@ const printJob = (receiptContent: string) => {
 };
 
 export const printKitchenStruk = (
-  order: Order,
-  menuItems: MenuItem[],
-  additionals: Additional[]
+  order: Order
 ) => {
   try {
-    const unprintedFood = order.detail_pesanans?.filter(item => {
-      const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-      // Item is food and has not been printed by kitchen checker yet
-      return menuItem?.kategori_struk === 'makanan' && item.printed === 0;
+    const unprintedFood = order.items?.filter(item => {
+      // Assuming kategori_struk is available on menu item, but it's not in the new API response.
+      // We will need a way to determine if it's food or drink.
+      // For now, let's assume we print all unprinted items for kitchen as a fallback.
+      // Ideally, the `items` object would contain the category type.
+      return (item as any).printed === 0;
     }) || [];
     
     if (unprintedFood.length > 0) {
-      const receiptText = generateReceiptText(order, menuItems, {
+      const receiptText = generateReceiptText(order, {
         title: "CHECKER DAPUR",
         showPrices: false,
         itemsToPrint: unprintedFood,
-        additionals,
       });
       printJob(receiptText);
       
-      // Update session state for kitchen and update backend
       updatePrintedStatus(unprintedFood);
     } else {
-        alert("Tidak ada item makanan baru untuk dicetak di Dapur.");
+        alert("Tidak ada item baru untuk dicetak di Dapur.");
     }
   } catch(e) {
       console.error("Error printing kitchen receipt:", e);
@@ -267,32 +233,22 @@ export const printKitchenStruk = (
 
 export const printMainCheckerStruk = (
   order: Order,
-  menuItems: MenuItem[],
-  additionals: Additional[]
 ) => {
   try {
-    // For Main Checker, we are interested in any new DRINK item
-    const newDrinks = order.detail_pesanans?.filter(item => {
-        const menuItem = menuItems.find(mi => mi.id === item.menu_id);
-        return menuItem?.kategori_struk === 'minuman' && item.printed === 0
-    }) || [];
+    const newItems = order.items?.filter(item => (item as any).printed === 0) || [];
 
-    if (newDrinks.length > 0) {
-      const receiptText = generateReceiptText(order, menuItems, {
+    if (newItems.length > 0) {
+      const receiptText = generateReceiptText(order, {
         title: "MAIN CHECKER",
         showPrices: true,
-        // We pass only new drinks to `itemsToPrint` to print in the first block
-        itemsToPrint: newDrinks,
-        // We pass ALL items to `allItemsForSummary` to print them in a single block
-        allItemsForSummary: order.detail_pesanans,
-        additionals,
+        itemsToPrint: newItems,
+        allItemsForSummary: order.items,
       });
       printJob(receiptText);
       
-      // Mark all new items as printed for the 'main' session
-      updatePrintedStatus(newDrinks);
+      updatePrintedStatus(newItems);
     } else {
-        alert("Tidak ada item minuman baru untuk dicetak di Main Checker.");
+        alert("Tidak ada item baru untuk dicetak di Main Checker.");
     }
   } catch(e) {
       console.error("Error printing main checker receipt:", e);
@@ -301,14 +257,13 @@ export const printMainCheckerStruk = (
 };
 
 
-export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additionals: Additional[], paymentAmount?: number) => {
+export const printPaymentStruk = (order: Order, paymentAmount?: number) => {
     try {
-        const receiptText = generateReceiptText(order, menuItems, {
+        const receiptText = generateReceiptText(order, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
-            itemsToPrint: order.detail_pesanans || [],
+            itemsToPrint: order.items || [],
             paymentAmount: paymentAmount,
-            additionals
         });
         printJob(receiptText);
     } catch(error) {
@@ -317,13 +272,12 @@ export const printPaymentStruk = (order: Order, menuItems: MenuItem[], additiona
     }
 };
 
-export const printBillStruk = (order: Order, menuItems: MenuItem[], additionals: Additional[]) => {
+export const printBillStruk = (order: Order) => {
     try {
-        const receiptText = generateReceiptText(order, menuItems, {
+        const receiptText = generateReceiptText(order, {
             title: "BILL",
             showPrices: true,
-            itemsToPrint: order.detail_pesanans || [],
-            additionals: additionals,
+            itemsToPrint: order.items || [],
         });
         printJob(receiptText);
     } catch(error) {

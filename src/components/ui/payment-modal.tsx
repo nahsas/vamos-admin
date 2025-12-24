@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Order, MenuItem, Additional } from '@/lib/data';
+import { Order } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Landmark, QrCode, Pencil, Check, Receipt, Info, Tag, Loader2, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -46,19 +46,7 @@ export function PaymentModal({
   const [discountCode, setDiscountCode] = React.useState('');
   const [appliedDiscount, setAppliedDiscount] = React.useState<{ amount: number, finalTotal: number, code: string } | null>(null);
   
-  // Need menuItems for printing
-  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
-  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
-  React.useEffect(() => {
-    fetch('https://vamos-api-v2.sejadikopi.com/api/menus')
-        .then(res => res.json())
-        .then(data => setMenuItems(data.data || []));
-    fetch('https://vamos-api-v2.sejadikopi.com/api/additionals')
-        .then(res => res.json())
-        .then(data => setAdditionals(data.data || []));
-  }, []);
-
-  const orderTotal = order ? parseInt(order.total, 10) : 0;
+  const orderTotal = order ? order.subtotal : 0;
   const displayTotal = appliedDiscount ? appliedDiscount.finalTotal : orderTotal;
   
   const handleAutoFill = () => {
@@ -135,21 +123,15 @@ export function PaymentModal({
 
     const now = new Date().toISOString();
 
-    const finalPayload: Partial<Order> & { cash_received?: number } = {
+    const finalPayload = {
         status: "completed",
-        updated_at: now,
-        completed_at: now,
-        is_final: true,
         payment_method: paymentMethod.toLowerCase() as 'cash' | 'qris',
         bank_qris: paymentMethod === 'QRIS' ? selectedBank : null,
         discount_code: appliedDiscount?.code || order.discount_code || null,
-        discount_amount: appliedDiscount?.amount || order.discount_amount || 0,
-        total_after_discount: appliedDiscount?.finalTotal || order.total_after_discount || orderTotal
+        discount: appliedDiscount?.amount || order.discount || 0,
+        total_amount: appliedDiscount?.finalTotal || order.total_amount,
+        cash_received: paymentMethod === 'Cash' ? Number(paymentAmount) : undefined,
     };
-
-    if (paymentMethod === 'Cash') {
-      finalPayload.cash_received = Number(paymentAmount);
-    }
     
     try {
         const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/${order.id}`, {
@@ -171,8 +153,8 @@ export function PaymentModal({
             description: `Pesanan #${order.id} telah ditandai sebagai selesai.`,
         });
         
-        // Print the payment receipt with the final order details
-        printPaymentStruk({ ...order, ...finalPayload, detail_pesanans: order.detail_pesanans }, menuItems, additionals, paymentMethod === 'Cash' ? Number(paymentAmount) : undefined);
+        const finalOrderState = { ...order, ...finalPayload };
+        printPaymentStruk(finalOrderState as Order);
         
         onOpenChange(false);
         appEventEmitter.emit('new-order'); // To refetch data on pages
@@ -211,9 +193,9 @@ export function PaymentModal({
             </div>
           <DialogTitle className="text-xl font-bold">
             Pembayaran{' '}
-            {order.location_type.toLowerCase() === 'dine_in'
-              ? `Meja ${order.no_meja}`
-              : order.no_meja}
+            {order.order_type.toLowerCase() === 'dine-in'
+              ? `${order.identifier}`
+              : order.identifier}
           </DialogTitle>
           <p className="text-muted-foreground text-sm">Silakan pilih metode pembayaran</p>
         </DialogHeader>

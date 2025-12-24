@@ -41,7 +41,7 @@ export function useOrderNotification() {
         return;
       }
       
-      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.detail_pesanans?.length ?? 0]));
+      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.items?.length ?? 0]));
 
       if (isFirstLoad.current) {
         setLastKnownOrdersState(currentOrdersState);
@@ -54,7 +54,7 @@ export function useOrderNotification() {
 
       for (const order of activeOrders) {
           const lastItemCount = lastKnownOrdersState.get(order.id);
-          const currentItemCount = order.detail_pesanans?.length ?? 0;
+          const currentItemCount = order.items?.length ?? 0;
 
           // Case 1: A completely new order has arrived.
           if (lastItemCount === undefined) {
@@ -140,5 +140,3 @@ export function useOrderNotification() {
     return () => clearInterval(interval);
   }, [fetchActiveOrders]);
 }
-
-    

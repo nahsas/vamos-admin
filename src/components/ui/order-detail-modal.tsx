@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Order, MenuItem, OrderItem, Additional } from '@/lib/data';
+import { Order, OrderItem } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -52,8 +52,8 @@ const statusConfig: {
   };
 } = {
   pending: { label: 'PENDING', color: 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900', headerColor: 'bg-primary' },
-  diproses: { label: 'PROSES', color: 'bg-blue-500 text-white', headerColor: 'bg-primary' },
-  selesai: { label: 'SELESAI', color: 'bg-green-500 text-white', headerColor: 'bg-green-600' },
+  process: { label: 'PROSES', color: 'bg-blue-500 text-white', headerColor: 'bg-primary' },
+  completed: { label: 'SELESAI', color: 'bg-green-500 text-white', headerColor: 'bg-green-600' },
   cancelled: { label: 'BATAL', color: 'bg-red-500 text-white', headerColor: 'bg-red-600' },
 };
 
@@ -61,29 +61,20 @@ export function OrderDetailModal({
   order,
   open,
   onOpenChange,
-  menuItems,
   onOrderDeleted,
 }: {
   order: Order | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  menuItems: MenuItem[];
   onOrderDeleted: () => void;
 }) {
   const { toast } = useToast();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false);
   
   const [currentOrder, setCurrentOrder] = React.useState<Order | null>(order);
-  const [additionals, setAdditionals] = React.useState<Additional[]>([]);
 
   React.useEffect(() => {
     setCurrentOrder(order);
-    if(open) {
-      fetch('https://vamos-api-v2.sejadikopi.com/api/additionals')
-        .then(res => res.json())
-        .then(data => setAdditionals(data.data || []))
-        .catch(console.error);
-    }
   }, [order, open]);
 
 
@@ -91,7 +82,7 @@ export function OrderDetailModal({
     if (!currentOrder) return;
 
     try {
-      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/pesanans/${currentOrder.id}`, {
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/${currentOrder.id}`, {
         method: 'DELETE',
       });
 
@@ -117,159 +108,29 @@ export function OrderDetailModal({
   };
   
   const updateOrderTotalOnBackend = async (orderId: number, newTotal: number) => {
-    try {
-        const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/pesanans/${orderId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ total: newTotal, total_after_discount: newTotal }),
-        });
-        if (!response.ok) throw new Error('Gagal memperbarui total pesanan di server.');
-    } catch (error) {
-        console.error("Failed to update order total on backend:", error);
-        // We can choose to show a toast here, but for now, we'll let the main toast handle it.
-    }
+    // This function can be expanded later if needed
   }
 
   const handleUpdateItemQuantity = async (item: OrderItem, newQuantity: number) => {
     if (!currentOrder || newQuantity < 0) return;
 
     if (newQuantity === 0) {
-        if (confirm(`Yakin ingin menghapus item "${getMenuDetails(item.menu_id)?.nama || 'Item'}" dari pesanan?`)) {
+        if (confirm(`Yakin ingin menghapus item "${item.menu_name || 'Item'}" dari pesanan?`)) {
             handleDeleteItem(item.id);
         }
         return;
     }
     
-    const newSubtotal = (item.base_price + (parseInt(item.additional_price, 10) || 0)) * newQuantity;
-
-    try {
-      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/detail_pesanan/${item.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          jumlah: newQuantity,
-          subtotal: newSubtotal
-        }),
-      });
-
-      if (!response.ok) throw new Error('Gagal memperbarui kuantitas item.');
-      
-      const updatedDetails = currentOrder.detail_pesanans.map(detail => 
-          detail.id === item.id ? { ...detail, jumlah: newQuantity, subtotal: String(newSubtotal) } : detail
-      );
-      const newTotal = updatedDetails.reduce((sum, detail) => sum + parseInt(detail.subtotal, 10), 0);
-
-      setCurrentOrder({
-          ...currentOrder,
-          detail_pesanans: updatedDetails,
-          total: String(newTotal),
-          total_after_discount: newTotal,
-      });
-      
-      await updateOrderTotalOnBackend(currentOrder.id, newTotal);
-
-      toast({
-        title: 'Kuantitas Diperbarui',
-        description: `Kuantitas untuk ${getMenuDetails(item.menu_id)?.nama} sekarang ${newQuantity}.`,
-      });
-
-    } catch(error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Gagal memperbarui kuantitas item.',
-      });
-    }
+    // Quantity update is disabled in modal for now
   };
   
   const handleDeleteItem = async (itemId: number) => {
-    if (!currentOrder) return;
-    try {
-        const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/detail_pesanan/${itemId}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) {
-            throw new Error('Gagal menghapus item pesanan.');
-        }
-
-        const updatedDetails = currentOrder.detail_pesanans.filter(item => item.id !== itemId);
-        const newTotal = updatedDetails.reduce((sum, item) => sum + parseInt(item.subtotal, 10), 0);
-        
-        setCurrentOrder({
-            ...currentOrder,
-            detail_pesanans: updatedDetails,
-            total: String(newTotal),
-            total_after_discount: newTotal,
-        });
-
-        await updateOrderTotalOnBackend(currentOrder.id, newTotal);
-
-        toast({
-            title: 'Sukses',
-            description: 'Item berhasil dihapus dari pesanan.',
-        });
-    } catch (error) {
-        console.error('Error deleting order item:', error);
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: (error as Error).message || 'Gagal menghapus item.',
-        });
-    }
+    // Item deletion is disabled in modal for now
   };
 
-  const getMenuDetails = (menuId: number) => {
-    return menuItems.find((item) => item.id === menuId);
-  };
-
-  const getAdditionalNames = (item: OrderItem): string[] => {
-    const names: string[] = [];
-
-    const processAdditionals = (data: any) => {
-        let parsedData;
-        if (typeof data === 'string') {
-            try {
-                parsedData = JSON.parse(data);
-            } catch (e) {
-                console.error("Failed to parse additionals string:", e);
-                return {}; // Return empty object on failure
-            }
-        } else if (typeof data === 'object' && data !== null) {
-            parsedData = data;
-        } else {
-            return {}; // Not a string or a valid object
-        }
-        return parsedData;
-    }
-    
-    const itemAdditionals = processAdditionals(item.additionals);
-    const itemDimsumAdditionals = processAdditionals(item.dimsum_additionals);
-
-    for (const id in itemAdditionals) {
-        if (itemAdditionals[id]) {
-            const additional = additionals.find(add => add.id === parseInt(id));
-            if (additional) {
-                names.push(additional.name);
-            }
-        }
-    }
-    for (const id in itemDimsumAdditionals) {
-        if (itemDimsumAdditionals[id]) {
-            const additional = additionals.find(add => add.id === parseInt(id));
-            if (additional) {
-                names.push(additional.name);
-            }
-        }
-    }
-    return names;
-}
-  
-  const totalItems = currentOrder?.detail_pesanans.reduce((sum, item) => sum + item.jumlah, 0) || 0;
-  const isProcessing = currentOrder?.status.toLowerCase() === 'diproses';
-  const isCompleted = currentOrder?.status.toLowerCase() === 'selesai' || currentOrder?.status.toLowerCase() === 'cancelled';
+  const totalItems = currentOrder?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  const isProcessing = currentOrder?.status.toLowerCase() === 'process';
+  const isCompleted = currentOrder?.status.toLowerCase() === 'completed' || currentOrder?.status.toLowerCase() === 'cancelled';
 
   const handlePaymentClick = () => {
     onOpenChange(false);
@@ -278,7 +139,7 @@ export function OrderDetailModal({
 
   const handlePrintBill = () => {
     if (currentOrder) {
-      printBillStruk(currentOrder, menuItems, additionals);
+      printBillStruk(currentOrder);
     }
   };
 
@@ -302,9 +163,9 @@ export function OrderDetailModal({
               <div className="flex justify-between items-center">
                 <DialogTitle>
                   Detail Pesanan{' '}
-                  {currentOrder.location_type.toLowerCase() === 'dine_in'
-                    ? `Meja ${currentOrder.no_meja}`
-                    : currentOrder.no_meja}
+                  {currentOrder.order_type.toLowerCase() === 'dine_in'
+                    ? `${currentOrder.identifier}`
+                    : currentOrder.identifier}
                 </DialogTitle>
               </div>
               <div className="flex items-center gap-2 text-sm pt-2">
@@ -328,68 +189,38 @@ export function OrderDetailModal({
             </DialogHeader>
 
             <div className="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
-                {currentOrder.detail_pesanans.map((item) => {
-                const menuItem = getMenuDetails(item.menu_id);
-                const addonNames = getAdditionalNames(item);
+                {currentOrder.items?.map((item) => {
                 return (
                     <div key={item.id} className="bg-card rounded-lg p-3">
                         <div className="flex justify-between items-start gap-4">
                            <div className="flex-1 space-y-1">
                                 <div className="font-bold flex items-center gap-2">
-                                    {menuItem?.name || 'Nama tidak ditemukan'}{' '}
-                                     {item.printed === 0 && !isCompleted && (
-                                      <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
-                                          <Bell className="w-2.5 h-2.5 mr-1"/>
-                                          BARU
-                                      </Badge>
-                                    )}
+                                    {item.menu_name || 'Nama tidak ditemukan'}{' '}
                                 </div>
                                 <div className="flex items-center gap-1 flex-wrap">
-                                    {item.varian && (
+                                    {item.variant_name && (
                                     <Badge
                                         variant="outline"
                                         className={cn(
                                         "text-xs",
-                                        item.varian.toLowerCase() === 'hot' 
+                                        item.variant_name.toLowerCase() === 'hot' 
                                             ? 'border-red-300 bg-white text-red-400' 
                                             : 'border-blue-300 bg-white text-blue-400'
                                         )}
                                     >
-                                        {item.varian}
+                                        {item.variant_name}
                                     </Badge>
                                     )}
-                                    {addonNames.map((add, index) => (
-                                        <Badge key={index} variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                                    {item.selected_additional_name && (
+                                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
                                             <PlusCircle className="mr-1 h-3 w-3" />
-                                            {add}
+                                            {item.selected_additional_name}
                                         </Badge>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                              <div className="text-right flex-shrink-0 flex items-center gap-2">
-                                {!isCompleted ? (
-                                    <div className="flex items-center gap-1 border rounded-md">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-7 w-7" 
-                                            onClick={() => handleUpdateItemQuantity(item, item.jumlah - 1)}
-                                        >
-                                            <Minus className="h-4 w-4"/>
-                                        </Button>
-                                        <span className="font-bold w-4 text-center">{item.jumlah}</span>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-7 w-7" 
-                                            onClick={() => handleUpdateItemQuantity(item, item.jumlah + 1)}
-                                        >
-                                            <Plus className="h-4 w-4"/>
-                                        </Button>
-                                    </div>
-                                ) : (
-                                     <p className="font-semibold">x {item.jumlah}</p>
-                                )}
+                                <p className="font-semibold">x {item.quantity}</p>
                             </div>
                         </div>
                         {item.note && (
@@ -401,17 +232,11 @@ export function OrderDetailModal({
                         <div className="text-sm mt-2 pt-2 border-t border-dashed">
                              <div className="flex justify-between">
                                  <span>Harga satuan:</span>
-                                 <span>Rp {item.base_price.toLocaleString('id-ID')}</span>
+                                 <span>Rp {item.item_unit_price.toLocaleString('id-ID')}</span>
                              </div>
-                              {item.additional_price && parseInt(item.additional_price, 10) > 0 && (
-                                <div className="flex justify-between">
-                                    <span>Harga tambahan:</span>
-                                    <span>Rp {parseInt(item.additional_price, 10).toLocaleString('id-ID')}</span>
-                                </div>
-                              )}
                              <div className="flex justify-between font-bold text-primary">
-                                 <span>Subtotal ({item.jumlah}x):</span>
-                                 <span>Rp {parseInt(item.subtotal, 10).toLocaleString('id-ID')}</span>
+                                 <span>Subtotal ({item.quantity}x):</span>
+                                 <span>Rp {item.item_total_price.toLocaleString('id-ID')}</span>
                              </div>
                         </div>
                     </div>
@@ -423,7 +248,7 @@ export function OrderDetailModal({
                 <div className="w-full flex justify-between items-center">
                     <div>
                         <p className="text-sm text-muted-foreground">Total Pembayaran:</p>
-                        <p className="text-2xl font-bold">Rp {(currentOrder.total_after_discount ?? parseInt(currentOrder.total, 10)).toLocaleString('id-ID')}</p>
+                        <p className="text-2xl font-bold">Rp {(currentOrder.total_amount).toLocaleString('id-ID')}</p>
                     </div>
                      <p className="text-sm text-muted-foreground">{totalItems} item</p>
                 </div>
@@ -489,5 +314,3 @@ export function OrderDetailModal({
     </>
   );
 }
-
-    

@@ -25,15 +25,10 @@ const statusConfig: {
   cancelled: { variant: 'destructive', label: 'Dibatalkan', color: 'bg-red-500 text-white' },
 };
 
-export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuItem[] }) {
+export function OrderCard({ order }: { order: Order }) {
   const router = useRouter();
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
 
-  const getMenuName = (menuId: number) => {
-    const menuItem = menuItems.find((item) => item.id === menuId);
-    return menuItem ? menuItem.nama : 'Item Tidak Dikenal';
-  };
-  
   const handleRedirect = () => {
     router.push('/orders');
   }
@@ -80,27 +75,27 @@ export function OrderCard({ order, menuItems }: { order: Order; menuItems: MenuI
               </div>
               </div>
 
-              { (order.detail_pesanans && order.detail_pesanans.length > 0) &&
+              { (order.items && order.items.length > 0) &&
               <div className="border-t border-dashed pt-3">
                 <div className="flex justify-between items-center text-sm font-medium mb-2">
                     <h4>Detail Pesanan</h4>
                     <span className="text-muted-foreground">
-                        {order.detail_pesanans.reduce((acc, item) => acc + item.jumlah, 0)} item
+                        {order.items.reduce((acc, item) => acc + item.quantity, 0)} item
                     </span>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground">
-                    {order.detail_pesanans.slice(0, 2).map((item) => (
+                    {order.items.slice(0, 2).map((item) => (
                     <div key={item.id} className="flex justify-between">
-                        <span>{getMenuName(item.menu_id)}</span>
-                        <span>x {item.jumlah}</span>
+                        <span>{item.menu_name}</span>
+                        <span>x {item.quantity}</span>
                     </div>
                     ))}
-                    {order.detail_pesanans.length > 2 && (
+                    {order.items.length > 2 && (
                       <div className={cn(
                           "text-center text-xs pt-2",
                           isPending ? "text-yellow-500" : "text-blue-500"
                       )}>
-                          + {order.detail_pesanans.length - 2} menu lainnya...
+                          + {order.items.length - 2} menu lainnya...
                       </div>
                     )}
                 </div>
