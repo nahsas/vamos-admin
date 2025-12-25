@@ -41,7 +41,7 @@ export function useOrderNotification() {
         return;
       }
       
-      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.items?.length ?? 0]));
+      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.items?.filter(item => (item as any).printed === 0).length ?? 0]));
 
       if (isFirstLoad.current) {
         setLastKnownOrdersState(currentOrdersState);
@@ -52,16 +52,16 @@ export function useOrderNotification() {
       const newOrders: Order[] = [];
       const updatedOrders: Order[] = [];
 
-      for (const order of activeOrders) {
-          const lastItemCount = lastKnownOrdersState.get(order.id);
-          const currentItemCount = order.items?.length ?? 0;
-
+       for (const order of activeOrders) {
+          const lastNewItemCount = lastKnownOrdersState.get(order.id);
+          const currentNewItemCount = order.items?.filter(item => (item as any).printed === 0).length ?? 0;
+          
           // Case 1: A completely new order has arrived.
-          if (lastItemCount === undefined) {
+          if (lastNewItemCount === undefined && currentNewItemCount > 0) {
               newOrders.push(order);
           } 
           // Case 2: An existing order has new items added.
-          else if (currentItemCount > lastItemCount) {
+          else if (lastNewItemCount !== undefined && currentNewItemCount > lastNewItemCount) {
               updatedOrders.push(order);
           }
       }
@@ -108,9 +108,13 @@ export function useOrderNotification() {
         
         appEventEmitter.emit('new-order');
         setLastKnownOrdersState(currentOrdersState);
-      } else if (currentOrdersState.size !== lastKnownOrdersState.size) {
-        // This handles cases where orders were completed/cancelled elsewhere.
-        setLastKnownOrdersState(currentOrdersState);
+      } else {
+        const currentIds = new Set(currentOrdersState.keys());
+        const lastIds = new Set(lastKnownOrdersState.keys());
+
+        if (currentIds.size !== lastIds.size) {
+            setLastKnownOrdersState(currentOrdersState);
+        }
       }
 
     } catch (error) {
@@ -127,7 +131,7 @@ export function useOrderNotification() {
           });
       }
     }
-  }, [lastKnownOrdersState, toast, router, fetchError]);
+  }, [lastKnownOrdersState, toast, router]);
 
   useEffect(() => {
     const interval = setInterval(() => {
