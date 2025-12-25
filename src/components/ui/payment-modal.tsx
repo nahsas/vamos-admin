@@ -129,7 +129,6 @@ export function PaymentModal({
         bank_qris: paymentMethod === 'QRIS' ? selectedBank : null,
         discount_code: appliedDiscount?.code || order.discount_code || null,
         discount: appliedDiscount?.amount || order.discount || 0,
-        total_amount: appliedDiscount?.finalTotal || order.total_amount,
     };
     
     try {
