@@ -23,7 +23,12 @@ interface ReceiptOptions {
     showPrices: boolean;
     itemsToPrint: OrderItem[];
     allItemsForSummary?: OrderItem[]; // For main checker summary
-    paymentAmount?: number;
+    paymentInfo?: {
+        method: 'cash' | 'qris';
+        cashReceived?: number;
+        changeAmount?: number;
+        bank?: string | null;
+    }
 }
 
 const updatePrintedStatus = (items: OrderItem[]) => {
@@ -60,7 +65,7 @@ const generateReceiptText = (
     options: ReceiptOptions
 ): string => {
   
-  const { title, showPrices, itemsToPrint, allItemsForSummary, paymentAmount } = options;
+  const { title, showPrices, itemsToPrint, allItemsForSummary, paymentInfo } = options;
 
   const orderDate = order?.completed_at ? new Date(order.completed_at) : new Date();
   const dateStr = orderDate.toLocaleDateString("id-ID", {
@@ -160,17 +165,18 @@ const generateReceiptText = (
     }
     receipt += createLine("TOTAL BAYAR", `Rp${formatCurrency(total)}`) + "\n";
 
-    if (showPrices && order.payment_method) {
+    if (paymentInfo) {
       let metodeLabel = "";
-      if (order.payment_method === "cash") {
+      if (paymentInfo.method === "cash") {
         metodeLabel = "CASH";
-        if (paymentAmount && paymentAmount > 0) {
-            receipt += createLine("DIBAYAR", `Rp${formatCurrency(paymentAmount)}`) + "\n";
-            const change = paymentAmount - total;
-            receipt += createLine("KEMBALIAN", `Rp${formatCurrency(change)}`) + "\n";
+        if (paymentInfo.cashReceived !== undefined) {
+            receipt += createLine("DIBAYAR", `Rp${formatCurrency(paymentInfo.cashReceived)}`) + "\n";
         }
-      } else if (order.payment_method === "qris") {
-        metodeLabel = order.bank_qris ? `QRIS ${order.bank_qris}` : "QRIS";
+        if (paymentInfo.changeAmount !== undefined) {
+            receipt += createLine("KEMBALIAN", `Rp${formatCurrency(paymentInfo.changeAmount)}`) + "\n";
+        }
+      } else if (paymentInfo.method === "qris") {
+        metodeLabel = paymentInfo.bank ? `QRIS ${paymentInfo.bank}` : "QRIS";
       }
       if (metodeLabel) {
         receipt += createLine("Metode", metodeLabel) + "\n";
@@ -257,13 +263,18 @@ export const printMainCheckerStruk = (
 };
 
 
-export const printPaymentStruk = (order: Order, paymentAmount?: number) => {
+export const printPaymentStruk = (order: Order) => {
     try {
         const receiptText = generateReceiptText(order, {
             title: "STRUK PEMBELIAN",
             showPrices: true,
             itemsToPrint: order.items || [],
-            paymentAmount: paymentAmount,
+            paymentInfo: {
+                method: order.payment_method || 'cash',
+                cashReceived: order.cash_received,
+                changeAmount: order.change_amount,
+                bank: order.bank_qris
+            },
         });
         printJob(receiptText);
     } catch(error) {

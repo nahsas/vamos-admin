@@ -121,16 +121,15 @@ export function PaymentModal({
 
     setIsLoading(true);
 
-    const now = new Date().toISOString();
-
     const finalPayload = {
         status: "completed",
         payment_method: paymentMethod.toLowerCase() as 'cash' | 'qris',
+        cash_received: paymentMethod === 'Cash' ? Number(paymentAmount) : displayTotal,
+        change_amount: paymentMethod === 'Cash' ? changeAmount : 0,
         bank_qris: paymentMethod === 'QRIS' ? selectedBank : null,
         discount_code: appliedDiscount?.code || order.discount_code || null,
         discount: appliedDiscount?.amount || order.discount || 0,
         total_amount: appliedDiscount?.finalTotal || order.total_amount,
-        cash_received: paymentMethod === 'Cash' ? Number(paymentAmount) : undefined,
     };
     
     try {
@@ -153,7 +152,7 @@ export function PaymentModal({
             description: `Pesanan #${order.id} telah ditandai sebagai selesai.`,
         });
         
-        const finalOrderState = { ...order, ...finalPayload };
+        const finalOrderState = { ...order, ...finalPayload, total_amount: displayTotal, change_amount: finalPayload.change_amount };
         printPaymentStruk(finalOrderState as Order);
         
         onOpenChange(false);
