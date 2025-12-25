@@ -38,6 +38,7 @@ export type OrderItem = {
   item_unit_price: number;
   item_total_price: number;
   printed?: number;
+  is_printed?: boolean;
 };
 
 export type Order = {
@@ -77,4 +78,3 @@ export type Struk = {
   kembalian: number;
   created_at: string;
 }
-

@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { appEventEmitter } from '@/lib/event-emitter';
 
 export function useOrderNotification() {
-  const [lastKnownOrdersState, setLastKnownOrdersState] = useState<Map<number, number>>(new Map());
+  const [lastKnownOrders, setLastKnownOrders] = useState<Order[]>([]);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
@@ -31,42 +31,42 @@ export function useOrderNotification() {
       if (!response.ok) {
         throw new Error('Failed to fetch active orders');
       }
-      // If fetch is successful, clear any previous error
+      
       if (fetchError) {
           setFetchError(null);
       }
-      const { data: activeOrders }: { data: Order[] } = await response.json();
 
-      if (!activeOrders) {
-        return;
-      }
+      const { data: activeOrders }: { data: Order[] } = await response.json();
       
-      const currentOrdersState = new Map(activeOrders.map(order => [order.id, order.items?.filter(item => (item as any).printed === 0).length ?? 0]));
+      if (!activeOrders) return;
 
       if (isFirstLoad.current) {
-        setLastKnownOrdersState(currentOrdersState);
+        setLastKnownOrders(activeOrders);
         isFirstLoad.current = false;
         return;
       }
       
-      const newOrders: Order[] = [];
-      const updatedOrders: Order[] = [];
+      const newOrderNotifications: Order[] = [];
+      const updatedOrderNotifications: Order[] = [];
 
-       for (const order of activeOrders) {
-          const lastNewItemCount = lastKnownOrdersState.get(order.id);
-          const currentNewItemCount = order.items?.filter(item => (item as any).printed === 0).length ?? 0;
-          
-          // Case 1: A completely new order has arrived.
-          if (lastNewItemCount === undefined && currentNewItemCount > 0) {
-              newOrders.push(order);
-          } 
-          // Case 2: An existing order has new items added.
-          else if (lastNewItemCount !== undefined && currentNewItemCount > lastNewItemCount) {
-              updatedOrders.push(order);
+      for (const newOrder of activeOrders) {
+          const oldOrder = lastKnownOrders.find(o => o.id === newOrder.id);
+
+          if (!oldOrder) {
+              // New order detected
+              newOrderNotifications.push(newOrder);
+          } else {
+              // Existing order, check for new items
+              const oldUnprintedCount = oldOrder.items?.filter(item => !item.is_printed).length ?? 0;
+              const newUnprintedCount = newOrder.items?.filter(item => !item.is_printed).length ?? 0;
+              
+              if (newUnprintedCount > oldUnprintedCount) {
+                  updatedOrderNotifications.push(newOrder);
+              }
           }
       }
 
-      const hasNewActivity = newOrders.length > 0 || updatedOrders.length > 0;
+      const hasNewActivity = newOrderNotifications.length > 0 || updatedOrderNotifications.length > 0;
 
       if (hasNewActivity) {
         if (audioRef.current) {
@@ -76,9 +76,8 @@ export function useOrderNotification() {
           });
         }
         
-        // Handle new orders
-        newOrders.forEach(order => {
-            const customer = order.order_type.toLowerCase() === 'dine_in' ? `Meja ${order.identifier}`: order.identifier;
+        newOrderNotifications.forEach(order => {
+            const customer = order.order_type.toLowerCase() === 'dine-in' ? `Meja ${order.identifier}`: order.identifier;
             toast({
                 title: '🔔 Pesanan Baru Diterima!',
                 description: `Pesanan baru dari ${customer} telah diterima.`,
@@ -91,9 +90,8 @@ export function useOrderNotification() {
             });
         });
 
-        // Handle updated orders
-        updatedOrders.forEach(order => {
-            const customer = order.order_type.toLowerCase() === 'dine_in' ? `Meja ${order.identifier}`: order.identifier;
+        updatedOrderNotifications.forEach(order => {
+            const customer = order.order_type.toLowerCase() === 'dine-in' ? `Meja ${order.identifier}`: order.identifier;
             toast({
                 title: '🔔 Item Baru Ditambahkan!',
                 description: `Item baru ditambahkan ke pesanan ${customer}.`,
@@ -107,19 +105,11 @@ export function useOrderNotification() {
         });
         
         appEventEmitter.emit('new-order');
-        setLastKnownOrdersState(currentOrdersState);
-      } else {
-        const currentIds = new Set(currentOrdersState.keys());
-        const lastIds = new Set(lastKnownOrdersState.keys());
-
-        if (currentIds.size !== lastIds.size) {
-            setLastKnownOrdersState(currentOrdersState);
-        }
       }
+      setLastKnownOrders(activeOrders);
 
     } catch (error) {
       console.error('Error fetching active orders:', error);
-      // Only show the toast if it's a new error
       if (!fetchError) {
           const errorMessage = 'Could not connect to server to check for new orders. Please check your network connection.';
           setFetchError(errorMessage);
@@ -131,16 +121,11 @@ export function useOrderNotification() {
           });
       }
     }
-  }, [lastKnownOrdersState, toast, router]);
+  }, [lastKnownOrders, toast, router, fetchError]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchActiveOrders();
-    }, 3000); // Poll every 3 seconds
-
-    // Fetch once on mount
+    const interval = setInterval(fetchActiveOrders, 3000); 
     fetchActiveOrders();
-
     return () => clearInterval(interval);
   }, [fetchActiveOrders]);
 }
