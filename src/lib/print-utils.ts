@@ -202,22 +202,70 @@ const generateReceiptText = (
 };
 
 const printJob = (receiptContent: string) => {
-    const encoded = encodeURIComponent(receiptContent);
-    const url = `intent:${encoded}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end`;
-    window.location.href = url;
+    // --- Fallback for Desktop/Web Print ---
+    const webPrint = () => {
+        const receiptHtml = `
+            <html>
+                <head>
+                    <title>Cetak Struk</title>
+                    <style>
+                        body { 
+                            font-family: 'Courier New', Courier, monospace;
+                            width: 300px; 
+                            font-size: 12px;
+                        }
+                        pre { 
+                            white-space: pre-wrap; 
+                            word-wrap: break-word;
+                            font-family: 'Courier New', Courier, monospace;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <pre>${receiptContent.replace(/[\x00-\x1F\x7F]/g, "")}</pre>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.onafterprint = window.close;
+                        }
+                    </script>
+                </body>
+            </html>
+        `;
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(receiptHtml);
+            printWindow.document.close();
+        } else {
+            alert('Gagal membuka jendela cetak. Pastikan pop-up diizinkan.');
+        }
+    };
+
+    // --- Primary method for RawBT on Android ---
+    try {
+        const encoded = encodeURIComponent(receiptContent);
+        const url = `intent:${encoded}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end`;
+        
+        const intentLink = document.createElement('a');
+        intentLink.href = url;
+
+        // Hide the link and trigger it
+        intentLink.style.display = 'none';
+        document.body.appendChild(intentLink);
+        intentLink.click();
+        document.body.removeChild(intentLink);
+
+    } catch (e) {
+        console.warn("Metode cetak RawBT gagal, menggunakan metode web print.", e);
+        webPrint();
+    }
 };
 
 export const printKitchenStruk = (
   order: Order
 ) => {
   try {
-    const unprintedFood = order.items?.filter(item => {
-      // Assuming kategori_struk is available on menu item, but it's not in the new API response.
-      // We will need a way to determine if it's food or drink.
-      // For now, let's assume we print all unprinted items for kitchen as a fallback.
-      // Ideally, the `items` object would contain the category type.
-      return !item.is_printed;
-    }) || [];
+    const unprintedFood = order.items?.filter(item => !item.is_printed) || [];
     
     if (unprintedFood.length > 0) {
       const receiptText = generateReceiptText(order, {
@@ -296,5 +344,3 @@ export const printBillStruk = (order: Order) => {
         alert("Gagal mencetak bill.");
     }
 };
-
-    
