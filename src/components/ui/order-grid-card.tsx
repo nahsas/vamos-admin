@@ -39,7 +39,7 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'process';
   
-  const hasNewItems = order.items?.some(item => (item as any).printed === 0);
+  const hasNewItems = order.items?.some(item => !item.is_printed);
 
   const totalItems = order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   
@@ -214,3 +214,4 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
   );
 }
 
+    

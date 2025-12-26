@@ -32,7 +32,7 @@ interface ReceiptOptions {
 }
 
 const updatePrintedStatus = (items: OrderItem[]) => {
-  const unprintedItems = items.filter(item => (item as any).printed === 0);
+  const unprintedItems = items.filter(item => !item.is_printed);
   if (unprintedItems.length === 0) return;
 
   const updatePromises = unprintedItems.map(item =>
@@ -137,7 +137,7 @@ const generateReceiptText = (
     receipt += `\x1B\x61\x00`; // Align left
     receipt += "-- SEMUA ITEM --" + "\n";
     
-    const sortedItems = [...allItemsForSummary].sort((a, b) => (a.printed || 0) - (b.printed || 0));
+    const sortedItems = [...allItemsForSummary].sort((a, b) => (a.is_printed ? 1 : 0) - (b.is_printed ? 1 : 0));
     
     sortedItems.forEach((item) => {
         if (item.quantity === 0) return;
@@ -216,7 +216,7 @@ export const printKitchenStruk = (
       // We will need a way to determine if it's food or drink.
       // For now, let's assume we print all unprinted items for kitchen as a fallback.
       // Ideally, the `items` object would contain the category type.
-      return (item as any).printed === 0;
+      return !item.is_printed;
     }) || [];
     
     if (unprintedFood.length > 0) {
@@ -241,7 +241,7 @@ export const printMainCheckerStruk = (
   order: Order,
 ) => {
   try {
-    const newItems = order.items?.filter(item => (item as any).printed === 0) || [];
+    const newItems = order.items?.filter(item => !item.is_printed) || [];
 
     if (newItems.length > 0) {
       const receiptText = generateReceiptText(order, {
@@ -296,3 +296,5 @@ export const printBillStruk = (order: Order) => {
         alert("Gagal mencetak bill.");
     }
 };
+
+    
