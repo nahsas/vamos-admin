@@ -163,7 +163,7 @@ export function OrderDetailModal({
               <div className="flex justify-between items-center">
                 <DialogTitle>
                   Detail Pesanan{' '}
-                  {currentOrder.order_type.toLowerCase() === 'dine_in'
+                  {currentOrder.order_type.toLowerCase() === 'dine-in'
                     ? `${currentOrder.identifier}`
                     : currentOrder.identifier}
                 </DialogTitle>
@@ -196,6 +196,11 @@ export function OrderDetailModal({
                            <div className="flex-1 space-y-1">
                                 <div className="font-bold flex items-center gap-2">
                                     {item.menu_name || 'Nama tidak ditemukan'}{' '}
+                                    {!item.is_printed && (
+                                        <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
+                                            BARU
+                                        </Badge>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1 flex-wrap">
                                     {item.variant_name && (
