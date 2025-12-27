@@ -113,8 +113,7 @@ const generateReceiptText = (
   itemsToPrint.forEach((item) => {
       if (item.quantity === 0) return;
 
-      let itemName = `${item.quantity}x ${item.menu_name.replace(/\*/g, '')}`;
-      if (item.variant_name) itemName += ` (${item.variant_name})`;
+      const itemName = `${item.quantity}x ${item.menu_name.replace(/\*/g, '')}`;
 
       if (showPrices) {
           const subtotal = `Rp${formatCurrency(item.item_total_price)}`;
@@ -123,8 +122,14 @@ const generateReceiptText = (
           receipt += itemName + "\n";
       }
       
+      if (item.variant_name) {
+        receipt += `  (${item.variant_name})\n`;
+      }
+      if (item.selected_additional_name) {
+        receipt += `  + ${item.selected_additional_name}\n`;
+      }
       if (item.note) {
-          receipt += `  Note: ${item.note}\n`;
+        receipt += `  *Note: ${item.note}\n`;
       }
   });
 
@@ -142,13 +147,18 @@ const generateReceiptText = (
     sortedItems.forEach((item) => {
         if (item.quantity === 0) return;
 
-        let itemName = `${item.quantity}x ${item.menu_name.replace(/\*/g, '')}`;
-        if (item.variant_name) itemName += ` (${item.variant_name})`;
+        const itemName = `${item.quantity}x ${item.menu_name.replace(/\*/g, '')}`;
         const subtotal = `Rp${formatCurrency(item.item_total_price)}`;
         receipt += createLine(itemName, subtotal) + "\n";
 
+        if (item.variant_name) {
+          receipt += `  (${item.variant_name})\n`;
+        }
+        if (item.selected_additional_name) {
+          receipt += `  + ${item.selected_additional_name}\n`;
+        }
         if (item.note) {
-            receipt += `  Note: ${item.note}\n`;
+          receipt += `  *Note: ${item.note}\n`;
         }
     });
   }
