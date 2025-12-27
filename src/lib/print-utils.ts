@@ -265,17 +265,17 @@ export const printKitchenStruk = (
   order: Order
 ) => {
   try {
-    const unprintedFood = order.items?.filter(item => !item.is_printed && item.checker_type === 'bar') || [];
+    const unprintedItems = order.items?.filter(item => !item.is_printed && item.checker_type === 'bar') || [];
     
-    if (unprintedFood.length > 0) {
+    if (unprintedItems.length > 0) {
       const receiptText = generateReceiptText(order, {
         title: "CHECKER DAPUR",
         showPrices: false,
-        itemsToPrint: unprintedFood,
+        itemsToPrint: unprintedItems,
       });
       printJob(receiptText);
       
-      updatePrintedStatus(unprintedFood);
+      updatePrintedStatus(unprintedItems);
     } else {
         alert("Tidak ada item baru untuk dicetak di Dapur.");
     }

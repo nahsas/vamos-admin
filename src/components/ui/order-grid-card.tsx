@@ -40,6 +40,8 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
   const isProcessing = order.status.toLowerCase() === 'process';
   
   const hasNewItems = order.items?.some(item => !item.is_printed);
+  const hasNewMainCheckerItems = order.items?.some(item => !item.is_printed && item.checker_type === 'main');
+  const hasNewBarCheckerItems = order.items?.some(item => !item.is_printed && item.checker_type === 'bar');
 
   const totalItems = order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   
@@ -164,18 +166,18 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
                 <AlertDialogHeader>
                     <AlertDialogTitle>Pilih Tipe Checker</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Pilih checker yang ingin Anda cetak untuk item baru.
+                        Pilih checker yang ingin Anda cetak untuk item baru. Tombol hanya aktif jika ada item yang sesuai.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col gap-2 mt-4 md:flex-row md:justify-between">
-                    <div className="grid grid-cols-2 gap-2 w-full">
-                        <AlertDialogAction onClick={handleKitchenPrint} className="w-full">
-                            Checker Dapur
-                        </AlertDialogAction>
-                        <AlertDialogAction onClick={handleMainCheckerPrint} className="w-full">
-                            Main Checker
-                        </AlertDialogAction>
-                    </div>
+                <div className="flex-col gap-2 mt-4 md:flex-row md:justify-between space-y-2">
+                    <Button onClick={handleMainCheckerPrint} className="w-full" disabled={!hasNewMainCheckerItems}>
+                        Main Checker
+                    </Button>
+                    <Button onClick={handleKitchenPrint} className="w-full" disabled={!hasNewBarCheckerItems}>
+                        Checker Dapur
+                    </Button>
+                </div>
+                <AlertDialogFooter>
                     <AlertDialogCancel className="w-full mt-2 md:mt-0">Batal</AlertDialogCancel>
                 </AlertDialogFooter>
             </AlertDialogContent>
@@ -213,5 +215,3 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
     </>
   );
 }
-
-    

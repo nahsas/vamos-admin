@@ -286,23 +286,10 @@ export function OrderDetailModal({
                         </Button>
 
                         <Button 
-                            onClick={isProcessing ? handlePaymentClick : () => {}}
-                            className={cn(
-                                isProcessing 
-                                    ? "bg-green-600 hover:bg-green-700" 
-                                    : "bg-blue-600 hover:bg-blue-700",
-                                "text-white"
-                            )}
+                            onClick={handlePaymentClick}
+                            className="bg-green-600 hover:bg-green-700 text-white"
                         >
-                        {isProcessing ? (
-                            <>
                             <Wallet className="mr-2 h-4 w-4" /> Bayar
-                            </>
-                        ) : (
-                            <>
-                            Proses <ArrowRight className="ml-2 h-4 w-4" />
-                            </>
-                        )}
                         </Button>
                     </DialogFooter>
                 )}
