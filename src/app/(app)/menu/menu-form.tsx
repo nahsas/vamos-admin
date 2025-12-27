@@ -149,6 +149,7 @@ export function MenuForm({
     formData.append('description', values.description || '');
     formData.append('kategori_struk', values.kategori_struk);
     formData.append('is_available', values.is_available ? '1' : '0');
+    formData.append('is_best_seller', values.is_best_seller ? '1' : '0');
     
     if (values.image instanceof File) {
       formData.append('image', values.image);
