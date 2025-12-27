@@ -265,7 +265,7 @@ export const printKitchenStruk = (
   order: Order
 ) => {
   try {
-    const unprintedFood = order.items?.filter(item => !item.is_printed && item.kategori_struk === 'bar') || [];
+    const unprintedFood = order.items?.filter(item => !item.is_printed && item.checker_type === 'bar') || [];
     
     if (unprintedFood.length > 0) {
       const receiptText = generateReceiptText(order, {
@@ -289,7 +289,7 @@ export const printMainCheckerStruk = (
   order: Order,
 ) => {
   try {
-    const newItems = order.items?.filter(item => !item.is_printed && item.kategori_struk === 'main') || [];
+    const newItems = order.items?.filter(item => !item.is_printed && item.checker_type === 'main') || [];
 
     if (newItems.length > 0) {
       const receiptText = generateReceiptText(order, {

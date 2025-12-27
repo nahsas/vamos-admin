@@ -14,7 +14,7 @@ export type MenuItem = {
   additional_ids?: number[];
   variants?: { id: number; name: string; price: number; is_available: boolean }[];
   additionals?: { id: number; name: string; price: number; is_available: boolean }[];
-  kategori_struk: 'main' | 'bar';
+  checker_type: 'main' | 'bar';
   stok: number;
 };
 
@@ -37,7 +37,7 @@ export type OrderItem = {
   item_unit_price: number;
   item_total_price: number;
   is_printed: boolean;
-  kategori_struk: 'main' | 'bar';
+  checker_type: 'main' | 'bar';
 };
 
 export type Order = {
