@@ -140,14 +140,6 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
         return getCategoryName(categoryId);
       }
     },
-     {
-      accessorKey: "kategori_struk",
-      header: "Tipe Checker",
-      cell: ({ row }) => {
-        const kategori_struk = row.getValue("kategori_struk") as string;
-        return <Badge variant={kategori_struk === 'bar' ? 'secondary' : 'default'} className="capitalize">{kategori_struk}</Badge>;
-      }
-    },
     {
       accessorKey: "price",
       header: () => <div className="text-right">Harga</div>,
