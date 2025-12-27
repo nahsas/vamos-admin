@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Order } from '@/lib/data';
+import { Order, OrderItem } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,9 +39,9 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
   const statusInfo = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
   const isProcessing = order.status.toLowerCase() === 'process';
   
-  const hasNewItems = order.items?.some(item => !item.is_printed);
-  const hasNewMainCheckerItems = order.items?.some(item => !item.is_printed && item.checker_type === 'main');
-  const hasNewBarCheckerItems = order.items?.some(item => !item.is_printed && item.checker_type === 'bar');
+  const hasUnprintedItems = order.items?.some(item => !item.is_printed);
+  const hasNewMainCheckerItems = order.items?.some(item => !item.is_printed && item.menu?.checker_type === 'main');
+  const hasNewBarCheckerItems = order.items?.some(item => !item.is_printed && item.menu?.checker_type === 'bar');
 
   const totalItems = order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   
@@ -81,7 +81,7 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
                 <h3 className="text-xl font-bold">
                   {order.identifier}
                 </h3>
-                {hasNewItems && (
+                {hasUnprintedItems && (
                   <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
                     <Bell className="w-2.5 h-2.5 mr-1"/>
                     BARU
@@ -157,7 +157,7 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
           <div className="grid grid-cols-3 gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button disabled={!hasNewItems} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
+              <Button disabled={!hasUnprintedItems} size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-1 py-1 flex items-center justify-center gap-1">
                   <FileText className="h-3 w-3" />
                   Checker
               </Button>

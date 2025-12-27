@@ -265,7 +265,7 @@ export const printKitchenStruk = (
   order: Order
 ) => {
   try {
-    const unprintedItems = order.items?.filter(item => !item.is_printed && item.checker_type === 'bar') || [];
+    const unprintedItems = order.items?.filter(item => !item.is_printed && item.menu?.checker_type === 'bar') || [];
     
     if (unprintedItems.length > 0) {
       const receiptText = generateReceiptText(order, {
@@ -289,7 +289,7 @@ export const printMainCheckerStruk = (
   order: Order,
 ) => {
   try {
-    const newItems = order.items?.filter(item => !item.is_printed && item.checker_type === 'main') || [];
+    const newItems = order.items?.filter(item => !item.is_printed && item.menu?.checker_type === 'main') || [];
 
     if (newItems.length > 0) {
       const receiptText = generateReceiptText(order, {
@@ -340,7 +340,7 @@ export const printBillStruk = (order: Order) => {
         });
         printJob(receiptText);
     } catch(error) {
-        console.error("Error printing bill:", error);
+        console.error("Error printing bill:", e);
         alert("Gagal mencetak bill.");
     }
 };

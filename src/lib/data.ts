@@ -37,7 +37,9 @@ export type OrderItem = {
   item_unit_price: number;
   item_total_price: number;
   is_printed: boolean;
-  checker_type: 'main' | 'bar';
+  menu?: {
+    checker_type: 'main' | 'bar';
+  }
 };
 
 export type Order = {
