@@ -1,5 +1,4 @@
 
-
 export type MenuItem = {
   id: number;
   name: string;
@@ -15,7 +14,7 @@ export type MenuItem = {
   additional_ids?: number[];
   variants?: { id: number; name: string; price: number; is_available: boolean }[];
   additionals?: { id: number; name: string; price: number; is_available: boolean }[];
-  kategori_struk: 'makanan' | 'minuman';
+  kategori_struk: 'main' | 'bar';
   stok: number;
 };
 
@@ -38,7 +37,7 @@ export type OrderItem = {
   item_unit_price: number;
   item_total_price: number;
   is_printed: boolean;
-  kategori_struk: 'makanan' | 'minuman';
+  kategori_struk: 'main' | 'bar';
 };
 
 export type Order = {

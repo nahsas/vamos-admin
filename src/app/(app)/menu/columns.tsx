@@ -145,7 +145,7 @@ export const columns = ({ onEdit, onDeleteSuccess, categories }: MenuColumnsProp
       header: "Tipe Checker",
       cell: ({ row }) => {
         const kategori_struk = row.getValue("kategori_struk") as string;
-        return <Badge variant={kategori_struk === 'makanan' ? 'secondary' : 'default'} className="capitalize">{kategori_struk}</Badge>;
+        return <Badge variant={kategori_struk === 'bar' ? 'secondary' : 'default'} className="capitalize">{kategori_struk}</Badge>;
       }
     },
     {

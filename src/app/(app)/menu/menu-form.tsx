@@ -44,7 +44,7 @@ const formSchema = z.object({
   price: z.coerce.number().min(0, 'Harga harus angka positif'),
   image: z.any().optional(),
   description: z.string().optional(),
-  kategori_struk: z.enum(['makanan', 'minuman']).default('minuman'),
+  kategori_struk: z.enum(['main', 'bar']).default('main'),
   is_available: z.boolean().default(true),
   is_best_seller: z.boolean().default(false),
   variant_ids: z.array(z.number()).optional(),
@@ -83,7 +83,7 @@ export function MenuForm({
       category_id: undefined,
       price: 0,
       description: '',
-      kategori_struk: 'minuman',
+      kategori_struk: 'main',
       is_available: true,
       is_best_seller: false,
       variant_ids: [],
@@ -101,7 +101,7 @@ export function MenuForm({
         category_id: menuItem.category_id,
         price: Number(menuItem.price),
         description: menuItem.description || '',
-        kategori_struk: menuItem.kategori_struk || 'minuman',
+        kategori_struk: menuItem.kategori_struk || 'main',
         is_available: menuItem.is_available,
         is_best_seller: menuItem.is_best_seller,
         variant_ids: variantIds,
@@ -118,7 +118,7 @@ export function MenuForm({
         category_id: undefined,
         price: 0,
         description: '',
-        kategori_struk: 'minuman',
+        kategori_struk: 'main',
         is_available: true,
         is_best_seller: false,
         variant_ids: [],
@@ -316,8 +316,8 @@ export function MenuForm({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="minuman">Minuman (Main Checker)</SelectItem>
-                              <SelectItem value="makanan">Makanan (Dapur)</SelectItem>
+                              <SelectItem value="main">Main Checker</SelectItem>
+                              <SelectItem value="bar">Bar Checker</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
