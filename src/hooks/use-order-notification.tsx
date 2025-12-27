@@ -16,18 +16,16 @@ export function useOrderNotification() {
   const isFirstLoad = useRef(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-
-  // This effect runs only once on the client to initialize the audio object.
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioRef.current) {
         audioRef.current = new Audio('/notification.mp3');
-        audioRef.current.preload = 'auto'; // Preload the audio file
+        audioRef.current.preload = 'auto';
     }
   }, []);
 
   const fetchActiveOrders = useCallback(async () => {
     try {
-      const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/orders?status=pending,process&with=items');
+      const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/orders?status=pending,process&with=items,items.menu');
       if (!response.ok) {
         throw new Error('Failed to fetch active orders');
       }
@@ -53,10 +51,8 @@ export function useOrderNotification() {
           const oldOrder = lastKnownOrders.find(o => o.id === newOrder.id);
 
           if (!oldOrder) {
-              // New order detected
               newOrderNotifications.push(newOrder);
           } else {
-              // Existing order, check for new items
               const oldUnprintedCount = oldOrder.items?.filter(item => !item.is_printed).length ?? 0;
               const newUnprintedCount = newOrder.items?.filter(item => !item.is_printed).length ?? 0;
               
@@ -124,8 +120,8 @@ export function useOrderNotification() {
   }, [lastKnownOrders, toast, router, fetchError]);
 
   useEffect(() => {
+    fetchActiveOrders(); // Fetch immediately on mount
     const interval = setInterval(fetchActiveOrders, 3000); 
-    fetchActiveOrders();
     return () => clearInterval(interval);
   }, [fetchActiveOrders]);
 }
