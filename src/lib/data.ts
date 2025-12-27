@@ -15,7 +15,7 @@ export type MenuItem = {
   additional_ids?: number[];
   variants?: { id: number; name: string; price: number; is_available: boolean }[];
   additionals?: { id: number; name: string; price: number; is_available: boolean }[];
-  kategori_struk?: 'makanan' | 'minuman';
+  kategori_struk: 'makanan' | 'minuman';
   stok: number;
 };
 
@@ -37,8 +37,8 @@ export type OrderItem = {
   selected_additional_price: number;
   item_unit_price: number;
   item_total_price: number;
-  printed?: number;
-  is_printed?: boolean;
+  is_printed: boolean;
+  kategori_struk: 'makanan' | 'minuman';
 };
 
 export type Order = {

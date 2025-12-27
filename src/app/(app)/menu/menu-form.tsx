@@ -44,6 +44,7 @@ const formSchema = z.object({
   price: z.coerce.number().min(0, 'Harga harus angka positif'),
   image: z.any().optional(),
   description: z.string().optional(),
+  kategori_struk: z.enum(['makanan', 'minuman']).default('minuman'),
   is_available: z.boolean().default(true),
   is_best_seller: z.boolean().default(false),
   variant_ids: z.array(z.number()).optional(),
@@ -82,6 +83,7 @@ export function MenuForm({
       category_id: undefined,
       price: 0,
       description: '',
+      kategori_struk: 'minuman',
       is_available: true,
       is_best_seller: false,
       variant_ids: [],
@@ -99,6 +101,7 @@ export function MenuForm({
         category_id: menuItem.category_id,
         price: Number(menuItem.price),
         description: menuItem.description || '',
+        kategori_struk: menuItem.kategori_struk || 'minuman',
         is_available: menuItem.is_available,
         is_best_seller: menuItem.is_best_seller,
         variant_ids: variantIds,
@@ -115,6 +118,7 @@ export function MenuForm({
         category_id: undefined,
         price: 0,
         description: '',
+        kategori_struk: 'minuman',
         is_available: true,
         is_best_seller: false,
         variant_ids: [],
@@ -143,6 +147,7 @@ export function MenuForm({
     formData.append('category_id', values.category_id.toString());
     formData.append('price', values.price.toString());
     formData.append('description', values.description || '');
+    formData.append('kategori_struk', values.kategori_struk);
     formData.append('is_available', values.is_available ? '1' : '0');
     
     if (values.image instanceof File) {
@@ -294,6 +299,31 @@ export function MenuForm({
                         </div>
                         <FormMessage />
                     </FormItem>
+
+                    <FormField
+                      control={form.control}
+                      name="kategori_struk"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipe Struk</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Pilih tipe struk" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="minuman">Minuman (Main Checker)</SelectItem>
+                              <SelectItem value="makanan">Makanan (Dapur)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                      <div className='flex gap-4'>
                       <FormField
