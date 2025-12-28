@@ -37,7 +37,7 @@ const updatePrintedStatus = (items: OrderItem[]) => {
 
   const updatePromises = unprintedItems.map(item =>
     fetch(`https://vamos-api-v2.sejadikopi.com/api/orders/items/${item.id}/mark-printed`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ printed: 1 }),
     }).then(response => {
@@ -349,8 +349,9 @@ export const printBillStruk = (order: Order) => {
             itemsToPrint: order.items || [],
         });
         printJob(receiptText);
-    } catch(error) {
+    } catch(e) {
         console.error("Error printing bill:", e);
         alert("Gagal mencetak bill.");
     }
 };
+
