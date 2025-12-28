@@ -44,65 +44,67 @@ export function useOrderNotification() {
         return;
       }
       
-      const newOrderNotifications: Order[] = [];
-      const updatedOrderNotifications: Order[] = [];
+      setLastKnownOrders(prevOrders => {
+        const newOrderNotifications: Order[] = [];
+        const updatedOrderNotifications: Order[] = [];
 
-      for (const newOrder of activeOrders) {
-          const oldOrder = lastKnownOrders.find(o => o.id === newOrder.id);
+        for (const newOrder of activeOrders) {
+            const oldOrder = prevOrders.find(o => o.id === newOrder.id);
 
-          if (!oldOrder) {
-              newOrderNotifications.push(newOrder);
-          } else {
-              const oldUnprintedCount = oldOrder.items?.filter(item => !item.is_printed).length ?? 0;
-              const newUnprintedCount = newOrder.items?.filter(item => !item.is_printed).length ?? 0;
-              
-              if (newUnprintedCount > oldUnprintedCount) {
-                  updatedOrderNotifications.push(newOrder);
-              }
-          }
-      }
-
-      const hasNewActivity = newOrderNotifications.length > 0 || updatedOrderNotifications.length > 0;
-
-      if (hasNewActivity) {
-        if (audioRef.current) {
-          audioRef.current.currentTime = 0;
-          audioRef.current.play().catch(error => {
-            console.log("Audio playback failed, user may need to interact with the page first.", error);
-          });
+            if (!oldOrder) {
+                newOrderNotifications.push(newOrder);
+            } else {
+                const oldUnprintedCount = oldOrder.items?.filter(item => !item.is_printed).length ?? 0;
+                const newUnprintedCount = newOrder.items?.filter(item => !item.is_printed).length ?? 0;
+                
+                if (newUnprintedCount > oldUnprintedCount) {
+                    updatedOrderNotifications.push(newOrder);
+                }
+            }
         }
-        
-        newOrderNotifications.forEach(order => {
-            const customer = order.order_type.toLowerCase() === 'dine-in' ? `Meja ${order.identifier}`: order.identifier;
-            toast({
-                title: '🔔 Pesanan Baru Diterima!',
-                description: `Pesanan baru dari ${customer} telah diterima.`,
-                action: (
-                    <Button onClick={() => router.push('/orders')} size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-                        Lihat Pesanan
-                    </Button>
-                ),
-                duration: 10000,
-            });
-        });
 
-        updatedOrderNotifications.forEach(order => {
-            const customer = order.order_type.toLowerCase() === 'dine-in' ? `Meja ${order.identifier}`: order.identifier;
-            toast({
-                title: '🔔 Item Baru Ditambahkan!',
-                description: `Item baru ditambahkan ke pesanan ${customer}.`,
-                action: (
-                    <Button onClick={() => router.push('/orders')} size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-                        Lihat Pesanan
-                    </Button>
-                ),
-                duration: 10000,
+        const hasNewActivity = newOrderNotifications.length > 0 || updatedOrderNotifications.length > 0;
+
+        if (hasNewActivity) {
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(error => {
+              console.log("Audio playback failed, user may need to interact with the page first.", error);
             });
-        });
-        
-        appEventEmitter.emit('new-order');
-      }
-      setLastKnownOrders(activeOrders);
+          }
+          
+          newOrderNotifications.forEach(order => {
+              const customer = order.order_type.toLowerCase() === 'dine-in' ? `Meja ${order.identifier}`: order.identifier;
+              toast({
+                  title: '🔔 Pesanan Baru Diterima!',
+                  description: `Pesanan baru dari ${customer} telah diterima.`,
+                  action: (
+                      <Button onClick={() => router.push('/orders')} size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                          Lihat Pesanan
+                      </Button>
+                  ),
+                  duration: 10000,
+              });
+          });
+
+          updatedOrderNotifications.forEach(order => {
+              const customer = order.order_type.toLowerCase() === 'dine-in' ? `Meja ${order.identifier}`: order.identifier;
+              toast({
+                  title: '🔔 Item Baru Ditambahkan!',
+                  description: `Item baru ditambahkan ke pesanan ${customer}.`,
+                  action: (
+                      <Button onClick={() => router.push('/orders')} size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                          Lihat Pesanan
+                      </Button>
+                  ),
+                  duration: 10000,
+              });
+          });
+          
+          appEventEmitter.emit('new-order');
+        }
+        return activeOrders;
+      });
 
     } catch (error) {
       console.error('Error fetching active orders:', error);
@@ -117,7 +119,7 @@ export function useOrderNotification() {
           });
       }
     }
-  }, [lastKnownOrders, toast, router, fetchError]);
+  }, [toast, router, fetchError]);
 
   useEffect(() => {
     fetchActiveOrders(); // Fetch immediately on mount
