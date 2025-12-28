@@ -36,7 +36,11 @@ export default function AttendancePage() {
       if (!response.ok) throw new Error('Gagal mengambil data absensi');
       
       const data = await response.json();
-      setAttendance(data.data || []);
+      if (data && Array.isArray(data.data)) {
+        setAttendance(data.data);
+      } else {
+        setAttendance([]);
+      }
     } catch (error) {
       console.error("Gagal mengambil data absensi", error);
       toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data absensi." });
