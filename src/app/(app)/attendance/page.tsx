@@ -23,7 +23,16 @@ export default function AttendancePage() {
   const fetchData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/v1/admin/attendance/today?search=${searchTerm}`);
+      const session = localStorage.getItem('sejadikopi-session');
+      if (!session) throw new Error('Sesi tidak ditemukan');
+
+      const { access_token } = JSON.parse(session);
+
+      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/v1/admin/attendance/today?search=${searchTerm}`, {
+        headers: {
+            'Authorization': `Bearer ${access_token}`
+        }
+      });
       if (!response.ok) throw new Error('Gagal mengambil data absensi');
       
       const data = await response.json();
