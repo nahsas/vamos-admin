@@ -39,9 +39,9 @@ export default function WorkersPage() {
       if (!response.ok) throw new Error('Gagal mengambil data pekerja');
       
       const data = await response.json();
-      // Check if data exists and is an array before setting state
-      if (data && Array.isArray(data.data)) {
-        setWorkers(data.data);
+      // The API returns a paginated response, the workers are in `data.data`
+      if (data && data.data && Array.isArray(data.data.data)) {
+        setWorkers(data.data.data);
       } else {
         setWorkers([]);
       }
