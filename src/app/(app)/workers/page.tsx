@@ -28,13 +28,27 @@ export default function WorkersPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('https://vamos.sejadikopi.com/api/v1/admin/workers');
+      const session = localStorage.getItem('sejadikopi-session');
+      if (!session) throw new Error('Sesi tidak ditemukan');
+      const { access_token } = JSON.parse(session);
+
+      const response = await fetch('https://vamos.sejadikopi.com/api/v1/admin/workers', {
+        headers: {
+            'Authorization': `Bearer ${access_token}`
+        }
+      });
       if (!response.ok) throw new Error('Gagal mengambil data pekerja');
       
       const data = await response.json();
-      setWorkers(data.data || []);
+      if (Array.isArray(data.data)) {
+        setWorkers(data.data);
+      } else {
+        setWorkers([]);
+        console.error("API response for workers is not an array:", data);
+      }
     } catch (error) {
       console.error("Gagal mengambil data pekerja", error);
+      setWorkers([]);
       toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data pekerja." });
     }
   }, [toast]);
