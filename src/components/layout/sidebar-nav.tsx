@@ -136,9 +136,16 @@ export function SidebarNav() {
     setIsLoading(true);
     try {
         const newStatus = !isShopOpen;
+        const session = localStorage.getItem('sejadikopi-session');
+        if (!session) throw new Error('Sesi tidak ditemukan');
+        const { access_token } = JSON.parse(session);
+
         const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/settings', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${access_token}`
+            },
             body: JSON.stringify({ is_open: newStatus }),
         });
         if (!response.ok) {
