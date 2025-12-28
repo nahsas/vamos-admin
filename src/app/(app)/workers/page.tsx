@@ -1,4 +1,3 @@
-
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -40,11 +39,11 @@ export default function WorkersPage() {
       if (!response.ok) throw new Error('Gagal mengambil data pekerja');
       
       const data = await response.json();
-      if (Array.isArray(data.data)) {
+      // Check if data exists and is an array before setting state
+      if (data && Array.isArray(data.data)) {
         setWorkers(data.data);
       } else {
         setWorkers([]);
-        console.error("API response for workers is not an array:", data);
       }
     } catch (error) {
       console.error("Gagal mengambil data pekerja", error);
@@ -78,7 +77,7 @@ export default function WorkersPage() {
 
   const filteredWorkers = workers.filter(worker => 
     worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    worker.nip.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (worker.nip && worker.nip.toLowerCase().includes(searchTerm.toLowerCase())) ||
     worker.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
