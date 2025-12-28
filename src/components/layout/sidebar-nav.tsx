@@ -93,6 +93,7 @@ export function SidebarNav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [isShopOpen, setIsShopOpen] = useState<boolean | null>(null);
+  const [isAutomaticBestSeller, setIsAutomaticBestSeller] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -112,6 +113,7 @@ export function SidebarNav() {
         const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/settings');
         const data = await response.json();
         setIsShopOpen(data.is_open);
+        setIsAutomaticBestSeller(data.is_auto_best_seller);
     } catch (error) {
         console.error("Gagal mengambil status toko:", error);
         toast({
@@ -146,7 +148,10 @@ export function SidebarNav() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${access_token}`
             },
-            body: JSON.stringify({ is_open: newStatus }),
+            body: JSON.stringify({ 
+                is_open: newStatus,
+                is_auto_best_seller: isAutomaticBestSeller // include current best seller status
+            }),
         });
         if (!response.ok) {
             throw new Error('Gagal memperbarui status');

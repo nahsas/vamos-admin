@@ -88,6 +88,7 @@ export default function MenuPage() {
   const [bestSellerSearchTerm, setBestSellerSearchTerm] = useState('');
 
   const [isAutomaticBestSeller, setIsAutomaticBestSeller] = useState(true);
+  const [isShopOpen, setIsShopOpen] = useState(true);
 
   const [stats, setStats] = useState({
     totalMenu: 0,
@@ -144,6 +145,7 @@ export default function MenuPage() {
       if (settingsRes.ok) {
         const settingsData = await settingsRes.json();
         setIsAutomaticBestSeller(settingsData.is_auto_best_seller);
+        setIsShopOpen(settingsData.is_open);
       }
       
        if (menuItemsData) {
@@ -165,7 +167,10 @@ export default function MenuPage() {
         const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/settings', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_auto_best_seller: checked }),
+            body: JSON.stringify({ 
+                is_auto_best_seller: checked,
+                is_open: isShopOpen // Include the current shop status
+            }),
         });
         if (!response.ok) {
             throw new Error('Gagal memperbarui pengaturan menu terlaris.');
