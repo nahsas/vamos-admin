@@ -37,7 +37,7 @@ export const columns = ({ onEdit, onDeleteSuccess }: WorkerColumnsProps): Column
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/v1/admin/workers/${id}`, {
+      const response = await fetch(`https://vamos.sejadikopi.com/api/v1/admin/workers/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error("Gagal menghapus pekerja.");

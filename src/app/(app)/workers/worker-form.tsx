@@ -97,8 +97,8 @@ export function WorkerForm({
     try {
       const method = worker ? 'PUT' : 'POST';
       const url = worker
-        ? `https://vamos-api-v2.sejadikopi.com/api/v1/admin/workers/${worker.id}`
-        : 'https://vamos-api-v2.sejadikopi.com/api/v1/admin/workers';
+        ? `https://vamos.sejadikopi.com/api/v1/admin/workers/${worker.id}`
+        : 'https://vamos.sejadikopi.com/api/v1/admin/workers';
 
       const body = { ...values };
       if (!body.password) {

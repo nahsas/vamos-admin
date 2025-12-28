@@ -27,7 +27,7 @@ export const columns: ColumnDef<Attendance>[] = [
         cell: ({ row }) => {
             const url = row.getValue("clock_in_photo_url") as string | null;
             if (!url) return "-";
-            const fullUrl = `https://vamos-api-v2.sejadikopi.com/storage/${url}`;
+            const fullUrl = `https://vamos.sejadikopi.com/storage/${url}`;
             return <Image src={fullUrl} alt="Foto Masuk" width={50} height={50} className="rounded-md object-cover" unoptimized/>;
         }
     },
@@ -46,7 +46,7 @@ export const columns: ColumnDef<Attendance>[] = [
         cell: ({ row }) => {
             const url = row.getValue("clock_out_photo_url") as string | null;
             if (!url) return "-";
-            const fullUrl = `https://vamos-api-v2.sejadikopi.com/storage/${url}`;
+            const fullUrl = `https://vamos.sejadikopi.com/storage/${url}`;
             return <Image src={fullUrl} alt="Foto Pulang" width={50} height={50} className="rounded-md object-cover" unoptimized/>;
         }
     }

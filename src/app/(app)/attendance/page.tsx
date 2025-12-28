@@ -28,7 +28,7 @@ export default function AttendancePage() {
 
       const { access_token } = JSON.parse(session);
 
-      const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/v1/admin/attendance/today?search=${searchTerm}`, {
+      const response = await fetch(`https://vamos.sejadikopi.com/api/v1/admin/attendance/today?search=${searchTerm}`, {
         headers: {
             'Authorization': `Bearer ${access_token}`
         }

@@ -28,7 +28,7 @@ export default function WorkersPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('https://vamos-api-v2.sejadikopi.com/api/v1/admin/workers');
+      const response = await fetch('https://vamos.sejadikopi.com/api/v1/admin/workers');
       if (!response.ok) throw new Error('Gagal mengambil data pekerja');
       
       const data = await response.json();
