@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store, Fingerprint, UserCog } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store, Fingerprint, UserCog, Users, CalendarCheck } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import React, { useState, useEffect } from "react";
 
@@ -50,8 +50,8 @@ const managementNavItems = [
 ];
 
 const externalNavItems = [
-    { href: "https://vamos-api-v2.sejadikopi.com/admin", label: "Admin Menu", icon: UserCog, roles: ['admin'], target: "_blank" },
-    { href: "https://vamos-api-v2.sejadikopi.com", label: "Absensi Karyawan", icon: Fingerprint, roles: ['admin', 'kasir'], target: "_blank" },
+    { href: "/workers", label: "Manajemen Pekerja", icon: Users, roles: ['admin'] },
+    { href: "/attendance", label: "Laporan Absensi", icon: CalendarCheck, roles: ['admin', 'kasir'] },
 ];
 
 
