@@ -26,7 +26,6 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { Discount } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
 
 type DiscountColumnsProps = {
   onEdit: (discount: Discount) => void;
@@ -51,20 +50,23 @@ export const columns = ({ onEdit, onDeleteSuccess }: DiscountColumnsProps): Colu
 
   return [
     {
-      accessorKey: "code",
-      header: "Kode",
+      accessorKey: "name",
+      header: "Nama",
     },
     {
-      accessorKey: "type",
+      accessorKey: "is_percentage",
       header: "Tipe",
-      cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
+      cell: ({ row }) => {
+        const isPercentage = row.getValue("is_percentage");
+        return <div className="capitalize">{isPercentage ? 'Persentase' : 'Tetap'}</div>
+      },
     },
     {
       accessorKey: "value",
       header: "Nilai",
       cell: ({ row }) => {
         const discount = row.original;
-        if (discount.type === 'percentage') {
+        if (discount.is_percentage) {
           return `${discount.value}%`;
         }
         return new Intl.NumberFormat("id-ID", {
@@ -74,20 +76,11 @@ export const columns = ({ onEdit, onDeleteSuccess }: DiscountColumnsProps): Colu
       },
     },
     {
-        accessorKey: "is_active",
+        accessorKey: "is_available",
         header: "Status",
         cell: ({ row }) => {
-            const isActive = row.getValue("is_active");
-            return <Badge variant={isActive ? "outline" : "secondary"}>{isActive ? 'Aktif' : 'Tidak Aktif'}</Badge>
-        }
-    },
-    {
-        accessorKey: "valid_to",
-        header: "Berlaku Hingga",
-        cell: ({row}) => {
-            const validTo = row.getValue("valid_to") as string | undefined;
-            if (!validTo) return <span>-</span>;
-            return format(new Date(validTo), "dd MMM yyyy");
+            const isAvailable = row.getValue("is_available");
+            return <Badge variant={isAvailable ? "outline" : "secondary"}>{isAvailable ? 'Aktif' : 'Tidak Aktif'}</Badge>
         }
     },
     {
@@ -141,5 +134,3 @@ export const columns = ({ onEdit, onDeleteSuccess }: DiscountColumnsProps): Colu
     },
   ]
 }
-
-    

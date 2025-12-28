@@ -7,12 +7,10 @@ export type Category = {
 
 export type Discount = {
   id: number;
-  code: string;
-  type: 'percentage' | 'fixed';
+  name: string;
   value: number;
-  is_active: boolean;
-  valid_from?: string;
-  valid_to?: string;
+  is_percentage: boolean;
+  is_available: boolean;
 };
 
 export type Additional = {
