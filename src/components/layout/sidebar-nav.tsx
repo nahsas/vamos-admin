@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store, Fingerprint, UserCog, Users, CalendarCheck } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, History, BarChart3, BookOpen, LogOut, DoorClosed, Store, Fingerprint, UserCog, Users, CalendarCheck, X } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import React, { useState, useEffect } from "react";
 
@@ -19,6 +19,7 @@ import {
   SidebarTrigger,
   SidebarGroup,
   SidebarGroupLabel,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -92,6 +93,7 @@ function ShopStatusModal({ isOpen, onOpenChange, shopStatus, onConfirm, loading 
 export function SidebarNav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { isMobile, setOpenMobile } = useSidebar() ?? { isMobile: false, setOpenMobile: () => {} };
   const [isShopOpen, setIsShopOpen] = useState<boolean | null>(null);
   const [isAutomaticBestSeller, setIsAutomaticBestSeller] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -198,12 +200,19 @@ export function SidebarNav() {
     <>
       <Sidebar>
         <SidebarHeader className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-             <Image src="https://vamos-api-v2.sejadikopi.com/api/images?path=Logo/vamos.png" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg border border-sidebar-border shadow-lg" unoptimized />
-            <div>
-              <h1 className="text-lg font-headline font-bold">VAMOS</h1>
-              <p className="text-sm text-muted-foreground">Panel Admin</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Image src="https://vamos-api-v2.sejadikopi.com/api/images?path=Logo/vamos.png" alt="Sejadi Kopi Logo" width={56} height={56} className="rounded-lg border border-sidebar-border shadow-lg" unoptimized />
+              <div>
+                <h1 className="text-lg font-headline font-bold">VAMOS</h1>
+                <p className="text-sm text-muted-foreground">Panel Admin</p>
+              </div>
             </div>
+            {isMobile && (
+              <Button variant="ghost" size="icon" onClick={() => setOpenMobile(false)}>
+                <X className="h-5 w-5" />
+              </Button>
+            )}
           </div>
         </SidebarHeader>
         <SidebarContent className="p-4">
