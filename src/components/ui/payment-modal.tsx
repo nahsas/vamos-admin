@@ -45,6 +45,16 @@ export function PaymentModal({
 
   const [discountCode, setDiscountCode] = React.useState('');
   const [appliedDiscount, setAppliedDiscount] = React.useState<{ amount: number, finalTotal: number, code: string } | null>(null);
+
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (e.currentTarget.scrollTop > 10) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  };
   
   const orderTotal = order ? order.subtotal : 0;
   const displayTotal = appliedDiscount ? appliedDiscount.finalTotal : orderTotal;
@@ -126,7 +136,7 @@ export function PaymentModal({
         payment_method: paymentMethod.toLowerCase() as 'cash' | 'qris',
         cash_received: paymentMethod === 'Cash' ? Number(paymentAmount) : displayTotal,
         change_amount: paymentMethod === 'Cash' ? changeAmount : 0,
-        bank_qris: paymentMethod === 'QRIS' ? selectedBank : null,
+        bank_qris: paymentMethod === 'QRIS' ? selectedBank : '',
         discount_code: appliedDiscount?.code || order.discount_code || null,
         discount: appliedDiscount?.amount || order.discount || 0,
     };
@@ -177,198 +187,217 @@ export function PaymentModal({
       setIsLoading(false);
       setDiscountCode('');
       setAppliedDiscount(null);
+      setIsScrolled(false);
     }
   }, [open]);
 
   if (!order) return null;
 
+  const getTitleText = () => {
+    return `Pembayaran ${order.order_type.toLowerCase() === 'dine-in' ? `${order.identifier}` : order.identifier}`;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[90vh] rounded-xl">
-        <DialogHeader className="p-4 text-center items-center sticky top-0 bg-background z-10 border-b">
-            <div className="p-3 bg-green-100 rounded-full mb-2">
-                <Receipt className="w-6 h-6 text-green-600" />
-            </div>
-          <DialogTitle className="text-xl font-bold">
-            Pembayaran{' '}
-            {order.order_type.toLowerCase() === 'dine-in'
-              ? `${order.identifier}`
-              : order.identifier}
-          </DialogTitle>
-          <p className="text-muted-foreground text-sm">Silakan pilih metode pembayaran</p>
-        </DialogHeader>
+        <div 
+            className={cn(
+                "sticky top-0 z-10 bg-background transition-all duration-200",
+                isScrolled ? "py-3 px-4 shadow-md border-b" : "py-0 h-0 opacity-0"
+            )}
+        >
+            <h3 className="font-semibold text-center text-lg">{getTitleText()}</h3>
+        </div>
 
-        <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-4">
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 space-y-2">
-             <div className="flex justify-between items-center text-sm">
-                <span className="font-medium text-foreground/80">Subtotal:</span>
-                <span className="text-foreground">
-                Rp {orderTotal.toLocaleString('id-ID')}
-                </span>
-            </div>
-            {appliedDiscount && (
-                 <div className="flex justify-between items-center text-sm text-red-400">
-                    <span className="font-medium">Diskon ({appliedDiscount.code}):</span>
-                    <span>
-                    - Rp {appliedDiscount.amount.toLocaleString('id-ID')}
+        <div className="flex-grow overflow-y-auto" onScroll={handleScroll}>
+            <DialogHeader className="p-4 text-center items-center">
+                <div className="p-3 bg-green-100 rounded-full mb-2">
+                    <Receipt className="w-6 h-6 text-green-600" />
+                </div>
+              <DialogTitle className="text-xl font-bold">
+                {getTitleText()}
+              </DialogTitle>
+              <p className="text-muted-foreground text-sm">Silakan pilih metode pembayaran</p>
+            </DialogHeader>
+        
+            <div className="px-4 pb-4 space-y-4">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 space-y-2">
+                 <div className="flex justify-between items-center text-sm">
+                    <span className="font-medium text-foreground/80">Subtotal:</span>
+                    <span className="text-foreground">
+                    Rp {orderTotal.toLocaleString('id-ID')}
                     </span>
                 </div>
-            )}
-            <div className="border-t border-primary/20 border-dashed my-1"></div>
-            <div className="flex justify-between items-center">
-                <span className="font-medium text-foreground/80">Total Pembayaran:</span>
-                <span className="font-bold text-xl text-primary-foreground">
-                Rp {displayTotal.toLocaleString('id-ID')}
-                </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="discount-code">Kode Diskon (Opsional)</Label>
-            <div className="flex gap-2">
-              <Input 
-                id="discount-code" 
-                placeholder="MASUKKAN KODE DISKON"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value)}
-                disabled={!!appliedDiscount || isApplyingDiscount}
-              />
-              <Button 
-                onClick={handleApplyDiscount}
-                className="bg-amber-600 hover:bg-amber-700 text-white" 
-                disabled={!discountCode || !!appliedDiscount || isApplyingDiscount}
-              >
-                {isApplyingDiscount ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                    "Terapkan"
+                {appliedDiscount && (
+                     <div className="flex justify-between items-center text-sm text-red-400">
+                        <span className="font-medium">Diskon ({appliedDiscount.code}):</span>
+                        <span>
+                        - Rp {appliedDiscount.amount.toLocaleString('id-ID')}
+                        </span>
+                    </div>
                 )}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <Label>Metode Pembayaran</Label>
-            <div className="grid grid-cols-2 gap-2">
-                 <Button
-                    variant={paymentMethod === 'Cash' ? 'default' : 'outline'}
-                    onClick={() => setPaymentMethod('Cash')}
-                    className={cn(
-                        "h-12 text-base",
-                        paymentMethod === 'Cash' ? "bg-green-600 hover:bg-green-700 border-green-600 text-white" : "bg-gray-100 text-gray-800"
-                    )}
-                 >
-                    <Landmark className="mr-2 h-5 w-5"/> Tunai
-                </Button>
-                 <Button
-                    variant={paymentMethod === 'QRIS' ? 'default' : 'outline'}
-                    onClick={() => setPaymentMethod('QRIS')}
-                    className={cn(
-                        "h-12 text-base",
-                         paymentMethod === 'QRIS' ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-gray-100 text-gray-800"
-                    )}
-                 >
-                    <QrCode className="mr-2 h-5 w-5"/> QRIS
-                </Button>
-            </div>
-          </div>
-
-            {paymentMethod === 'Cash' && (
-                <div className="space-y-2">
-                    <Label htmlFor="payment-amount">Jumlah Pembayaran</Label>
-                    <div className="relative">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">Rp</span>
-                        <Input
-                            id="payment-amount"
-                            type="number"
-                            placeholder="Masukkan jumlah pembayaran"
-                            className="pl-8 pr-8"
-                            value={paymentAmount}
-                            onChange={(e) => setPaymentAmount(e.target.value)}
-                        />
-                         {paymentAmount && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="absolute inset-y-0 right-0 flex items-center justify-center h-full w-10 text-muted-foreground"
-                                onClick={() => setPaymentAmount('')}
-                            >
-                                <X className="h-4 w-4"/>
-                            </Button>
-                        )}
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-sm">
-                        {quickAddAmounts.map(amount => (
-                            <Button key={amount} variant="outline" size="sm" onClick={() => handleQuickAdd(amount)} className="bg-secondary hover:bg-secondary/80">
-                                +Rp {amount.toLocaleString('id-ID')}
-                            </Button>
-                        ))}
-                    </div>
-                    <Button onClick={handleAutoFill} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                        <Pencil className="mr-2 h-4 w-4" /> Uang Pas
-                    </Button>
-                    {paymentAmount && (
-                         <div className={cn(
-                            "rounded-lg p-3 flex justify-between items-center text-lg",
-                             isShortfall ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                         )}>
-                            <span className="font-medium">{isShortfall ? 'Kurang:' : 'Kembalian:'}</span>
-                            <span className="font-bold">
-                                {changeText}
-                            </span>
-                        </div>
-                    )}
+                <div className="border-t border-primary/20 border-dashed my-1"></div>
+                <div className="flex justify-between items-center">
+                    <span className="font-medium text-foreground/80">Total Pembayaran:</span>
+                    <span className="font-bold text-xl text-primary-foreground">
+                    Rp {displayTotal.toLocaleString('id-ID')}
+                    </span>
                 </div>
-            )}
+              </div>
 
-            {paymentMethod === 'QRIS' && (
-                <div className="space-y-4">
-                    <div>
-                        <Label>Pilih Bank untuk QRIS</Label>
-                        <div className="grid grid-cols-3 gap-2 mt-2">
-                            {banks.map((bank) => (
-                                <button
-                                    key={bank.id}
-                                    onClick={() => setSelectedBank(bank.id as any)}
-                                    className={cn(
-                                        "border-2 rounded-lg p-2 flex flex-col items-center justify-center space-y-1 transition-all",
-                                        selectedBank === bank.id ? "border-purple-600 bg-purple-50" : "border-gray-200 bg-white"
-                                    )}
+              <div className="space-y-2">
+                <Label htmlFor="discount-code">Kode Diskon (Opsional)</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    id="discount-code" 
+                    placeholder="MASUKKAN KODE DISKON"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    disabled={!!appliedDiscount || isApplyingDiscount}
+                  />
+                  <Button 
+                    onClick={handleApplyDiscount}
+                    className="bg-amber-600 hover:bg-amber-700 text-white" 
+                    disabled={!discountCode || !!appliedDiscount || isApplyingDiscount}
+                  >
+                    {isApplyingDiscount ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        "Terapkan"
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <Label>Metode Pembayaran</Label>
+                <div className="grid grid-cols-2 gap-2">
+                     <Button
+                        variant={paymentMethod === 'Cash' ? 'default' : 'outline'}
+                        onClick={() => {
+                            setPaymentMethod('Cash');
+                            setSelectedBank(null);
+                        }}
+                        className={cn(
+                            "h-12 text-base",
+                            paymentMethod === 'Cash' ? "bg-green-600 hover:bg-green-700 border-green-600 text-white" : "bg-gray-100 text-gray-800"
+                        )}
+                     >
+                        <Landmark className="mr-2 h-5 w-5"/> Tunai
+                    </Button>
+                     <Button
+                        variant={paymentMethod === 'QRIS' ? 'default' : 'outline'}
+                        onClick={() => {
+                            setPaymentMethod('QRIS');
+                            setPaymentAmount('');
+                        }}
+                        className={cn(
+                            "h-12 text-base",
+                             paymentMethod === 'QRIS' ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-gray-100 text-gray-800"
+                        )}
+                     >
+                        <QrCode className="mr-2 h-5 w-5"/> QRIS
+                    </Button>
+                </div>
+              </div>
+
+                {paymentMethod === 'Cash' && (
+                    <div className="space-y-2">
+                        <Label htmlFor="payment-amount">Jumlah Pembayaran</Label>
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">Rp</span>
+                            <Input
+                                id="payment-amount"
+                                type="number"
+                                placeholder="Masukkan jumlah pembayaran"
+                                className="pl-8 pr-8"
+                                value={paymentAmount}
+                                onChange={(e) => setPaymentAmount(e.target.value)}
+                            />
+                             {paymentAmount && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="absolute inset-y-0 right-0 flex items-center justify-center h-full w-10 text-muted-foreground"
+                                    onClick={() => setPaymentAmount('')}
                                 >
-                                    <Image src={bank.logo} alt={bank.name} width={60} height={24} className="object-contain" unoptimized />
-                                    <span className="text-sm font-medium text-gray-800">{bank.name}</span>
-                                </button>
+                                    <X className="h-4 w-4"/>
+                                </Button>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-sm">
+                            {quickAddAmounts.map(amount => (
+                                <Button key={amount} variant="outline" size="sm" onClick={() => handleQuickAdd(amount)} className="bg-secondary hover:bg-secondary/80">
+                                    +Rp {amount.toLocaleString('id-ID')}
+                                </Button>
                             ))}
                         </div>
-                    </div>
-                    
-                    {selectedBank && (
-                        <div className="bg-purple-50 border border-dashed border-purple-200 rounded-lg p-3 space-y-2">
-                             <div className="flex items-center gap-2">
-                                <QrCode className="h-5 w-5 text-purple-600" />
-                                <div className="flex flex-col">
-                                    <span className="font-semibold text-purple-800">Metode QRIS</span>
-                                    <span className="text-sm text-purple-600">Bank: {selectedBank}</span>
-                                </div>
-                             </div>
-                             <div className="border-t border-purple-200 my-2"></div>
-                             <div className="flex justify-between items-center">
-                                <span className="font-medium text-purple-800">Total Pembayaran:</span>
-                                <span className="font-bold text-xl text-purple-900">
-                                    Rp {displayTotal.toLocaleString('id-ID')}
+                        <Button onClick={handleAutoFill} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                            <Pencil className="mr-2 h-4 w-4" /> Uang Pas
+                        </Button>
+                        {paymentAmount && (
+                             <div className={cn(
+                                "rounded-lg p-3 flex justify-between items-center text-lg",
+                                 isShortfall ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                             )}>
+                                <span className="font-medium">{isShortfall ? 'Kurang:' : 'Kembalian:'}</span>
+                                <span className="font-bold">
+                                    {changeText}
                                 </span>
-                             </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {paymentMethod === 'QRIS' && (
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Pilih Bank untuk QRIS</Label>
+                            <div className="grid grid-cols-3 gap-2 mt-2">
+                                {banks.map((bank) => (
+                                    <button
+                                        key={bank.id}
+                                        onClick={() => setSelectedBank(bank.id as any)}
+                                        className={cn(
+                                            "border-2 rounded-lg p-2 flex flex-col items-center justify-center space-y-1 transition-all",
+                                            selectedBank === bank.id ? "border-purple-600 bg-purple-50" : "border-gray-200 bg-white"
+                                        )}
+                                    >
+                                        <Image src={bank.logo} alt={bank.name} width={60} height={24} className="object-contain" unoptimized />
+                                        <span className="text-sm font-medium text-gray-800">{bank.name}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    )}
-                    
-                    <Alert className="bg-blue-50 border-blue-200 text-blue-800">
-                        <Info className="h-4 w-4 text-blue-500" />
-                        <AlertDescription>
-                            Pembayaran akan diproses melalui QRIS dengan total akhir secara otomatis
-                        </AlertDescription>
-                    </Alert>
-                </div>
-            )}
+                        
+                        {selectedBank && (
+                            <div className="bg-purple-50 border border-dashed border-purple-200 rounded-lg p-3 space-y-2">
+                                 <div className="flex items-center gap-2">
+                                    <QrCode className="h-5 w-5 text-purple-600" />
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-purple-800">Metode QRIS</span>
+                                        <span className="text-sm text-purple-600">Bank: {selectedBank}</span>
+                                    </div>
+                                 </div>
+                                 <div className="border-t border-purple-200 my-2"></div>
+                                 <div className="flex justify-between items-center">
+                                    <span className="font-medium text-purple-800">Total Pembayaran:</span>
+                                    <span className="font-bold text-xl text-purple-900">
+                                        Rp {displayTotal.toLocaleString('id-ID')}
+                                    </span>
+                                 </div>
+                            </div>
+                        )}
+                        
+                        <Alert className="bg-blue-50 border-blue-200 text-blue-800">
+                            <Info className="h-4 w-4 text-blue-500" />
+                            <AlertDescription>
+                                Pembayaran akan diproses melalui QRIS dengan total akhir secara otomatis
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
+            </div>
         </div>
 
         <DialogFooter className="p-4 bg-background border-t grid grid-cols-2 gap-2">
