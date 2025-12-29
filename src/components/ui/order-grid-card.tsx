@@ -174,7 +174,7 @@ export function OrderGridCard({ order, onDetailClick, onUpdateStatus, onPaymentC
                         Main Checker
                     </Button>
                     <Button onClick={handleKitchenPrint} className="w-full" disabled={!hasNewBarCheckerItems}>
-                        Checker Dapur
+                        Bar Checker
                     </Button>
                 </div>
                 <AlertDialogFooter>

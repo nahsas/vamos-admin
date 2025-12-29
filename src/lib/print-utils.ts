@@ -279,7 +279,7 @@ export const printKitchenStruk = (
     
     if (unprintedItems.length > 0) {
       const receiptText = generateReceiptText(order, {
-        title: "CHECKER DAPUR",
+        title: "BAR CHECKER",
         showPrices: false,
         itemsToPrint: unprintedItems,
       });
@@ -287,11 +287,11 @@ export const printKitchenStruk = (
       
       updatePrintedStatus(unprintedItems);
     } else {
-        alert("Tidak ada item baru untuk dicetak di Dapur.");
+        alert("Tidak ada item baru untuk dicetak di Bar.");
     }
   } catch(e) {
       console.error("Error printing kitchen receipt:", e);
-      alert("Gagal mencetak struk dapur.");
+      alert("Gagal mencetak struk bar.");
   }
 };
 
