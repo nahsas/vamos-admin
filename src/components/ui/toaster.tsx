@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useToast } from "@/hooks/use-toast"
@@ -21,10 +22,14 @@ export function Toaster() {
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
-                <ToastDescription>{description}</ToastDescription>
+                <div className="hidden sm:block">
+                  <ToastDescription>{description}</ToastDescription>
+                </div>
               )}
             </div>
-            {action}
+            <div className="hidden sm:block">
+              {action}
+            </div>
             <ToastClose />
           </Toast>
         )
