@@ -5,9 +5,9 @@ import { useAuth } from '@/context/auth-context';
 import { DataTable } from "@/components/data-table";
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarCheck, Search, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Attendance } from '@/lib/types';
+import { CalendarCheck, Search } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Attendance, Worker } from '@/lib/types';
 import { columns as attendanceColumns } from "./columns";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -27,27 +27,47 @@ export default function AttendancePage() {
       if (!session) throw new Error('Sesi tidak ditemukan');
 
       const { access_token } = JSON.parse(session);
+      const headers = { 'Authorization': `Bearer ${access_token}` };
 
-      const response = await fetch(`https://vamos.sejadikopi.com/api/v1/admin/attendance/today?search=${searchTerm}`, {
-        headers: {
-            'Authorization': `Bearer ${access_token}`
-        }
-      });
-      if (!response.ok) throw new Error('Gagal mengambil data absensi');
+      const [attendanceRes, workersRes] = await Promise.all([
+          fetch(`https://vamos.sejadikopi.com/api/v1/admin/attendance/today`, { headers }),
+          fetch('https://vamos.sejadikopi.com/api/v1/admin/workers', { headers })
+      ]);
+
+      if (!attendanceRes.ok) throw new Error('Gagal mengambil data absensi');
+      if (!workersRes.ok) throw new Error('Gagal mengambil data pekerja');
       
-      const data = await response.json();
-      if (data && Array.isArray(data.data)) {
-        setAttendance(data.data);
-      } else {
-        setAttendance([]);
-      }
+      const attendanceData = await attendanceRes.json();
+      const workersData = await workersRes.json();
+
+      const attendanceRecords = attendanceData.data.data || [];
+      const allWorkers: Worker[] = workersData.data.data.filter((w: Worker) => w.is_active) || [];
+
+      const processedAttendance = allWorkers.map(worker => {
+          const workerRecords = attendanceRecords.filter((rec: any) => rec.worker_id === worker.id);
+          const clockIn = workerRecords.find((rec: any) => rec.type === 'clock_in');
+          const clockOut = workerRecords.find((rec: any) => rec.type === 'clock_out');
+
+          return {
+              id: worker.id,
+              worker_id: worker.id,
+              worker_name: worker.name,
+              clock_in_time: clockIn ? clockIn.timestamp : null,
+              clock_out_time: clockOut ? clockOut.timestamp : null,
+              clock_in_photo_url: clockIn ? clockIn.photo_path : null,
+              clock_out_photo_url: clockOut ? clockOut.photo_path : null,
+          };
+      });
+
+      setAttendance(processedAttendance);
+
     } catch (error) {
-      console.error("Gagal mengambil data absensi", error);
-      toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data absensi." });
+      console.error("Gagal mengambil data", error);
+      toast({ variant: "destructive", title: "Error", description: "Tidak dapat memuat data." });
     } finally {
         setDataLoading(false);
     }
-  }, [searchTerm, toast]);
+  }, [toast]);
 
   useEffect(() => {
     if (user) {
