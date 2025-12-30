@@ -212,7 +212,8 @@ const generateReceiptText = (
 };
 
 const printJob = (receiptContent: string) => {
-    // --- Fallback for Desktop/Web Print ---
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
     const webPrint = () => {
         const receiptHtml = `
             <html>
@@ -250,23 +251,26 @@ const printJob = (receiptContent: string) => {
             alert('Gagal membuka jendela cetak. Pastikan pop-up diizinkan.');
         }
     };
+    
+    if (isAndroid) {
+        // Primary method for RawBT on Android
+        try {
+            const encoded = encodeURIComponent(receiptContent);
+            const url = `intent:${encoded}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end`;
+            
+            const intentLink = document.createElement('a');
+            intentLink.href = url;
+            intentLink.style.display = 'none';
+            document.body.appendChild(intentLink);
+            intentLink.click();
+            document.body.removeChild(intentLink);
 
-    // --- Primary method for RawBT on Android ---
-    try {
-        const encoded = encodeURIComponent(receiptContent);
-        const url = `intent:${encoded}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end`;
-        
-        const intentLink = document.createElement('a');
-        intentLink.href = url;
-
-        // Hide the link and trigger it
-        intentLink.style.display = 'none';
-        document.body.appendChild(intentLink);
-        intentLink.click();
-        document.body.removeChild(intentLink);
-
-    } catch (e) {
-        console.warn("Metode cetak RawBT gagal, menggunakan metode web print.", e);
+        } catch (e) {
+            console.warn("Metode cetak RawBT gagal, menggunakan metode web print.", e);
+            webPrint(); // Fallback to web print if intent fails
+        }
+    } else {
+        // Use web print for non-Android devices (desktop, iOS, etc.)
         webPrint();
     }
 };
