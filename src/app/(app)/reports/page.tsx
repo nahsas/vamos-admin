@@ -121,7 +121,7 @@ const expenseFormSchema = z.object({
 
 type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
-function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpen: boolean, onClose: () => void, onSuccess: () => void, userEmail: string, expense: any | null }) {
+function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: boolean, onClose: () => void, onSuccess: () => void, user: any | null, expense: any | null }) {
     const { toast } = useToast();
     const [imagePreview, setImagePreview] = React.useState<string | null>(null);
     const galleryInputRef = React.useRef<HTMLInputElement>(null);
@@ -183,21 +183,25 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
     try {
       const imageFile = form.getValues('image');
       const formData = new FormData();
+      
+      // API expects 'title' and 'description', but form uses 'deskripsi' for both.
+      // Let's use 'deskripsi' for both fields as per user intent.
       formData.append('title', values.deskripsi);
+      formData.append('description', values.deskripsi);
       formData.append('amount', values.jumlah.toString());
       formData.append('type', values.kategori);
       formData.append('date', values.tanggal);
-      formData.append('created_by', userEmail);
+      formData.append('created_by', user?.id?.toString() || '0');
+      
       if (imageFile instanceof File) {
         formData.append('image', imageFile);
       }
 
-      const method = expense ? 'POST' : 'POST'; // API uses POST for update with multipart
-      const url = expense
-        ? `https://vamos-api-v2.sejadikopi.com/api/expenses/${expense.id}`
-        : 'https://vamos-api-v2.sejadikopi.com/api/expenses';
+      const method = 'POST';
+      let url = 'https://vamos-api-v2.sejadikopi.com/api/expenses';
       
       if(expense) {
+        url = `https://vamos-api-v2.sejadikopi.com/api/expenses/${expense.id}`;
         formData.append('_method', 'PUT');
       }
       
@@ -625,7 +629,7 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-8">
-      {isExpenseFormOpen && user && <ExpenseForm isOpen={isExpenseFormOpen} onClose={() => setIsExpenseFormOpen(false)} onSuccess={fetchData} userEmail={user.email} expense={editingExpense}/>}
+      {isExpenseFormOpen && <ExpenseForm isOpen={isExpenseFormOpen} onClose={() => setIsExpenseFormOpen(false)} onSuccess={fetchData} user={user} expense={editingExpense}/>}
       <OrderDetailModal 
         order={selectedOrder}
         open={isDetailModalOpen}
@@ -864,3 +868,5 @@ export default function ReportsPage() {
     </div>
   )
 }
+
+    
