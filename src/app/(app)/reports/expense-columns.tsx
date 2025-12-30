@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, Pencil, Trash2 } from "lucide-react"
 import { format } from "date-fns"
+import Image from "next/image"
 
 type Expense = {
     id: number;
@@ -14,6 +15,7 @@ type Expense = {
     type: string;
     date: string;
     created_by: number;
+    image_url?: string;
 }
 
 type ExpenseColumnsProps = {
@@ -51,8 +53,26 @@ export const expenseColumns = ({ onEdit, onDelete }: ExpenseColumnsProps): Colum
         cell: ({ row }) => <div className="text-right">{toRupiah(row.getValue("amount"))}</div>,
     },
     {
-        accessorKey: "created_by",
-        header: "Dibuat oleh",
+        accessorKey: "image_url",
+        header: "Bukti",
+        cell: ({ row }) => {
+            const imageUrl = row.getValue("image_url") as string | null;
+            if (!imageUrl) {
+                return <span>-</span>;
+            }
+            return (
+                <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                    <Image 
+                        src={imageUrl} 
+                        alt={`Bukti untuk ${row.original.title}`} 
+                        width={60} 
+                        height={60} 
+                        className="rounded-md object-cover cursor-pointer transition-transform hover:scale-110"
+                        unoptimized
+                    />
+                </a>
+            );
+        }
     },
     {
         id: "actions",
