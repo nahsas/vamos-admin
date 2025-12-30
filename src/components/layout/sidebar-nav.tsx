@@ -53,6 +53,7 @@ const managementNavItems = [
 const externalNavItems = [
     { href: "/workers", label: "Manajemen Pekerja", icon: Users, roles: ['admin'] },
     { href: "/attendance", label: "Laporan Absensi", icon: CalendarCheck, roles: ['admin', 'kasir'] },
+    { href: "/pengaturan", label: "Pengaturan", icon: UserCog, roles: ['admin'] },
 ];
 
 

@@ -63,7 +63,7 @@ const ReportStatCard = ({
 }) => (
   <Card className={cn(bgColor, textColor, "rounded-xl shadow-lg")}>
     <CardContent className="p-4">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row items-start justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-medium">
             {icon}
@@ -77,7 +77,7 @@ const ReportStatCard = ({
             </div>
           )}
         </div>
-        {rightIcon && <div className="p-3 bg-white/20 rounded-lg">{rightIcon}</div>}
+        {rightIcon && <div className="p-3 bg-white/20 rounded-lg mt-2 sm:mt-0">{rightIcon}</div>}
       </div>
     </CardContent>
   </Card>
@@ -338,6 +338,7 @@ export default function ReportsPage() {
 
   const [transactions, setTransactions] = React.useState<any[]>([]);
   const [expenses, setExpenses] = React.useState<any[]>([]);
+  const [settings, setSettings] = React.useState<any>(null);
   
   const [dataLoading, setDataLoading] = React.useState(true);
   const [exporting, setExporting] = React.useState(false);
@@ -371,10 +372,14 @@ export default function ReportsPage() {
       if (sDate) expenseUrl.searchParams.set('start_date', format(new Date(sDate), 'yyyy-MM-dd'));
       if (eDate) expenseUrl.searchParams.set('end_date', format(new Date(eDate), 'yyyy-MM-dd'));
       expenseUrl.searchParams.set('order', 'tanggal.desc');
+
+      // --- SETTINGS FETCH ---
+      const settingsUrl = 'https://vamos-api-v2.sejadikopi.com/api/settings';
       
-      const [transactionRes, expenseRes] = await Promise.all([
+      const [transactionRes, expenseRes, settingsRes] = await Promise.all([
           fetch(transactionUrl.toString()),
           fetch(expenseUrl.toString()),
+          fetch(settingsUrl),
       ]);
 
       let allTransactions: any[] = [];
@@ -393,6 +398,14 @@ export default function ReportsPage() {
           setExpenses([]);
       }
       
+      if (settingsRes.ok) {
+        const data = await settingsRes.json();
+        setSettings(data);
+      } else {
+        console.error("Failed to fetch settings:", await settingsRes.text());
+        setSettings({ pitty_cash: 0 }); // Fallback
+      }
+
       // --- CLIENT-SIDE FILTERING FOR PAYMENT METHOD ---
       let filteredTransactions = allTransactions;
       if (paymentMethod !== 'all') {
@@ -525,7 +538,7 @@ export default function ReportsPage() {
         qris_bsi: { amount: 0, count: 0 },
     });
   
-    const pittyCash = 1000000;
+    const pittyCash = settings?.pitty_cash || 0;
     const setoran = paymentBreakdown.cash.amount - totalExpenses;
 
     const filterDateRangeStr = `${startDate ? format(startDate, 'd MMM yyyy') : ''} - ${endDate ? format(endDate, 'd MMM yyyy') : ''}`;
@@ -704,14 +717,14 @@ export default function ReportsPage() {
                     </SelectContent>
                 </Select>
             </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-4">
             <Button onClick={handleApplyFilter} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
                 <Check className="mr-2 h-4 w-4" /> Terapkan
             </Button>
             <Button variant="secondary" onClick={handleResetFilter} className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
                 <RotateCcw className="mr-2 h-4 w-4" /> Reset
             </Button>
-            <Button variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold sm:col-span-2 md:col-span-1" onClick={handleExport} disabled={exporting}>
+            <Button variant="secondary" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold md:col-span-1" onClick={handleExport} disabled={exporting}>
                 {exporting ? (
                     <>
                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -728,7 +741,7 @@ export default function ReportsPage() {
       </Card>
       
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <ReportStatCard
             title="Total Pendapatan"
             value={toRupiah(totalRevenue)}
@@ -777,7 +790,7 @@ export default function ReportsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <PaymentBreakdownCard title="Pitty Cash" amount={toRupiah(pittyCash)} transactions="Kas tetap" icon={<Wallet className="h-6 w-6"/>} />
                 <PaymentBreakdownCard title="Tunai" amount={toRupiah(paymentBreakdown.cash.amount)} transactions={paymentBreakdown.cash.count} icon={<Landmark className="h-6 w-6"/>} />
                 <PaymentBreakdownCard title="QRIS (Semua)" amount={toRupiah(paymentBreakdown.qris.amount)} transactions={paymentBreakdown.qris.count} icon={<Grip className="h-6 w-6"/>} />
@@ -851,5 +864,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-
-    
