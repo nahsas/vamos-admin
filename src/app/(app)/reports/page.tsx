@@ -111,11 +111,12 @@ const PaymentBreakdownCard = ({
 )
 
 const expenseFormSchema = z.object({
-  id: z.string().optional(),
-  kategori: z.string().min(1, 'Kategori wajib diisi'),
-  deskripsi: z.string().min(1, 'Deskripsi wajib diisi'),
-  jumlah: z.coerce.number().min(1, 'Jumlah harus lebih dari 0'),
-  tanggal: z.string(),
+  id: z.number().optional(),
+  title: z.string().min(1, 'Judul wajib diisi'),
+  description: z.string().optional(),
+  amount: z.coerce.number().min(1, 'Jumlah harus lebih dari 0'),
+  type: z.string().min(1, 'Tipe wajib diisi'),
+  date: z.string(),
   image: z.any().optional(),
 });
 
@@ -130,10 +131,11 @@ function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: bo
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(expenseFormSchema),
         defaultValues: {
-            kategori: 'Operasional',
-            deskripsi: '',
-            jumlah: 0,
-            tanggal: format(new Date(), 'yyyy-MM-dd'),
+            title: '',
+            description: '',
+            amount: 0,
+            type: 'Operasional',
+            date: format(new Date(), 'yyyy-MM-dd'),
             image: null,
         },
     });
@@ -143,24 +145,25 @@ function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: bo
         if (expense) {
              form.reset({
                 id: expense.id,
-                kategori: expense.kategori,
-                deskripsi: expense.deskripsi,
-                jumlah: expense.jumlah,
-                tanggal: format(new Date(expense.tanggal), 'yyyy-MM-dd'),
+                title: expense.title,
+                description: expense.description,
+                amount: expense.amount,
+                type: expense.type,
+                date: format(new Date(expense.date), 'yyyy-MM-dd'),
                 image: null,
             });
-            if(expense.bukti_url) {
-                setImagePreview(`https://vamos-api-v2.sejadikopi.com/api/images?path=${expense.bukti_url}`);
+            if(expense.image_url) {
+                setImagePreview(expense.image_url);
             } else {
                 setImagePreview(null);
             }
         } else {
              form.reset({
-                kategori: 'Operasional',
-                deskripsi: '',
-                jumlah: 0,
-                tanggal: defaultDate,
-                id: `EXP-${Date.now()}`,
+                title: '',
+                description: '',
+                amount: 0,
+                type: 'Operasional',
+                date: defaultDate,
                 image: null,
             });
             setImagePreview(null);
@@ -180,56 +183,54 @@ function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: bo
     };
 
     const onSubmit = async (values: ExpenseFormValues) => {
-    try {
-      const imageFile = form.getValues('image');
-      const formData = new FormData();
-      
-      // API expects 'title' and 'description', but form uses 'deskripsi' for both.
-      // Let's use 'deskripsi' for both fields as per user intent.
-      formData.append('title', values.deskripsi);
-      formData.append('description', values.deskripsi);
-      formData.append('amount', values.jumlah.toString());
-      formData.append('type', values.kategori);
-      formData.append('date', values.tanggal);
-      formData.append('created_by', user?.id?.toString() || '0');
-      
-      if (imageFile instanceof File) {
-        formData.append('image', imageFile);
-      }
+        try {
+            const imageFile = form.getValues('image');
+            const formData = new FormData();
+            
+            formData.append('title', values.title);
+            formData.append('description', values.description || values.title);
+            formData.append('amount', values.amount.toString());
+            formData.append('type', values.type);
+            formData.append('date', values.date);
+            formData.append('created_by', user?.id?.toString() || '0');
+            
+            if (imageFile instanceof File) {
+                formData.append('image', imageFile);
+            }
 
-      const method = 'POST';
-      let url = 'https://vamos-api-v2.sejadikopi.com/api/expenses';
-      
-      if(expense) {
-        url = `https://vamos-api-v2.sejadikopi.com/api/expenses/${expense.id}`;
-        formData.append('_method', 'PUT');
-      }
-      
-      const response = await fetch(url, {
-        method: method,
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Server responded with an error:", errorData);
-        throw new Error(errorData.message || 'Gagal menyimpan pengeluaran.');
-      }
+            const method = 'POST';
+            let url = 'https://vamos-api-v2.sejadikopi.com/api/expenses';
+            
+            if(expense) {
+                url = `https://vamos-api-v2.sejadikopi.com/api/expenses/${expense.id}`;
+                formData.append('_method', 'PUT');
+            }
+            
+            const response = await fetch(url, {
+                method: method,
+                body: formData,
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Server responded with an error:", errorData);
+                throw new Error(errorData.message || 'Gagal menyimpan pengeluaran.');
+            }
 
-      toast({
-        title: 'Sukses',
-        description: `Pengeluaran berhasil ${expense ? 'diperbarui' : 'ditambahkan'}.`,
-      });
-      onSuccess();
-      onClose();
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message,
-      });
-    }
-  };
+            toast({
+                title: 'Sukses',
+                description: `Pengeluaran berhasil ${expense ? 'diperbarui' : 'ditambahkan'}.`,
+            });
+            onSuccess();
+            onClose();
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: error.message,
+            });
+        }
+    };
     
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -243,7 +244,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: bo
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-4">
-                                  <FormField control={form.control} name="kategori" render={({ field }) => (
+                                  <FormField control={form.control} name="type" render={({ field }) => (
                                       <FormItem>
                                           <FormLabel>Kategori</FormLabel>
                                           <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -262,7 +263,16 @@ function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: bo
                                           <FormMessage />
                                       </FormItem>
                                   )} />
-                                  <FormField control={form.control} name="deskripsi" render={({ field }) => (
+                                  <FormField control={form.control} name="title" render={({ field }) => (
+                                      <FormItem>
+                                          <FormLabel>Judul</FormLabel>
+                                          <FormControl>
+                                              <Input placeholder="cth. Pembelian biji kopi" {...field} />
+                                          </FormControl>
+                                          <FormMessage />
+                                      </FormItem>
+                                  )} />
+                                   <FormField control={form.control} name="description" render={({ field }) => (
                                       <FormItem>
                                           <FormLabel>Deskripsi</FormLabel>
                                           <FormControl>
@@ -271,7 +281,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, user, expense }: { isOpen: bo
                                           <FormMessage />
                                       </FormItem>
                                   )} />
-                                  <FormField control={form.control} name="jumlah" render={({ field }) => (
+                                  <FormField control={form.control} name="amount" render={({ field }) => (
                                       <FormItem>
                                           <FormLabel>Jumlah (Rp)</FormLabel>
                                           <FormControl><Input type="number" placeholder="cth. 15000" {...field} /></FormControl>
@@ -375,7 +385,7 @@ export default function ReportsPage() {
       const expenseUrl = new URL('https://vamos-api-v2.sejadikopi.com/api/expenses');
       if (sDate) expenseUrl.searchParams.set('start_date', format(new Date(sDate), 'yyyy-MM-dd'));
       if (eDate) expenseUrl.searchParams.set('end_date', format(new Date(eDate), 'yyyy-MM-dd'));
-      expenseUrl.searchParams.set('order', 'tanggal.desc');
+      expenseUrl.searchParams.set('order', 'date.desc');
 
       // --- SETTINGS FETCH ---
       const settingsUrl = 'https://vamos-api-v2.sejadikopi.com/api/settings';
@@ -479,7 +489,7 @@ export default function ReportsPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleDeleteExpense = async (id: string) => {
+  const handleDeleteExpense = async (id: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?')) return;
     try {
         const response = await fetch(`https://vamos-api-v2.sejadikopi.com/api/expenses/${id}`, {
@@ -496,8 +506,8 @@ export default function ReportsPage() {
     const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
     
     const displayedExpenses = expenses.filter(e =>
-      (e.kategori && e.kategori.toLowerCase().includes(expenseSearch.toLowerCase())) ||
-      (e.deskripsi && e.deskripsi.toLowerCase().includes(expenseSearch.toLowerCase()))
+      (e.type && e.type.toLowerCase().includes(expenseSearch.toLowerCase())) ||
+      (e.title && e.title.toLowerCase().includes(expenseSearch.toLowerCase()))
     );
 
     const displayedTransactions = transactions.filter(t =>
@@ -506,7 +516,7 @@ export default function ReportsPage() {
     );
     
     const totalRevenue = displayedTransactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);
-    const totalExpenses = displayedExpenses.reduce((sum, e) => sum + Number(e.jumlah), 0);
+    const totalExpenses = displayedExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const netProfit = totalRevenue - totalExpenses;
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
     
@@ -603,10 +613,10 @@ export default function ReportsPage() {
 
             // --- EXPENSES SHEET ---
             const expensesData = displayedExpenses.map(e => ({
-                "Tanggal": format(new Date(e.tanggal), 'dd MMM yyyy'),
-                "Kategori": e.kategori,
-                "Deskripsi": e.deskripsi,
-                "Jumlah": { v: e.jumlah, t: 'n', z: currencyFormat },
+                "Tanggal": format(new Date(e.date), 'dd MMM yyyy'),
+                "Kategori": e.type,
+                "Deskripsi": e.title,
+                "Jumlah": { v: e.amount, t: 'n', z: currencyFormat },
                 "Dibuat oleh": e.created_by
             }));
             const expenses_ws = XLSX.utils.json_to_sheet(expensesData);
@@ -868,5 +878,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-
-    

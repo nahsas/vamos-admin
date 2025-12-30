@@ -7,39 +7,48 @@ import { ArrowUpDown, Pencil, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 
 type Expense = {
-    id: string;
-    kategori: string;
-    deskripsi: string;
-    jumlah: number;
-    tanggal: string;
-    created_by: string;
+    id: number;
+    title: string;
+    description: string;
+    amount: number;
+    type: string;
+    date: string;
+    created_by: number;
 }
 
 type ExpenseColumnsProps = {
     onEdit: (expense: Expense) => void;
-    onDelete: (id: string) => void;
+    onDelete: (id: number) => void;
 }
 
 const toRupiah = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
 
 export const expenseColumns = ({ onEdit, onDelete }: ExpenseColumnsProps): ColumnDef<Expense>[] => [
     {
-        accessorKey: "tanggal",
+        accessorKey: "date",
         header: "Tanggal",
-        cell: ({ row }) => format(new Date(row.getValue("tanggal")), 'dd MMM yyyy')
+        cell: ({ row }) => format(new Date(row.getValue("date")), 'dd MMM yyyy')
     },
     {
-        accessorKey: "kategori",
+        accessorKey: "type",
         header: "Kategori",
     },
     {
-        accessorKey: "deskripsi",
+        accessorKey: "title",
         header: "Deskripsi",
+         cell: ({ row }) => {
+            const expense = row.original;
+            return (
+                <div className="max-w-[200px] truncate" title={expense.description || expense.title}>
+                    {expense.title}
+                </div>
+            )
+        }
     },
     {
-        accessorKey: "jumlah",
+        accessorKey: "amount",
         header: () => <div className="text-right">Jumlah</div>,
-        cell: ({ row }) => <div className="text-right">{toRupiah(row.getValue("jumlah"))}</div>,
+        cell: ({ row }) => <div className="text-right">{toRupiah(row.getValue("amount"))}</div>,
     },
     {
         accessorKey: "created_by",
