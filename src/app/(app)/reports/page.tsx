@@ -281,7 +281,7 @@ function ExpenseForm({ isOpen, onClose, onSuccess, userEmail, expense }: { isOpe
                                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 h-full flex flex-col justify-center items-center text-center">
                                       {imagePreview ? (
                                           <div className="relative w-full h-48 mb-4">
-                                              <Image src={imagePreview} alt="Pratinjau Bukti" className="rounded-md object-cover w-full h-full" unoptimized />
+                                              <Image src={imagePreview} alt="Pratinjau Bukti" fill className="rounded-md object-cover" unoptimized />
                                           </div>
                                       ) : (
                                           <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
